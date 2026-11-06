@@ -3,7 +3,8 @@
 A small, fast Mac git client for a team that works mostly through agents.
 It wraps the `git` CLI, shows branches and history clearly, handles worktrees
 well, and adds lightweight shared tasks and review requests that sync through
-git itself. No AI features, no accounts, no server.
+git itself. No AI features, no server. Accounts are optional: you can sign
+in to GitHub or GitLab (section 10), and the app works the same without it.
 
 Status: phase 1 (git client) and phase 2 (cowork: tasks, board, reviews, comments, mentions, notifications) are built — see README.md. Open source under the MIT license.
 
@@ -22,7 +23,7 @@ Goals
 Non-goals
 - AI anything.
 - Replacing Slack, or being a full Jira.
-- Host-specific features that need API tokens (at least not in v1).
+- Host features that need the API (PR lists, CI status) in v1. Planned, see section 10.
 - Windows or Linux (macOS on Apple Silicon only).
 
 ## 2. Tech stack
@@ -242,3 +243,80 @@ concurrent edits, comments and approvals.
 7. Packaging (`make app`), dogfood internally for a week.
 8. Cowork: store + sync, then board, then reviews, then notifications. (done)
 9. Next: phase 3 — license, CI on GitHub Actions, optional signing once the repo goes public.
+10. Phase 4 — host sign-in (built), then SSH key and host features (section 10).
+
+## 10. Phase 4: signing in to GitHub and GitLab
+
+Status: sign-in and "making git use the token" are built (Settings >
+Accounts; code in `Sources/GitCowork/Accounts` and
+`Sources/GitCoworkCore/Accounts`). Browser sign-in on github.com and
+gitlab.com needs our OAuth apps registered and their client IDs filled into
+`OAuthApps.swift`; until then it asks for a client ID, and tokens work. Not
+built yet: the SSH key and the API features below.
+
+How git gets the token: `git credential-cache` on a private socket, plus
+`-c credential.https://<host>.helper=` (clears the person's helpers for that
+host, so osxkeychain never stores a copy) and
+`-c credential.https://<host>.helper=cache --socket …`. The cache is filled
+before each fetch/pull/push/clone and stopped when the app quits.
+
+Goal: as easy as GitKraken. Click "Sign in with GitHub" (or GitLab), approve
+in the browser, and push and pull work, even on a Mac where git was never set
+up. Optional: anyone whose SSH keys or credential helpers already work keeps
+using them, and the app works without an account.
+
+Today the app runs with `GIT_TERMINAL_PROMPT=0`, so an HTTPS push with no
+credential helper just fails. That's the gap this fills first.
+
+### Sign-in
+
+- **GitHub**: OAuth device flow. The app shows a short code, you approve it on
+  github.com. No client secret ships in the app and no redirect URL is needed.
+- **GitLab** (gitlab.com and self-hosted): OAuth with PKCE in the browser
+  (`ASWebAuthenticationSession`). Gitea and Forgejo support the same flow.
+- Self-hosted servers need their own OAuth app registered on that server. If
+  that's not possible, paste a personal access token instead.
+- Tokens go in the macOS Keychain, one per host and account. Sign out in
+  Settings removes them.
+
+### Making git use the token
+
+- The app passes a credential helper (git's own `credential-cache`, see
+  Status above) only on the git commands it runs itself, per host, with `-c`
+  options like the ones in `GitDefaults`. It never writes to the person's
+  global git config, so the terminal is unchanged.
+- If a credential helper or SSH key already works for a remote, the app leaves
+  it alone. Sign-in is offered when a push or fetch fails with an auth error,
+  and in Settings.
+
+### Optional SSH key
+
+- "Create SSH key" generates an ed25519 key, uploads it through the host's API
+  (GitHub `POST /user/keys`, GitLab `POST /user/keys`), and saves it under
+  `~/.ssh/` with its passphrase in the Keychain.
+- The app uses it for its own commands via `GIT_SSH_COMMAND` with
+  `IdentitiesOnly=yes`. It doesn't edit `~/.ssh/config`. A button can add the
+  `Host` entry for people who want the terminal to use the key too.
+- HTTPS plus a token is the default. The SSH key is an extra.
+
+### What signing in unlocks
+
+In this order:
+1. Clone from a list of your repos (and your orgs' repos).
+2. PRs/MRs: list open ones, show them on branches in the graph, create one
+   from the app instead of only opening the web page.
+3. CI status on branches and commits.
+
+### Things to know
+
+- We register one OAuth app on github.com and one on gitlab.com. The client
+  IDs are public and can ship in the app.
+- GitHub's classic `repo` scope covers all your private repos. A GitHub App
+  gives finer control but needs installing per org. Start with an OAuth app,
+  revisit later.
+- Some GitHub orgs block OAuth apps until an admin approves them. GitKraken
+  has the same limit. Show a clear message with a link to the approval page.
+- Code: a `Hosts/` provider per host (GitHub, GitLab, Gitea/Forgejo) behind one
+  small protocol, building on `HostKind` and `RemoteLinks` in GitCoworkCore.
+  Token storage and the helper live in the app target, and request/response
+  parsing goes in core with tests.

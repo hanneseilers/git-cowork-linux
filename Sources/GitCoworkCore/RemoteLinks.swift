@@ -1,6 +1,6 @@
 import Foundation
 
-public enum HostKind: String, CaseIterable, Sendable {
+public enum HostKind: String, CaseIterable, Codable, Sendable {
     case github, gitlab, gitea   // gitea also covers Forgejo / Codeberg
 }
 

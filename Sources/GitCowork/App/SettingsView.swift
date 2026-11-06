@@ -9,6 +9,7 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            AccountsSection()
             Section("Apps") {
                 TextField("Editor", text: $editorApp, prompt: Text("Visual Studio Code, Cursor, Zed…"))
                 TextField("Terminal", text: $terminalApp, prompt: Text("Terminal, iTerm, Ghostty, Warp…"))
