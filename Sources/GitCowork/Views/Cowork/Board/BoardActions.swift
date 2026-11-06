@@ -75,6 +75,8 @@ struct BoardCardMenu: View {
     let model: RepoModel
     let task: CoworkTask
 
+    @Environment(\.windowActions) private var windowActions
+
     var body: some View {
         StatusPicker(title: "Move To", selection: Binding(
             get: { task.status },
@@ -92,6 +94,11 @@ struct BoardCardMenu: View {
                 .disabled(ref.kind == .localBranch && ref.isHead)
         } else {
             Button("Start Task") { model.startTask(task.id) }
+        }
+        if let wt = model.worktree(of: task) {
+            if wt.path != model.root.path { Button("Open Worktree") { windowActions?.open(wt.path) } }
+        } else {
+            Button("Start in New Worktree") { model.startTaskInWorktree(task.id) { windowActions?.open($0) } }
         }
         Button("Copy ID") { External.copy(task.id) }
         Divider()
