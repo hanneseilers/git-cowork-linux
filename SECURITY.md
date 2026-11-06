@@ -16,7 +16,7 @@ Fixes go into the newest release and `main`. Please update with
 2. Click **Report a vulnerability**.
 
 You can also use this link directly:
-<https://github.com/OWNER/git-cowork/security/advisories/new>
+<https://github.com/michael-smao/git-cowork/security/advisories/new>
 
 Include what you found, how to reproduce it, and which version you use
 (git-cowork › About git-cowork).

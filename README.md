@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/OWNER/git-cowork/actions/workflows/ci.yml"><img src="https://github.com/OWNER/git-cowork/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/michael-smao/git-cowork/actions/workflows/ci.yml"><img src="https://github.com/michael-smao/git-cowork/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/macOS-14%2B-black?logo=apple" alt="macOS 14+">
   <img src="https://img.shields.io/badge/Apple%20Silicon-arm64-black" alt="Apple Silicon">
   <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
@@ -53,7 +53,7 @@ Requirements: Apple Silicon Mac, macOS 14 or newer, Xcode Command Line Tools.
 
 ```bash
 xcode-select --install          # skip if you already have git and swift
-git clone https://github.com/OWNER/git-cowork.git && cd git-cowork
+git clone https://github.com/michael-smao/git-cowork.git && cd git-cowork
 make install                    # builds and copies git-cowork.app to /Applications
 ```
 
@@ -74,7 +74,7 @@ version, uninstalling, and troubleshooting.
 ### Versions
 
 Releases follow [Semantic Versioning](https://semver.org) and are tagged
-`vX.Y.Z`; see [Releases](https://github.com/OWNER/git-cowork/releases) and
+`vX.Y.Z`; see [Releases](https://github.com/michael-smao/git-cowork/releases) and
 [CHANGELOG.md](CHANGELOG.md). **About git-cowork** shows your version and
 the commit it was built from, e.g. "Version 0.1.0 (1448777)".
 

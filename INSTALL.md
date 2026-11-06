@@ -29,7 +29,7 @@ The full Xcode app works too, but isn't needed.
 Pick a folder for the source, for example `~/Developer`, and run:
 
 ```bash
-git clone https://github.com/OWNER/git-cowork.git
+git clone https://github.com/michael-smao/git-cowork.git
 ```
 
 ```bash
@@ -138,5 +138,5 @@ source folder. Keep them with `git stash`, or throw them away with
 commits that aren't upstream. If you don't need them:
 `git reset --hard origin/main && make install`.
 
-Anything else: [open an issue](https://github.com/OWNER/git-cowork/issues)
+Anything else: [open an issue](https://github.com/michael-smao/git-cowork/issues)
 with the version from the About window.

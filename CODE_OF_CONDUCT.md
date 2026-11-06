@@ -10,7 +10,7 @@ in issues, pull requests, discussions or anywhere else in this project.
 ## Reporting
 
 If someone's behavior bothers you, contact the maintainer privately through
-the email address on their [GitHub profile](https://github.com/OWNER).
+the email address on their [GitHub profile](https://github.com/michael-smao).
 Reports are handled confidentially.
 
 The maintainer may remove comments, commits or other contributions that
