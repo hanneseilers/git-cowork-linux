@@ -6,7 +6,7 @@
 
 <p align="center">
   A small, fast, native Mac git client — with a task board and code reviews that live inside your repo.<br>
-  No accounts. No server. No telemetry. Just <code>git</code>.
+  No sign-up. No server. No telemetry. Just <code>git</code>.
 </p>
 
 <p align="center">
@@ -106,7 +106,9 @@ also drop a folder onto any window.
 | **Diff** | Hunk or split view, intra-line highlights, stage / unstage / discard single hunks. |
 | **Merge / rebase** | Banner with Continue / Skip / Abort, conflicted files, "use mine / theirs". |
 | **Hosts** | "Create pull/merge request" and "Open on …" for GitHub, GitLab, Gitea and Forgejo, including self-hosted. |
-| **Accounts** | Optional. Sign in to GitHub or GitLab in the browser, or paste an access token (also Gitea / Forgejo), and HTTPS push and pull just work. Settings > Accounts. Tokens stay in the Keychain and only git-cowork uses them. For SSH remotes, Create SSH Key makes a key, adds it to your GitHub or GitLab account and uses it in git-cowork without touching `~/.ssh/config`. |
+| **Clone** | Paste a URL, or, with an account added, pick from a filterable list of your repositories and your organizations' or groups'. |
+| **Undo** | ⌘Z takes back the last commit, amend, reset, checkout or branch delete, with plain git commands. Not offered once you've pushed. |
+| **Accounts** | Optional. Paste an access token for GitHub, GitLab, Gitea or Forgejo, and HTTPS push and pull just work. Browser sign-in (OAuth device flow) works too once you register an OAuth app for it; Settings > Accounts explains how. Settings > Accounts. Tokens stay in the Keychain and only git-cowork uses them. For SSH remotes, Create SSH Key makes a key, adds it to your GitHub or GitLab account and uses it in git-cowork without touching `~/.ssh/config`. |
 | **Board** | Shared tasks in Backlog / To Do / In Progress / In Review / Done, with assignee, labels, linked branch and comments. "Start Task" creates the branch here; "In New Worktree" gives it its own folder and tab (handy for agents). Filter by person or label; ⌘← / ⌘→ move the selected task. |
 | **Reviews** | Review requests for a branch: reviewers, verdicts (approved / changes requested), comments, and the branch's changes. |
 | **Inbox** | Tasks assigned to you, review requests, verdicts, @mentions and replies — also as macOS notifications. |
@@ -162,6 +164,8 @@ git-cowork and with plain git only.
 | ⌘↩ | Commit |
 | Esc | Close the diff |
 | ⌥⌘T / ⌥⌘E | Open in Terminal / editor |
+| ⌘Z | Undo the last git action |
+| ⌘← / ⌘→ | Move the selected task to the previous / next column |
 | ⌘J | Command log |
 
 Editor and terminal apps are set in Settings (⌘,).
@@ -178,8 +182,15 @@ agents are making the commits.
 paid notarization to open without warnings. Building locally avoids that and
 takes about a minute.
 
-**Is my data sent anywhere?** No. The app only talks to your git remotes,
-through your own `git`.
+**Is my data sent anywhere?** No telemetry, no server of ours. The app talks
+to your git remotes through your own `git`. If you add an account, it also
+calls that host's API (GitHub, GitLab, Gitea or Forgejo) to check the token,
+list your repositories and upload an SSH key you create. Tokens stay in your
+Keychain.
+
+**Does browser sign-in work out of the box?** Not yet: it needs an OAuth app
+registered on the host, and 0.1.0 doesn't ship one. Use an access token, or
+register your own app as Settings > Accounts describes.
 
 ## Development
 
@@ -188,6 +199,7 @@ make run        # debug build, run from the terminal
 make test       # unit tests (parsers, graph layout, diff, host links, cowork)
 make app        # build dist/git-cowork.app
 make version    # print the version
+make check-translations   # UI text without a German translation
 ```
 
 Builds with the Command Line Tools only; no Xcode project, no dependencies.
@@ -198,10 +210,12 @@ Sources/GitCoworkCore/   pure logic: parsers, graph lane layout, diff, host link
 Sources/GitCowork/
   App/                   entry point, windows/tabs, menus, settings, welcome screen
   Git/                   GitRunner (process + env), RepoModel (state, refresh, file watching),
-                         actions, CoworkStore (refs/cowork/main read/write/sync), notifier
+                         actions, undo, CoworkStore (refs/cowork/main read/write/sync), notifier
+  Accounts/              tokens in the Keychain, browser sign-in, SSH keys, host APIs
   Views/                 Theme (design tokens), Components, History (NSTableView graph),
                          Diff, Inspector, Sidebar, Chrome, Sheets, Cowork (board, reviews, inbox)
-Scripts/                 build-app.sh, make-icon.swift
+Scripts/                 build-app.sh, make-icon.swift, release, update, check-translations
+Resources/               Info.plist, translations (de.lproj)
 ```
 
 How it stays light:
@@ -222,4 +236,4 @@ privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) © 2026 smao GmbH

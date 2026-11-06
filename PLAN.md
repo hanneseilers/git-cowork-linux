@@ -183,13 +183,16 @@ Sync without conflicts:
 
 ## 5. Phase 3: open source release
 
-- License (MIT or Apache-2.0), README, screenshots.
-- Developer ID signing and notarization (Apple Developer account, $99/yr) so
-  downloads open without Gatekeeper warnings. Until then, internal builds are
-  ad-hoc signed and built from source with `make install`.
-- GitHub Actions on macOS runners: build and test on every PR, release a zip
-  and DMG on tags. Homebrew cask.
-- Sparkle for auto-updates (optional).
+Done: MIT license, README with screenshots, INSTALL guide, CHANGELOG,
+contributing and security docs, GitHub Actions (build and test on every push
+and PR; a GitHub release with changelog notes for every `vX.Y.Z` tag),
+`make release` / `make update`, English and German UI.
+
+Distribution stays free: no Apple Developer account, so no notarized
+download, DMG, Homebrew cask or Sparkle updates. People build from source
+with `make install` (ad-hoc signed, so Gatekeeper doesn't block it) and
+update with `make update`. Revisit if people without developer tools ask
+for a download.
 
 ## 6. Performance targets
 
@@ -241,9 +244,9 @@ concurrent edits, comments and approvals.
 4. Working copy, diff, commit.
 5. Worktrees panel.
 6. Merge/rebase states, conflict handling.
-7. Packaging (`make app`), dogfood internally for a week.
+7. Packaging (`make app`) and daily use on our own repos.
 8. Cowork: store + sync, then board, then reviews, then notifications. (done)
-9. Next: phase 3 — license, CI on GitHub Actions, optional signing once the repo goes public.
+9. Phase 3: open source release, 0.1.0 (see section 5).
 10. Phase 4 — host sign-in (built), then SSH key and host features (section 10).
 
 ## 10. Phase 4: signing in to GitHub and GitLab
