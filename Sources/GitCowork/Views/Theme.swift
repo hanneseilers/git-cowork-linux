@@ -168,10 +168,10 @@ enum Formatters {
     /// "now", "5m", "3h", "2d", then a short date.
     static func relative(_ date: Date, now: Date = .now) -> String {
         let s = now.timeIntervalSince(date)
-        if s < 60 { return "now" }
-        if s < 3600 { return "\(Int(s / 60))m ago" }
-        if s < 86_400 { return "\(Int(s / 3600))h ago" }
-        if s < 7 * 86_400 { return "\(Int(s / 86_400))d ago" }
+        if s < 60 { return L("now") }
+        if s < 3600 { return String(localized: "\(Int(s / 60))m ago") }
+        if s < 86_400 { return String(localized: "\(Int(s / 3600))h ago") }
+        if s < 7 * 86_400 { return String(localized: "\(Int(s / 86_400))d ago") }
         return shortDate.string(from: date)
     }
 
@@ -205,15 +205,15 @@ extension FileStatus {
 
     var label: String {
         switch self {
-        case .added: "Added"
-        case .copied: "Copied"
-        case .modified: "Modified"
-        case .typeChanged: "Type changed"
-        case .deleted: "Deleted"
-        case .renamed: "Renamed"
-        case .conflicted: "Conflicted"
-        case .untracked: "New file"
-        case .unknown: "Changed"
+        case .added: L("Added")
+        case .copied: L("Copied")
+        case .modified: L("Modified")
+        case .typeChanged: L("Type changed")
+        case .deleted: L("Deleted")
+        case .renamed: L("Renamed")
+        case .conflicted: L("Conflicted")
+        case .untracked: L("New file")
+        case .unknown: L("Changed")
         }
     }
 }
@@ -221,8 +221,8 @@ extension FileStatus {
 extension ChangeCounts {
     /// Non-empty groups in display order, each with the status whose icon it uses.
     var groups: [(status: FileStatus, label: String, count: Int)] {
-        [(FileStatus.conflicted, "conflicted", conflicted), (.modified, "modified", modified),
-         (.added, "added", added), (.deleted, "deleted", deleted), (.renamed, "renamed", renamed)]
+        [(FileStatus.conflicted, L("conflicted"), conflicted), (.modified, L("modified"), modified),
+         (.added, L("added"), added), (.deleted, L("deleted"), deleted), (.renamed, L("renamed"), renamed)]
             .filter { $0.2 > 0 }
     }
 }
@@ -261,10 +261,10 @@ extension ReviewVerdict {
 
     var title: String {
         switch self {
-        case .requested: "Waiting"
-        case .approved: "Approved"
-        case .changesRequested: "Changes requested"
-        case .commented: "Commented"
+        case .requested: L("Waiting")
+        case .approved: L("Approved")
+        case .changesRequested: L("Changes requested")
+        case .commented: L("Commented")
         }
     }
 

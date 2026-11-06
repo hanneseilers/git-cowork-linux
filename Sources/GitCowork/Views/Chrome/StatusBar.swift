@@ -85,8 +85,8 @@ struct StatusBar: View {
     private var commitCount: String {
         let count = model.commits.count
         let n = count.formatted()
-        if model.hasMoreCommits { return "\(n)+ commits" }
-        return count == 1 ? "1 commit" : "\(n) commits"
+        if model.hasMoreCommits { return String(localized: "\(n)+ commits") }
+        return count == 1 ? L("1 commit") : String(localized: "\(n) commits")
     }
 
     private func abbreviated(_ path: String) -> String {
@@ -142,13 +142,21 @@ private struct CoworkSyncStatus: View {
     }
 
     static func synced(_ date: Date, now: Date) -> String {
-        now.timeIntervalSince(date) < 60 ? "Tasks synced just now" : "Tasks synced \(Formatters.relative(date, now: now))"
+        now.timeIntervalSince(date) < 60 ? L("Tasks synced just now") : String(localized: "Tasks synced \(Formatters.relative(date, now: now))")
     }
 
     private func help(_ store: CoworkStore) -> String {
-        if let error = store.syncError { return "Task sync failed: \(error)\nClick to try again." }
-        let remote = store.remote.map { " with \($0)" } ?? " (no remote: tasks stay on this Mac)"
-        if let last = store.lastSync { return "Tasks and reviews synced\(remote) at \(Formatters.full(last)). Click to sync now." }
-        return "Sync tasks and reviews\(remote) now"
+        if let error = store.syncError { return String(localized: "Task sync failed: \(error)\nClick to try again.") }
+        // Whole sentences, so each one translates as a unit.
+        switch (store.remote, store.lastSync) {
+        case let (remote?, last?):
+            return String(localized: "Tasks and reviews synced with \(remote) at \(Formatters.full(last)). Click to sync now.")
+        case let (nil, last?):
+            return String(localized: "Tasks and reviews saved at \(Formatters.full(last)). No remote: tasks stay on this Mac.")
+        case let (remote?, nil):
+            return String(localized: "Sync tasks and reviews with \(remote) now")
+        case (nil, nil):
+            return L("No remote: tasks stay on this Mac")
+        }
     }
 }

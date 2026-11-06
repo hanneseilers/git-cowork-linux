@@ -79,7 +79,7 @@ extension RepoModel {
             result.detail = CommitDetail(
                 id: d.id, parents: [mb], authorName: d.authorName, authorEmail: d.authorEmail, authorDate: d.authorDate,
                 committerName: d.committerName, committerEmail: d.committerEmail, committerDate: d.committerDate,
-                message: "\(branch) → \(base)\n\nAll changes on the branch since its merge base \(mb.prefix(7)).")
+                message: String(localized: "\(branch) → \(base)\n\nAll changes on the branch since its merge base \(String(mb.prefix(7)))."))
         }
         return result
     }

@@ -46,7 +46,7 @@ struct Chip: View {
 
 struct StatusChip: View {
     let status: TaskStatus
-    var body: some View { Chip(text: status.title, symbol: status.symbol, color: status.color) }
+    var body: some View { Chip(text: status.label, symbol: status.symbol, color: status.color) }
 }
 
 struct VerdictChip: View {

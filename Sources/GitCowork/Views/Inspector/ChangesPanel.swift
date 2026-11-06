@@ -66,7 +66,7 @@ struct ChangesPanel: View {
         }
         .buttonStyle(.plain)
         .fixedSize()
-        .help("\(task.id): \(task.title) (\(task.status.title)). Show on the board.")
+        .help("\(task.id): \(task.title) (\(task.status.label)). Show on the board.")
     }
 
     /// "4 file changes on main"
@@ -100,7 +100,7 @@ private struct BranchReviewBar: View {
             if let review {
                 Divider()
                 CoworkLinkRow(label: "Review", title: review.title,
-                              help: "Show the review of \(review.branch)") {
+                              help: String(localized: "Show the review of \(review.branch)")) {
                     VerdictChip(verdict: review.overall)
                 } action: { model.showReview(review.id) }
                 .padding(.horizontal, InspectorStyle.padding)
@@ -347,7 +347,8 @@ private struct OperationBanner: View {
                 .foregroundStyle(conflicts > 0 ? Theme.Status.warning : Color.accentColor)
             VStack(alignment: .leading, spacing: 0) {
                 Text("\(operation.rawValue) in progress").font(Theme.Font.body.weight(.semibold))
-                Text(conflicts > 0 ? "\(conflicts) conflicted file\(conflicts == 1 ? "" : "s"): resolve, then stage." : "No conflicts left.")
+                Text(conflicts == 0 ? "No conflicts left." : conflicts == 1 ? "1 conflicted file: resolve, then stage."
+                     : "\(conflicts) conflicted files: resolve, then stage.")
                     .font(Theme.Font.small).foregroundStyle(.secondary)
             }
             Spacer()

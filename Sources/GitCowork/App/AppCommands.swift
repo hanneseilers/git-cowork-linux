@@ -137,7 +137,7 @@ struct AppCommands: Commands {
                 openWindow(id: "repo", value: resolved)
             } else {
                 let alert = NSAlert()
-                alert.messageText = "Not a git repository"
+                alert.messageText = L("Not a git repository")
                 alert.informativeText = path
                 alert.runModal()
             }

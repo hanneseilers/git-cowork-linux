@@ -39,9 +39,9 @@ enum FileSortMode: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .path: "Path"
-        case .name: "File Name"
-        case .status: "Status"
+        case .path: L("Path")
+        case .name: L("File Name")
+        case .status: L("Status")
         }
     }
 }

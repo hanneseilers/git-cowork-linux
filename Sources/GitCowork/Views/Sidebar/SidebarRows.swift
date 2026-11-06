@@ -124,7 +124,7 @@ struct SidebarHeaderButton: View {
         }
         .buttonStyle(.borderless)
         .foregroundStyle(.secondary)
-        .help(help)
+        .help(Text(ui: help))
     }
 }
 
@@ -298,7 +298,7 @@ struct SidebarTaskRow: View {
             Text(task.title).truncationMode(.tail)
             Spacer(minLength: 0)
         }
-        .help("\(task.id) · \(task.status.title)\n\(task.title)")
+        .help("\(task.id) · \(task.status.label)\n\(task.title)")
     }
 }
 
@@ -387,7 +387,7 @@ struct SidebarNoteRow: View {
     var body: some View {
         SidebarRowLayout {
             Color.clear.frame(width: SidebarStyle.iconWidth)
-            Text(text)
+            Text(ui: text)
                 .font(SidebarStyle.detailFont)
                 .foregroundStyle(.tertiary)
             Spacer(minLength: 0)
@@ -411,7 +411,7 @@ struct SidebarFilterField: View {
                 .textFieldStyle(.plain)
                 .focused(focus)
                 .onExitCommand { text = "" }
-            Text(text.isEmpty ? "Viewing \(count)" : "\(count) \(count == 1 ? "match" : "matches")")
+            Text(text.isEmpty ? "Viewing \(count)" : count == 1 ? "1 match" : "\(count) matches")
                 .font(SidebarStyle.detailFont.monospacedDigit())
                 .foregroundStyle(.tertiary)
                 .fixedSize()

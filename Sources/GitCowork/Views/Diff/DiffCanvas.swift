@@ -14,9 +14,9 @@ enum HunkAction: Hashable {
 
     var title: String {
         switch self {
-        case .stage: "Stage Hunk"
-        case .unstage: "Unstage Hunk"
-        case .discard: "Discard Hunk"
+        case .stage: L("Stage Hunk")
+        case .unstage: L("Unstage Hunk")
+        case .discard: L("Discard Hunk")
         }
     }
 }

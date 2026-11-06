@@ -37,6 +37,8 @@ if [ ! -f .build/AppIcon.icns ]; then
   iconutil -c icns "$ICONSET" -o .build/AppIcon.icns
 fi
 cp .build/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+# Translations (Resources/<lang>.lproj/Localizable.strings).
+cp -R Resources/*.lproj "$APP/Contents/Resources/"
 
 echo "→ Signing (ad-hoc)"
 codesign --force --sign - --timestamp=none "$APP"

@@ -88,12 +88,12 @@ enum HistoryColumn: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .refs: "Branch / tag"
-        case .graph: "Graph"
-        case .message: "Commit message"
-        case .author: "Author"
-        case .date: "Date"
-        case .sha: "SHA"
+        case .refs: L("Branch / tag")
+        case .graph: L("Graph")
+        case .message: L("Commit message")
+        case .author: L("Author")
+        case .date: L("Date")
+        case .sha: L("SHA")
         }
     }
 
@@ -445,7 +445,7 @@ final class HistoryTableCoordinator: NSObject, NSTableViewDataSource, NSTableVie
             var seen = Set<String>()
             for badge in badges(forCommit: i) where badge.kind == .branch {
                 for t in tasksByBranch[badge.name] ?? [] where seen.insert(t.id).inserted {
-                    info.tasks.append(.init(id: t.id, title: t.title, statusTitle: t.status.title, color: NSColor(t.status.color)))
+                    info.tasks.append(.init(id: t.id, title: t.title, statusTitle: t.status.label, color: NSColor(t.status.color)))
                 }
                 if info.review == nil, let r = reviewByBranch[badge.name] {
                     let v = r.overall
@@ -699,7 +699,7 @@ final class HistoryTableCoordinator: NSObject, NSTableViewDataSource, NSTableVie
                 // checking out switches to it, so say where it is.
                 if let other = model.localBranches.first(where: { $0.name == badge.name }) {
                     if !other.isHead {
-                        let at = other.target.prefix(7)
+                        let at = String(other.target.prefix(7))
                         menu.addItem(ActionItem("Checkout \(other.name) (local, at \(at))") { Task { await model.checkout(other) } })
                     }
                 } else {
@@ -731,7 +731,7 @@ final class HistoryTableCoordinator: NSObject, NSTableViewDataSource, NSTableVie
         menu.addItem(ActionItem("Cherry-pick into \(current)") { Task { await model.cherryPick(sha) } })
         menu.addItem(ActionItem("Revert Commit") { Task { await model.revert(sha) } })
 
-        let reset = NSMenuItem(title: "Reset \(current) to \(short)", action: nil, keyEquivalent: "")
+        let reset = NSMenuItem(title: String(localized: "Reset \(current) to \(short)"), action: nil, keyEquivalent: "")
         let sub = NSMenu()
         sub.addItem(ActionItem("Soft – keep changes staged") { model.reset(to: sha, mode: .soft) })
         sub.addItem(ActionItem("Mixed – keep changes unstaged") { model.reset(to: sha, mode: .mixed) })
@@ -759,12 +759,12 @@ final class HistoryHeaderMenu: NSObject, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        let title = NSMenuItem(title: "Columns", action: nil, keyEquivalent: "")
+        let title = NSMenuItem(title: L("Columns"), action: nil, keyEquivalent: "")
         title.isEnabled = false
         menu.addItem(title)
         for c in HistoryColumn.optional {
             let visible = coordinator.isColumnVisible(c)
-            let item = ActionItem(c.title) { [coordinator] in coordinator.setColumn(c, visible: !visible) }
+            let item = ActionItem("\(c.title)") { [coordinator] in coordinator.setColumn(c, visible: !visible) }
             item.state = visible ? .on : .off
             menu.addItem(item)
         }
@@ -775,9 +775,9 @@ final class HistoryHeaderMenu: NSObject, NSMenuDelegate {
 final class ActionItem: NSMenuItem {
     private let handler: () -> Void
 
-    init(_ title: String, handler: @escaping () -> Void) {
+    init(_ title: String.LocalizationValue, handler: @escaping () -> Void) {
         self.handler = handler
-        super.init(title: title, action: #selector(fire), keyEquivalent: "")
+        super.init(title: String(localized: title), action: #selector(fire), keyEquivalent: "")
         target = self
     }
 

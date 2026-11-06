@@ -21,6 +21,10 @@ First public release.
 - Command log (⌘J) showing every git command the app runs.
 - The app's own git calls ignore a repository's `core.fsmonitor` setting,
   so opening a repo can't start a program named in its config.
+- English and German. The app follows your Mac's language; pick one for
+  git-cowork alone in System Settings › General › Language & Region › Applications.
+- If a macOS update removed Apple's developer tools (and with them git),
+  the app says so at launch and offers to install them.
 
 ### Cowork
 - Shared task board (Backlog, To Do, In Progress, In Review, Done) with

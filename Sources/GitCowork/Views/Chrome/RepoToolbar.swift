@@ -120,10 +120,10 @@ private struct ActionButtons: View {
 
             ChromeDivider()
 
-            ChromeButton(title: "Terminal", symbol: "terminal", help: "Open in \(Prefs.terminalApp)") {
+            ChromeButton(title: "Terminal", symbol: "terminal", help: String(localized: "Open in \(Prefs.terminalApp)")) {
                 External.openTerminal(model.root.path)
             }
-            ChromeButton(title: "Editor", symbol: "chevron.left.forwardslash.chevron.right", help: "Open in \(Prefs.editorApp)") {
+            ChromeButton(title: "Editor", symbol: "chevron.left.forwardslash.chevron.right", help: String(localized: "Open in \(Prefs.editorApp)")) {
                 External.openEditor(model.root.path)
             }
         }
@@ -184,7 +184,7 @@ private struct RepositoryPicker: View {
     }
 
     private func worktreeLabel(_ wt: Worktree) -> String {
-        let branch = wt.branch ?? "detached"
+        let branch = wt.branch ?? L("detached")
         return wt.displayName == branch ? branch : "\(branch) — \(wt.displayName)"
     }
 
@@ -221,8 +221,8 @@ private struct BranchPicker: View {
 
     private var title: String {
         if let b = model.currentBranch { return b }
-        if let sha = model.headSHA { return "detached at \(sha.prefix(7))" }
-        return "no commits"
+        if let sha = model.headSHA { return String(format: L("detached at %@"), String(sha.prefix(7))) }
+        return L("no commits")
     }
 
     /// A branch checked out in another worktree can't be switched to here;

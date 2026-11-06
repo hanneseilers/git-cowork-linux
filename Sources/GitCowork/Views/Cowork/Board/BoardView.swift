@@ -221,7 +221,7 @@ struct BoardView: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(status.color)
                 .frame(width: 14)
-            Text(status.title)
+            Text(status.label)
                 .font(Theme.Font.body.weight(.semibold))
                 .lineLimit(1)
             CountBadge(count: count)
@@ -236,7 +236,7 @@ struct BoardView: View {
             }
             .buttonStyle(.borderless)
             .foregroundStyle(.secondary)
-            .help("New task in \(status.title)")
+            .help("New task in \(status.label)")
         }
         // Icon lines up with the card titles below.
         .padding(.leading, Theme.Space.m + Theme.Metrics.cardPadding)

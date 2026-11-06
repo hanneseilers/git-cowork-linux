@@ -57,7 +57,7 @@ struct CoworkLinkRow<Chip: View>: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: Theme.Space.m) {
-                Text(label)
+                Text(ui: label)
                     .font(Theme.Font.small)
                     .foregroundStyle(.secondary)
                     .frame(width: InspectorStyle.linkLabelWidth, alignment: .leading)
@@ -78,7 +78,7 @@ struct CoworkLinkRow<Chip: View>: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
-        .help(help)
+        .help(Text(ui: help))
     }
 }
 
@@ -94,13 +94,13 @@ struct CoworkLinks: View {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(tasks) { t in
                     CoworkLinkRow(label: "Task", id: t.id, title: t.title,
-                                  help: "Show \(t.id) on the board") {
+                                  help: String(localized: "Show \(t.id) on the board")) {
                         StatusChip(status: t.status)
                     } action: { model.showTask(t.id) }
                 }
                 ForEach(reviews) { r in
                     CoworkLinkRow(label: "Review", title: r.title,
-                                  help: "Show the review of \(r.branch)") {
+                                  help: String(localized: "Show the review of \(r.branch)")) {
                         VerdictChip(verdict: r.overall)
                     } action: { model.showReview(r.id) }
                 }

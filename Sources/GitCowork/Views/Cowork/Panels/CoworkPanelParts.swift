@@ -14,7 +14,7 @@ struct PropertyRow<Content: View>: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: Theme.Space.m) {
-            Text(label)
+            Text(ui: label)
                 .font(Theme.Font.small)
                 .foregroundStyle(.secondary)
                 .frame(width: Self.labelWidth, alignment: .leading)
@@ -61,7 +61,7 @@ struct PlaceholderEditor: View {
             .fixedSize(horizontal: false, vertical: maxHeight == .infinity)
             .overlay(alignment: .topLeading) {
                 if text.isEmpty {
-                    Text(placeholder)
+                    Text(ui: placeholder)
                         .font(Theme.Font.body)
                         .foregroundStyle(.tertiary)
                         .padding(.horizontal, Theme.Space.m + 1)
@@ -99,8 +99,8 @@ extension TeamMember {
 /// Short display name for an email: team name, else commit author name, else local part.
 @MainActor
 func displayName(_ email: String?, in store: CoworkStore) -> String {
-    guard let email, !email.isEmpty else { return "Unassigned" }
-    if email.lowercased() == store.me.id { return store.me.displayName + " (me)" }
+    guard let email, !email.isEmpty else { return L("Unassigned") }
+    if email.lowercased() == store.me.id { return store.me.displayName + L(" (me)") }
     return store.person(email)?.displayName ?? email
 }
 

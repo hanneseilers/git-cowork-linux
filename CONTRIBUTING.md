@@ -41,6 +41,22 @@ The version lives in `Resources/Info.plist`. To cut a release:
 Bump PATCH for fixes, MINOR for new features, MAJOR for breaking changes
 (for example to the cowork file format on `refs/cowork/main`).
 
+## Translations
+
+UI text is written in English in the code; translations live in
+`Resources/<lang>.lproj/Localizable.strings`, keyed by the English text.
+SwiftUI literals (`Text("Commit")`) are looked up automatically. Text that
+travels as a `String` goes through `Text(ui:)` or `L("…")`, and text with
+values uses `String(localized: "Delete \(name)?")` (key `Delete %@?`).
+Write whole sentences, not fragments glued together, so they translate.
+
+```bash
+make check-translations   # lists text without a German translation
+```
+
+To add a language, copy `de.lproj`, translate the values, and add the code
+to `CFBundleLocalizations` in `Resources/Info.plist`.
+
 ## Debug aids
 
 These exist in debug builds only (`swift build`, `make run`); release builds

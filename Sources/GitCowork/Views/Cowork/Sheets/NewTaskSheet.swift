@@ -39,7 +39,7 @@ struct NewTaskSheet: View {
                 SheetRow(label: "Status") {
                     Picker("Status", selection: $pickedStatus) {
                         ForEach(TaskStatus.allCases, id: \.self) { s in
-                            Label { Text(s.title) } icon: { menuSymbol(s.symbol, s.color) }.tag(s)
+                            Label { Text(s.label) } icon: { menuSymbol(s.symbol, s.color) }.tag(s)
                         }
                     }
                     .labelsHidden()

@@ -72,7 +72,7 @@ struct RenameBranchSheet: View {
     }
 
     var body: some View {
-        SheetScaffold(title: "Rename \(old)", confirmTitle: "Rename", confirmDisabled: !RefName.isValid(name) || name == old || model.busy != nil) {
+        SheetScaffold(title: String(localized: "Rename \(old)"), confirmTitle: "Rename", confirmDisabled: !RefName.isValid(name) || name == old || model.busy != nil) {
             Task { await model.renameBranch(old, to: name) }
         } content: {
             TextField("New name", text: $name).textFieldStyle(.roundedBorder)

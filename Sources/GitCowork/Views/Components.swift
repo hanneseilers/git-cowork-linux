@@ -164,7 +164,7 @@ struct SectionHeader<Trailing: View>: View {
 
     private var label: some View {
         HStack(spacing: Theme.Space.s) {
-            Text(title)
+            Text(ui: title)
                 .font(Theme.Font.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
@@ -239,9 +239,9 @@ struct EmptyState: View {
             Image(systemName: symbol)
                 .font(.system(size: 28, weight: .light))
                 .foregroundStyle(.tertiary)
-            Text(title).font(Theme.Font.body.weight(.medium))
+            Text(ui: title).font(Theme.Font.body.weight(.medium))
             if let message {
-                Text(message)
+                Text(ui: message)
                     .font(Theme.Font.small)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -263,13 +263,13 @@ struct SheetScaffold<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.l) {
-            Text(title).font(Theme.Font.title)
+            Text(ui: title).font(Theme.Font.title)
             content
             HStack {
                 Spacer()
                 Button("Cancel") { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Button(confirmTitle) {
+                Button(LocalizedStringKey(confirmTitle)) {
                     onConfirm()
                     dismiss()
                 }

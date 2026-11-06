@@ -12,7 +12,7 @@ struct StatusMenu: View {
         Menu {
             ForEach(TaskStatus.allCases, id: \.self) { s in
                 Button { onChange(s) } label: {
-                    Label { Text(s.title) } icon: { menuSymbol(s.symbol, s.color) }
+                    Label { Text(s.label) } icon: { menuSymbol(s.symbol, s.color) }
                 }
                 .disabled(s == status)
             }

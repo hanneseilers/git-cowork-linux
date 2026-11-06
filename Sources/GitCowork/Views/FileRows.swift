@@ -55,7 +55,7 @@ struct RowAction {
 }
 
 private func button(_ action: RowAction) -> some View {
-    Button(action.title, action: action.run)
+    Button(LocalizedStringKey(action.title), action: action.run)
         .buttonStyle(ActionButtonStyle.secondary(action.tint))
 }
 

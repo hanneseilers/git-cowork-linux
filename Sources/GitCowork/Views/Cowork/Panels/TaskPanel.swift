@@ -119,8 +119,8 @@ private struct TaskPanelContent: View {
     private func confirmDelete() {
         let t = task
         model.confirmation = Confirmation(
-            title: "Delete \(t.id)?",
-            message: "“\(t.title)” and its comments are removed for everyone on the next sync. Linked branches are kept.",
+            title: String(localized: "Delete \(t.id)?"),
+            message: String(localized: "“\(t.title)” and its comments are removed for everyone on the next sync. Linked branches are kept."),
             confirmTitle: "Delete Task"
         ) {
             await model.cowork.deleteTask(t)
