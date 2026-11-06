@@ -91,7 +91,7 @@ extension DiffCanvas {
         }
         let menu = NSMenu()
         menu.addItem(withTitle: "Copy", action: #selector(copy(_:)), keyEquivalent: "c")
-        menu.addItem(withTitle: "Select All", action: #selector(selectAll(_:)), keyEquivalent: "a")
+        menu.addItem(withTitle: L("Select All"), action: #selector(selectAll(_:)), keyEquivalent: "a")
         if let hunk = owningHunk(row: r), !actions.isEmpty {
             menu.addItem(.separator())
             for action in actions {

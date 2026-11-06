@@ -39,7 +39,7 @@ struct ChromeButtonLabel: View {
                 .overlay(alignment: .topTrailing) {
                     if badge > 0 { CountBadge(count: badge, style: .toolbar).offset(x: ChromeStyle.badgeOffset.width, y: ChromeStyle.badgeOffset.height) }
                 }
-            Text(title)
+            Text(ui: title)
                 .font(ChromeStyle.caption)
         }
         .frame(minWidth: minWidth)
@@ -62,7 +62,7 @@ struct ChromeButton: View {
         }
         .buttonStyle(HoverFillStyle.chrome())
         .disabled(disabled)
-        .help(help ?? title)
+        .help(Text(ui: help ?? title))
     }
 }
 
@@ -91,7 +91,7 @@ struct ChromeSplitButton<Items: View>: View {
             .menuIndicator(.hidden)
             .fixedSize()
             .disabled(disabled)
-            .help("More \(title) options")
+            .help("More \(L(title)) options")
         }
         .fixedSize()
     }
@@ -107,7 +107,7 @@ struct StackedPicker<Items: View>: View {
     var body: some View {
         Menu { items } label: {
             VStack(alignment: .leading, spacing: 0) {
-                Text(caption)
+                Text(ui: caption)
                     .font(ChromeStyle.caption)
                     .foregroundStyle(.secondary)
                 HStack(spacing: Theme.Space.s) {
@@ -126,7 +126,7 @@ struct StackedPicker<Items: View>: View {
         .buttonStyle(HoverFillStyle.chrome())
         .menuIndicator(.hidden)
         .fixedSize()
-        .help(help ?? caption)
+        .help(Text(ui: help ?? caption))
     }
 }
 

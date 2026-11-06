@@ -46,9 +46,9 @@ enum CenterMode: String, CaseIterable, Hashable {
 
     var title: String {
         switch self {
-        case .history: "History"
-        case .board: "Board"
-        case .reviews: "Reviews"
+        case .history: L("History")
+        case .board: L("Board")
+        case .reviews: L("Reviews")
         }
     }
 

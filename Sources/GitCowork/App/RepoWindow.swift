@@ -74,7 +74,7 @@ struct RepoWindow: View {
         Task {
             guard let resolved = await RepoLocator.resolve(chosen) else {
                 let alert = NSAlert()
-                alert.messageText = "Not a git repository"
+                alert.messageText = L("Not a git repository")
                 alert.informativeText = chosen
                 alert.runModal()
                 return

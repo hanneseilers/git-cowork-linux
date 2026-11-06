@@ -113,6 +113,10 @@ also drop a folder onto any window.
 
 Right-click works almost everywhere: branches, commits, worktrees, files.
 
+The app speaks **English and German** and follows your Mac's language. To
+use a different one for git-cowork only: System Settings › General ›
+Language & Region › Applications.
+
 ## How tasks and reviews work
 
 Tasks, the backlog, review requests and comments are small Markdown files on

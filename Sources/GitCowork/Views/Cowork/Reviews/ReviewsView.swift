@@ -11,10 +11,10 @@ struct ReviewsView: View {
 
         var title: String {
             switch self {
-            case .waiting: "Waiting for me"
-            case .mine: "Mine"
-            case .open: "All open"
-            case .closed: "Closed"
+            case .waiting: L("Waiting for me")
+            case .mine: L("Mine")
+            case .open: L("All open")
+            case .closed: L("Closed")
             }
         }
     }
@@ -129,7 +129,7 @@ struct ReviewsView: View {
             }
             .buttonStyle(ActionButtonStyle.primary())
             .disabled(model.currentBranch == nil)
-            .help(model.currentBranch.map { "Ask teammates to review \($0)" } ?? "Check out a branch first")
+            .help(model.currentBranch.map { String(localized: "Ask teammates to review \($0)") } ?? L("Check out a branch first"))
         }
     }
 

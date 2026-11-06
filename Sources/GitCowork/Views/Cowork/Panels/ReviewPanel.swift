@@ -216,7 +216,7 @@ private struct ReviewPanelContent: View {
                     Text("Task").font(Theme.Font.small).foregroundStyle(.secondary)
                         .frame(width: 32, alignment: .leading)
                     TaskIDText(id: id)
-                    Text(task?.title ?? "Not found")
+                    Text(task?.title ?? L("Not found"))
                         .foregroundStyle(task == nil ? .secondary : .primary)
                         .lineLimit(1)
                     Spacer(minLength: Theme.Space.s)

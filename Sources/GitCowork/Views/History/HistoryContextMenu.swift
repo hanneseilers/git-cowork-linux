@@ -45,7 +45,7 @@ extension HistoryTableCoordinator {
                 // checking out switches to it, so say where it is.
                 if let other = model.localBranches.first(where: { $0.name == badge.name }) {
                     if !other.isHead {
-                        let at = other.target.prefix(7)
+                        let at = String(other.target.prefix(7))
                         menu.addItem(ActionItem("Checkout \(other.name) (local, at \(at))") { Task { await model.checkout(other) } })
                     }
                 } else {
@@ -77,7 +77,7 @@ extension HistoryTableCoordinator {
         menu.addItem(ActionItem("Cherry-pick into \(current)") { Task { await model.cherryPick(sha) } })
         menu.addItem(ActionItem("Revert Commit") { Task { await model.revert(sha) } })
 
-        let reset = NSMenuItem(title: "Reset \(current) to \(short)", action: nil, keyEquivalent: "")
+        let reset = NSMenuItem(title: String(localized: "Reset \(current) to \(short)"), action: nil, keyEquivalent: "")
         let sub = NSMenu()
         sub.addItem(ActionItem("Soft – keep changes staged") { model.reset(to: sha, mode: .soft) })
         sub.addItem(ActionItem("Mixed – keep changes unstaged") { model.reset(to: sha, mode: .mixed) })
@@ -98,9 +98,9 @@ extension HistoryTableCoordinator {
 final class ActionItem: NSMenuItem {
     private let handler: () -> Void
 
-    init(_ title: String, handler: @escaping () -> Void) {
+    init(_ title: String.LocalizationValue, handler: @escaping () -> Void) {
         self.handler = handler
-        super.init(title: title, action: #selector(fire), keyEquivalent: "")
+        super.init(title: String(localized: title), action: #selector(fire), keyEquivalent: "")
         target = self
     }
 

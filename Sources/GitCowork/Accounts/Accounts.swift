@@ -12,7 +12,7 @@ final class AccountStore {
 
     func add(_ account: HostAccount, tokens: TokenSet) throws {
         guard let data = try? JSONEncoder().encode(tokens), Keychain.save(data, host: account.host) else {
-            throw SignInError(message: "Couldn't save the token in the Keychain.")
+            throw SignInError(message: L("Couldn't save the token in the Keychain."))
         }
         accounts.removeAll { $0.host == account.host }
         accounts.append(account)

@@ -62,7 +62,7 @@ private struct AccountSheetFrame<Content: View, Buttons: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.l) {
-            Text(title).font(Theme.Font.title)
+            Text(ui: title).font(Theme.Font.title)
             content
             if let error {
                 Text(error).font(Theme.Font.small).foregroundStyle(.red).textSelection(.enabled)
@@ -101,7 +101,7 @@ struct BrowserSignInSheet: View {
     private var trimmedClientID: String { clientID.trimmingCharacters(in: .whitespaces) }
 
     var body: some View {
-        AccountSheetFrame(title: "Sign In to \(kind.title)", error: error) {
+        AccountSheetFrame(title: String(localized: "Sign In to \(kind.title)"), error: error) {
             if let code {
                 Text("Enter this code on \(code.verificationURL.host ?? host) and approve git-cowork:")
                 Text(code.userCode).font(Self.codeFont).textSelection(.enabled)
@@ -134,8 +134,8 @@ struct BrowserSignInSheet: View {
 
     private var clientIDHelp: String {
         switch kind {
-        case .github: "Register an OAuth app under Settings > Developer settings > OAuth Apps on that server, tick \"Enable Device Flow\", and paste its client ID. Or use Add Token instead."
-        default: "Add an application under User settings > Applications on that server (GitLab 17.3 or later): untick \"Confidential\", allow the device code grant, scopes read_user, read_api and write_repository. Paste its application ID. Or use Add Token instead."
+        case .github: L("Register an OAuth app under Settings > Developer settings > OAuth Apps on that server, tick \"Enable Device Flow\", and paste its client ID. Or use Add Token instead.")
+        default: L("Add an application under User settings > Applications on that server (GitLab 17.3 or later): untick \"Confidential\", allow the device code grant, scopes read_user, read_api and write_repository. Paste its application ID. Or use Add Token instead.")
         }
     }
 

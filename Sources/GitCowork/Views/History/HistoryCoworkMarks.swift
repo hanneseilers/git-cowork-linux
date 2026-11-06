@@ -47,7 +47,7 @@ extension HistoryTableCoordinator {
             var seen = Set<String>()
             for badge in badges(forCommit: i) where badge.kind == .branch {
                 for t in tasksByBranch[badge.name] ?? [] where seen.insert(t.id).inserted {
-                    info.tasks.append(.init(id: t.id, title: t.title, statusTitle: t.status.title, color: NSColor(t.status.color)))
+                    info.tasks.append(.init(id: t.id, title: t.title, statusTitle: t.status.label, color: NSColor(t.status.color)))
                 }
                 if info.review == nil, let r = reviewByBranch[badge.name] {
                     let v = r.overall

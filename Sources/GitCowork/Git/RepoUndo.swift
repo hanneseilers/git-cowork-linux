@@ -47,7 +47,7 @@ extension RepoModel {
     /// "Undo Commit" etc. when the last action can be taken back now, else nil.
     var undoTitle: String? {
         guard let record = lastUndo, record.check(in: undoContext).commands != nil else { return nil }
-        return record.title
+        return L(record.title)
     }
 
     func undoLastAction() async {
@@ -57,7 +57,7 @@ extension RepoModel {
         lastUndo = nil
         switch record.check(in: undoContext) {
         case .blocked(let why):
-            alert = AlertItem(title: "\(record.title) isn't possible anymore", message: why)
+            alert = AlertItem(title: String(localized: "\(L(record.title)) isn't possible anymore"), message: why)
         case .ready(let commands):
             for args in commands {
                 guard await perform(record.title, args) else { return }

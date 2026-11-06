@@ -183,17 +183,17 @@ private struct RepoDialogs: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .alert(model.alert?.title ?? "", isPresented: isPresented(\.alert), presenting: model.alert) { _ in
+            .alert(Text(ui: model.alert?.title ?? ""), isPresented: isPresented(\.alert), presenting: model.alert) { _ in
                 Button("OK") {}
                 Button("Show Command Log") { model.showCommandLog = true }
             } message: { a in
-                Text(a.message)
+                Text(ui: a.message)
             }
-            .alert(model.confirmation?.title ?? "", isPresented: isPresented(\.confirmation), presenting: model.confirmation) { c in
-                Button(c.confirmTitle, role: c.destructive ? .destructive : nil) { Task { await c.action() } }
+            .alert(Text(ui: model.confirmation?.title ?? ""), isPresented: isPresented(\.confirmation), presenting: model.confirmation) { c in
+                Button(L(c.confirmTitle), role: c.destructive ? .destructive : nil) { Task { await c.action() } }
                 Button("Cancel", role: .cancel) {}
             } message: { c in
-                Text(c.message)
+                Text(ui: c.message)
             }
             .sheet(item: $model.sheet) { kind in
                 RepoSheet(model: model, kind: kind, openInNewTab: openInNewTab)

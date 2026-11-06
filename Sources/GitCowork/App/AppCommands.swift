@@ -40,7 +40,7 @@ struct AppCommands: Commands {
         // While text is being edited, Undo / Redo act on the text as usual;
         // otherwise Undo takes back the last git action.
         CommandGroup(replacing: .undoRedo) {
-            Button(textFocus.isEditing ? "Undo" : gitUndoTitle ?? "Undo") {
+            Button(textFocus.isEditing ? L("Undo") : gitUndoTitle ?? L("Undo")) {
                 if TextFocus.editingTextView() != nil {
                     TextFocus.undoText()
                 } else if gitUndoTitle != nil {
@@ -111,7 +111,7 @@ struct AppCommands: Commands {
             }
             .keyboardShortcut("t", modifiers: [.command, .shift])
             .disabled(model == nil)
-            Button(model?.currentBranch.map { "Request Review of \($0)…" } ?? "Request Review…") {
+            Button(model?.currentBranch.map { String(localized: "Request Review of \($0)…") } ?? L("Request Review…")) {
                 guard let m = model, let branch = m.currentBranch else { return }
                 m.sheet = .requestReview(branch: branch)
             }
@@ -159,7 +159,7 @@ struct AppCommands: Commands {
                 openWindow(id: "repo", value: resolved)
             } else {
                 let alert = NSAlert()
-                alert.messageText = "Not a git repository"
+                alert.messageText = L("Not a git repository")
                 alert.informativeText = path
                 alert.runModal()
             }

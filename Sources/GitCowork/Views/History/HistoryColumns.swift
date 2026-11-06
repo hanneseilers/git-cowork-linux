@@ -5,12 +5,12 @@ enum HistoryColumn: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .refs: "Branch / tag"
-        case .graph: "Graph"
-        case .message: "Commit message"
-        case .author: "Author"
-        case .date: "Date"
-        case .sha: "SHA"
+        case .refs: L("Branch / tag")
+        case .graph: L("Graph")
+        case .message: L("Commit message")
+        case .author: L("Author")
+        case .date: L("Date")
+        case .sha: L("SHA")
         }
     }
 
@@ -142,12 +142,12 @@ final class HistoryHeaderMenu: NSObject, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        let title = NSMenuItem(title: "Columns", action: nil, keyEquivalent: "")
+        let title = NSMenuItem(title: L("Columns"), action: nil, keyEquivalent: "")
         title.isEnabled = false
         menu.addItem(title)
         for c in HistoryColumn.optional {
             let visible = coordinator.isColumnVisible(c)
-            let item = ActionItem(c.title) { [coordinator] in coordinator.setColumn(c, visible: !visible) }
+            let item = ActionItem("\(c.title)") { [coordinator] in coordinator.setColumn(c, visible: !visible) }
             item.state = visible ? .on : .off
             menu.addItem(item)
         }

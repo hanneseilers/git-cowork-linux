@@ -1,7 +1,7 @@
 PREFIX ?= /Applications
 APP = dist/git-cowork.app
 
-.PHONY: app install update uninstall run test version release clean
+.PHONY: app install update uninstall run test check-translations version release clean
 
 app:            ## Build dist/git-cowork.app
 	@Scripts/build-app.sh
@@ -24,6 +24,9 @@ run:            ## Run a debug build from the terminal
 
 test:           ## Run unit tests
 	swift test
+
+check-translations: ## List UI text without a German translation
+	@python3 -I Scripts/check-translations.py
 
 version:        ## Print the version and the commit it's built from
 	@echo "$$(Scripts/version.sh) ($$(git describe --tags --always --dirty))"

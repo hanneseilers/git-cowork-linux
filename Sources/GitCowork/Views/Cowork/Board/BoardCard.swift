@@ -49,7 +49,7 @@ struct BoardCard: View, Equatable {
                             .font(Theme.Font.small.monospacedDigit())
                     }
                     .foregroundStyle(.secondary)
-                    .help("\(comments) comment\(comments == 1 ? "" : "s")")
+                    .help(comments == 1 ? "1 comment" : "\(comments) comments")
                 }
                 PersonAvatar(person: assignee, size: 18)
             }

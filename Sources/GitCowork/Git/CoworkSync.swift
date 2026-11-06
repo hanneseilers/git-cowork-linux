@@ -140,7 +140,7 @@ extension CoworkStore {
         }
         guard let merged = try await writeCommit(base: local, parents: [local, theirs], changes: changes,
                                                  message: "Merge cowork changes") else {
-            throw StoreError(message: "Couldn't write the cowork merge")
+            throw StoreError(message: L("Couldn't write the cowork merge"))
         }
         return merged
     }
