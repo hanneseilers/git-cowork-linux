@@ -21,6 +21,10 @@ First public release.
   in front (Settings › Git › Fetch automatically). It never asks for
   credentials and pauses after a failed sign-in.
 - Links to create pull/merge requests on GitHub, GitLab, Gitea and Forgejo.
+- Settings > Accounts: sign in to GitHub or GitLab in the browser, or add an
+  access token (also for Gitea and Forgejo), and HTTPS push and pull work
+  without setting up git. Tokens are kept in the Keychain and used only by
+  git-cowork; git in the terminal and SSH remotes are unchanged.
 - Command log (⌘J) showing every git command the app runs.
 - The app's own git calls ignore a repository's `core.fsmonitor` setting,
   so opening a repo can't start a program named in its config.

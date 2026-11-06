@@ -29,34 +29,16 @@ struct NewTaskSheet: View {
                 .textFieldStyle(.roundedBorder)
             PlaceholderEditor(text: $details, placeholder: "Description (optional)",
                               minHeight: 90, maxHeight: 90)
-            if let q = MentionCompletion.pendingQuery(in: details) {
-                let people = MentionCompletion.candidates(q, people: model.cowork.people)
-                if !people.isEmpty {
-                    MentionSuggestions(people: people) { details = MentionCompletion.complete(details, with: $0) }
-                }
-            }
+            MentionSuggestions(text: $details, people: model.cowork.people)
             SheetGrid {
                 SheetRow(label: "Status") {
-                    Picker("Status", selection: $pickedStatus) {
-                        ForEach(TaskStatus.allCases, id: \.self) { s in
-                            Label { Text(s.title) } icon: { menuSymbol(s.symbol, s.color) }.tag(s)
-                        }
-                    }
-                    .labelsHidden()
+                    StatusPicker(title: "Status", selection: $pickedStatus)
+                        .labelsHidden()
                     .fixedSize()
                 }
                 SheetRow(label: "Assignee") {
-                    Picker("Assignee", selection: $assignee) {
-                        Text("Unassigned").tag("")
-                        if !model.cowork.me.email.isEmpty {
-                            Text("Me (\(model.cowork.me.displayName))").tag(model.cowork.me.email)
-                        }
-                        Divider()
-                        ForEach(model.cowork.people.filter { $0.id != model.cowork.me.id }) { p in
-                            Text(p.displayName).tag(p.email)
-                        }
-                    }
-                    .labelsHidden()
+                    AssigneePicker(title: "Assignee", store: model.cowork, selection: $assignee)
+                        .labelsHidden()
                     .fixedSize()
                 }
                 SheetRow(label: "Labels") {

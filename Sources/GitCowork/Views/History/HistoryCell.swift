@@ -348,7 +348,7 @@ final class HistoryCell: NSTableCellView {
         guard let badge = badges.first else { return }
         let style = GraphStyle.Badge.self
         let pad = style.hPadding
-        let lead = GraphStyle.Text.leadingPadding   // same inset as the column title
+        let lead = Theme.Metrics.panelPadding   // same inset as the column title and other panels
         let maxX = bounds.width - pad
         let h = style.height
         let top = midY - h / 2
@@ -456,7 +456,7 @@ final class HistoryCell: NSTableCellView {
             let size = s.size(withAttributes: attrs)
             let rect = NSRect(x: x, y: midY - style.chipHeight / 2, width: size.width + style.chipPadding * 2, height: style.chipHeight)
             let path = NSBezierPath(roundedRect: rect, xRadius: Theme.Radius.badge, yRadius: Theme.Radius.badge)
-            (onBand ?? task.color).withAlphaComponent(style.chipFillAlpha * alpha).setFill()
+            (onBand ?? task.color).withAlphaComponent(CGFloat(Theme.Tint.chip) * alpha).setFill()
             path.fill()
             s.draw(at: NSPoint(x: rect.minX + style.chipPadding, y: midY - size.height / 2), withAttributes: attrs)
             x = rect.maxX

@@ -2,22 +2,16 @@ import SwiftUI
 
 /// Sizes and fonts for the window chrome: toolbar, status bar, welcome screen.
 enum ChromeStyle {
+    /// Picker captions and toolbar button titles.
     static let caption = Font.system(size: 10)
-    static let pickerTitle = Font.system(size: 13, weight: .semibold)
-    static let pickerChevron = Theme.Glyph.dropdown
     static let icon = Font.system(size: 15)
-    static let label = Font.system(size: 10)
     /// Badge position on a toolbar icon: over its top-right corner, never above the icon.
     static let badgeOffset = CGSize(width: 8, height: -2)
-    static let menuChevron = Theme.Glyph.dropdown
 
     static let iconHeight: CGFloat = 18
     static let buttonMinWidth: CGFloat = 40
-    static let buttonPadding = EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4)
     static let chevronPadding: CGFloat = 2
     static let dividerHeight: CGFloat = 28
-    /// Same as a list row, so the bar lines up with panel content above it.
-    static let statusBarHeight: CGFloat = Theme.Metrics.rowHeight
 
     // Center mode switch (History | Board | Reviews)
     static let segment = Font.system(size: 11, weight: .medium)
@@ -27,41 +21,7 @@ enum ChromeStyle {
     static let segmentTrackFill = 0.06
     static let segmentSelectedFill = 0.18
 
-    static let hoverFill = 0.08
-    static let pressedFill = 0.16
     static let tileIcon = Font.system(size: 18)
-}
-
-/// Flat toolbar button look: no bezel, a soft fill on hover and press.
-struct ChromeButtonStyle: ButtonStyle {
-    var horizontalPadding = ChromeStyle.buttonPadding.leading
-
-    func makeBody(configuration: Configuration) -> some View {
-        HoverBody(configuration: configuration, horizontalPadding: horizontalPadding)
-    }
-
-    private struct HoverBody: View {
-        let configuration: Configuration
-        let horizontalPadding: CGFloat
-        @State private var hovering = false
-        @Environment(\.isEnabled) private var enabled
-
-        var body: some View {
-            configuration.label
-                .padding(.vertical, ChromeStyle.buttonPadding.top)
-                .padding(.horizontal, horizontalPadding)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.control).fill(Color.primary.opacity(fill)))
-                .foregroundStyle(enabled ? .primary : .tertiary)
-                .contentShape(Rectangle())
-                .onHover { hovering = $0 }
-        }
-
-        private var fill: Double {
-            guard enabled else { return 0 }
-            if configuration.isPressed { return ChromeStyle.pressedFill }
-            return hovering ? ChromeStyle.hoverFill : 0
-        }
-    }
 }
 
 /// Icon above a small label, with an optional count badge on the icon.
@@ -80,7 +40,7 @@ struct ChromeButtonLabel: View {
                     if badge > 0 { CountBadge(count: badge, style: .toolbar).offset(x: ChromeStyle.badgeOffset.width, y: ChromeStyle.badgeOffset.height) }
                 }
             Text(title)
-                .font(ChromeStyle.label)
+                .font(ChromeStyle.caption)
         }
         .frame(minWidth: minWidth)
     }
@@ -100,7 +60,7 @@ struct ChromeButton: View {
         Button(action: action) {
             ChromeButtonLabel(title: title, symbol: symbol, badge: badge, minWidth: minWidth)
         }
-        .buttonStyle(ChromeButtonStyle())
+        .buttonStyle(HoverFillStyle.chrome())
         .disabled(disabled)
         .help(help ?? title)
     }
@@ -123,11 +83,11 @@ struct ChromeSplitButton<Items: View>: View {
                          minWidth: 0, action: action)
             Menu { items } label: {
                 Image(systemName: "chevron.down")
-                    .font(ChromeStyle.menuChevron)
+                    .font(Theme.Glyph.dropdown)
                     .frame(height: ChromeStyle.iconHeight)
             }
             .menuStyle(.button)
-            .buttonStyle(ChromeButtonStyle(horizontalPadding: ChromeStyle.chevronPadding))
+            .buttonStyle(HoverFillStyle.chrome(horizontalPadding: ChromeStyle.chevronPadding))
             .menuIndicator(.hidden)
             .fixedSize()
             .disabled(disabled)
@@ -152,18 +112,18 @@ struct StackedPicker<Items: View>: View {
                     .foregroundStyle(.secondary)
                 HStack(spacing: Theme.Space.s) {
                     Text(title)
-                        .font(ChromeStyle.pickerTitle)
+                        .font(Theme.Font.headline)
                         .lineLimit(1)
                         .truncationMode(.middle)
                     Image(systemName: "chevron.down")
-                        .font(ChromeStyle.pickerChevron)
+                        .font(Theme.Glyph.dropdown)
                         .foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: 220, alignment: .leading)
         }
         .menuStyle(.button)
-        .buttonStyle(ChromeButtonStyle())
+        .buttonStyle(HoverFillStyle.chrome())
         .menuIndicator(.hidden)
         .fixedSize()
         .help(help ?? caption)

@@ -32,7 +32,7 @@ struct StatusBar: View {
         }
         .font(Theme.Font.small)
         .padding(.horizontal, Theme.Metrics.panelPadding)
-        .frame(height: ChromeStyle.statusBarHeight)
+        .frame(height: Theme.Metrics.rowHeight)   // lines up with list rows above
         .background(.bar)
     }
 
@@ -143,7 +143,7 @@ private struct CoworkSyncStatus: View {
     }
 
     static func synced(_ date: Date, now: Date) -> String {
-        now.timeIntervalSince(date) < 60 ? "Tasks synced just now" : "Tasks synced \(Formatters.relative(date, now: now))"
+        "Tasks synced \(Formatters.relative(date, now: now))"
     }
 
     private func help(_ store: CoworkStore) -> String {

@@ -79,23 +79,6 @@ enum CommitText {
         if t.hasPrefix("|") || t.hasPrefix("#") || t.hasPrefix(">") { return true }
         return isTrailer(line)
     }
-
-    private static let day: DateFormatter = {
-        let f = DateFormatter()
-        f.setLocalizedDateFormatFromTemplate("ddMMyyyy")
-        return f
-    }()
-
-    private static let time: DateFormatter = {
-        let f = DateFormatter()
-        f.setLocalizedDateFormatFromTemplate("jjmm")
-        return f
-    }()
-
-    /// "06.11.2026, 14:01" (order and separators follow the user's locale).
-    static func stamp(_ date: Date) -> String {
-        "\(day.string(from: date)), \(time.string(from: date))"
-    }
 }
 
 /// Rounded card holding the subject in large type and the body below it.
@@ -129,8 +112,8 @@ struct MessageCard: View {
         }
         .scrollIndicators(.automatic)
         .frame(height: min(height, InspectorStyle.messageMaxHeight))
-        .background(InspectorStyle.cardBackground, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(InspectorStyle.cardBorder))
+        .background(Theme.cardFill, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(Theme.cardBorder))
     }
 }
 
@@ -147,12 +130,12 @@ struct AuthorBlock: View {
                 Text(detail.authorName)
                     .font(Theme.Font.body.weight(.semibold))
                     .lineLimit(1)
-                Text("authored \(CommitText.stamp(detail.authorDate))")
+                Text("authored \(Formatters.stamp(detail.authorDate))")
                     .font(Theme.Font.small)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                 if committerDiffers {
-                    Text("committed by \(detail.committerName), \(CommitText.stamp(detail.committerDate))")
+                    Text("committed by \(detail.committerName), \(Formatters.stamp(detail.committerDate))")
                         .font(Theme.Font.small)
                         .foregroundStyle(.tertiary)
                         .lineLimit(2)

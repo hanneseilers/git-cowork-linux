@@ -370,7 +370,7 @@ private struct ReviewPanelContent: View {
                 .background(selected ? Color.accentColor.opacity(Theme.Tint.selection) : .clear,
                             in: RoundedRectangle(cornerRadius: Theme.Radius.badge))
         }
-        .buttonStyle(HoverRowStyle())
+        .buttonStyle(HoverFillStyle.row)
         .help(f.path)
     }
 }

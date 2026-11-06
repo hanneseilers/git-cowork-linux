@@ -113,6 +113,25 @@ enum CoworkSelfTest {
         check(anna.review(review.id)?.overall == .approved, "both approvals survive the merge")
         check(anna.inbox.contains { $0.kind == .reviewVerdict }, "anna's inbox shows ben's approval")
 
+        print("4b. start a task in its own worktree")
+        let repoModel = RepoModel(root: a)
+        await repoModel.load()
+        if let wtTask = await anna.createTask(title: "Agent: tidy logging", status: .todo) {
+            await repoModel.cowork.reload()
+            let path = await repoModel.startTaskInWorktree(wtTask.id)
+            await repoModel.refresh()
+            let branch = RefName.branch(for: wtTask)
+            check(path.map { fm.fileExists(atPath: $0) } == true, "worktree folder created")
+            check(repoModel.worktrees.contains { $0.branch == branch }, "worktree on branch \(branch)")
+            let started = repoModel.cowork.task(wtTask.id)
+            check(started?.branch == branch && started?.status == .doing, "task linked and In Progress")
+            check(await repoModel.startTaskInWorktree(wtTask.id) == path, "second click reuses the worktree")
+            if let path { _ = await sh(["worktree", "remove", "--force", path], in: a) }
+        } else {
+            check(false, "create task for worktree")
+        }
+        repoModel.stopWatching()
+
         print("4. nothing else touched")
         check(await sh(["rev-parse", "HEAD"], in: b) == headBefore, "HEAD unchanged")
         check(await sh(["status", "--porcelain"], in: b) == "M README.md", "working tree change still there, nothing staged")

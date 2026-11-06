@@ -107,7 +107,7 @@ private struct WelcomeTile: View {
             .background(RoundedRectangle(cornerRadius: Theme.Radius.control).fill(Theme.cardFill))
             .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control).strokeBorder(Theme.cardBorder))
         }
-        .buttonStyle(ChromeButtonStyle(horizontalPadding: 0))
+        .buttonStyle(HoverFillStyle.chrome(horizontalPadding: 0))
     }
 }
 
@@ -136,7 +136,7 @@ private struct RecentRow: View {
             .padding(.vertical, Theme.Space.s)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .buttonStyle(ChromeButtonStyle())
+        .buttonStyle(HoverFillStyle.chrome())
         .help(path)
     }
 }
