@@ -60,7 +60,7 @@ import Testing
         #expect(r.httpMethod == "POST")
         #expect(r.value(forHTTPHeaderField: "Accept") == "application/json")
         let body = String(decoding: r.httpBody ?? Data(), as: UTF8.self)
-        #expect(body == "client_id=abc&scope=repo%20workflow%20read%3Aorg")
+        #expect(body == "client_id=abc&scope=repo%20workflow%20read%3Aorg%20write%3Apublic_key")
 
         let gl = try #require(DeviceFlow.tokenRequest(kind: .gitlab, host: "gitlab.com", clientID: "c", deviceCode: "d"))
         #expect(gl.url?.absoluteString == "https://gitlab.com/oauth/token")
@@ -180,5 +180,161 @@ import Testing
         // Another host still goes to the user's own helper.
         _ = try git(args + ["credential", "fill"], input: Data("protocol=https\nhost=example.invalid\n\n".utf8))
         #expect(fm.fileExists(atPath: leak.path))
+    }
+
+    // MARK: SSH key
+
+    @Test func oldAccountsDecodeWithoutKey() throws {
+        let json = #"{"host":"github.com","kind":"github","username":"octo","method":"oauth"}"#
+        let account = try JSONDecoder().decode(HostAccount.self, from: Data(json.utf8))
+        #expect(account.sshKey == nil)
+        #expect(account.canAddSSHKey)
+        #expect(!HostAccount(host: "codeberg.org", kind: .gitea, username: "a", method: .token).canAddSSHKey)
+    }
+
+    @Test func addSSHKeyRequests() throws {
+        let gh = try #require(HostAPI.addSSHKeyRequest(kind: .github, host: "github.com", token: "t1",
+                                                      title: "git-cowork on Mac", publicKey: "ssh-ed25519 AAAA c\n"))
+        #expect(gh.url?.absoluteString == "https://api.github.com/user/keys")
+        #expect(gh.httpMethod == "POST")
+        #expect(gh.value(forHTTPHeaderField: "Authorization") == "Bearer t1")
+        #expect(gh.value(forHTTPHeaderField: "Content-Type") == "application/json")
+        #expect(String(decoding: gh.httpBody ?? Data(), as: UTF8.self)
+                == #"{"key":"ssh-ed25519 AAAA c","title":"git-cowork on Mac"}"#)
+
+        let gl = try #require(HostAPI.addSSHKeyRequest(kind: .gitlab, host: "gitlab.example.com", token: "t2",
+                                                      title: "k", publicKey: "ssh-ed25519 BBBB"))
+        #expect(gl.url?.absoluteString == "https://gitlab.example.com/api/v4/user/keys")
+        #expect(String(decoding: gl.httpBody ?? Data(), as: UTF8.self)
+                == #"{"key":"ssh-ed25519 BBBB","title":"k","usage_type":"auth"}"#)
+
+        #expect(HostAPI.addSSHKeyRequest(kind: .gitea, host: "codeberg.org", token: "t", title: "k", publicKey: "k") == nil)
+    }
+
+    @Test func parsesAddSSHKeyAnswers() {
+        func parse(_ status: Int, _ body: String, _ kind: HostKind = .github, scopes: String? = nil) -> HostAPI.AddKeyResult {
+            HostAPI.parseAddSSHKey(status: status, data: Data(body.utf8), kind: kind, grantedScopes: scopes)
+        }
+        #expect(parse(201, #"{"id":1,"key":"ssh-ed25519 AAAA","title":"t"}"#) == .added)
+        #expect(parse(401, #"{"message":"Bad credentials"}"#) == .signedOut)
+        // GitHub: token from before write:public_key was asked for.
+        #expect(parse(404, #"{"message":"Not Found"}"#, scopes: "read:org, repo, workflow") == .missingScope)
+        #expect(parse(404, #"{"message":"Not Found"}"#, scopes: "repo, write:public_key") == .failed("Not Found"))
+        #expect(parse(403, #"{"message":"Resource not accessible by personal access token"}"#) == .missingScope)
+        #expect(parse(422, #"{"message":"Validation Failed","errors":[{"resource":"PublicKey","code":"custom","field":"key","message":"key is already in use"}]}"#)
+                == .failed("key is already in use"))
+        // GitLab
+        #expect(parse(403, #"{"error":"insufficient_scope"}"#, .gitlab) == .missingScope)
+        #expect(parse(400, #"{"message":{"fingerprint":["has already been taken"],"key":["has already been taken"]}}"#, .gitlab)
+                == .failed("fingerprint has already been taken; key has already been taken"))
+        #expect(parse(500, "oops", .gitlab) == .failed("HTTP 500"))
+    }
+
+    @Test func keyPaths() {
+        #expect(SSHKey.sshHost("git.example.com:8443") == "git.example.com")
+        let taken: Set<String> = ["/h/.ssh/git-cowork_github.com", "/h/.ssh/git-cowork_github.com_2.pub"]
+        #expect(SSHKey.newKeyPath(sshDir: "/h/.ssh", host: "gitlab.com", exists: taken.contains) == "/h/.ssh/git-cowork_gitlab.com")
+        #expect(SSHKey.newKeyPath(sshDir: "/h/.ssh", host: "github.com", exists: taken.contains) == "/h/.ssh/git-cowork_github.com_3")
+        #expect(SSHKey.newKeyPath(sshDir: "/h/.ssh", host: "../x", exists: { _ in false }) == nil)
+        #expect(SSHKey.newKeyPath(sshDir: "/h/.ssh", host: "a/b", exists: { _ in false }) == nil)
+    }
+
+    @Test func passphrases() {
+        let a = SSHKey.newPassphrase(), b = SSHKey.newPassphrase()
+        #expect(a != b)
+        #expect(Data(base64Encoded: a)?.count == 32)
+        #expect(SSHKey.passphraseInput("p", times: 2) == Data("p\np\n".utf8))
+    }
+
+    @Test func appConfigAndHostEntry() {
+        let config = SSHKey.appConfig(keys: [(host: "gitlab.example.com:8443", keyPath: "/Users/a/.ssh/git-cowork_gitlab.example.com"),
+                                             (host: "bad\nhost", keyPath: "/x")])
+        #expect(config.contains("Host gitlab.example.com\n  IdentityFile \"/Users/a/.ssh/git-cowork_gitlab.example.com\"\n  IdentitiesOnly yes\n  UseKeychain yes\n"))
+        #expect(!config.contains("bad"))
+        #expect(config.hasSuffix("Host *\n  Include ~/.ssh/config\n  Include /etc/ssh/ssh_config\n"))
+
+        let entry = SSHKey.hostEntry(host: "github.com", keyPath: "/Users/a/.ssh/git-cowork_github.com", home: "/Users/a")
+        #expect(entry == """
+            Host github.com
+              IdentityFile "~/.ssh/git-cowork_github.com"
+              IdentitiesOnly yes
+              IgnoreUnknown UseKeychain
+              UseKeychain yes
+
+            """)
+        #expect(SSHKey.sshCommand(configPath: "/tmp/a b/ssh_config") == "/usr/bin/ssh -F '/tmp/a b/ssh_config'")
+    }
+
+    /// The real thing: ssh resolves the app config to our key for the signed-in
+    /// host only, and the person's own config still applies to every host.
+    @Test func sshUsesKeyForSignedInHostOnly() throws {
+        let fm = FileManager.default
+        let dir = URL(fileURLWithPath: "/tmp").appendingPathComponent("gc-ssh-\(UUID().uuidString.prefix(8))")
+        try fm.createDirectory(at: dir, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        defer { try? fm.removeItem(at: dir) }
+        let key = dir.appendingPathComponent("git-cowork_github.com").path
+        let user = dir.appendingPathComponent("user_config")
+        try "Host github.com\n  HostName ssh.github.com\n  Port 443\nHost example.com\n  User bob\n".write(to: user, atomically: true, encoding: .utf8)
+        let config = dir.appendingPathComponent("ssh_config")
+        try SSHKey.appConfig(keys: [(host: "github.com", keyPath: key)], includes: [user.path]).write(to: config, atomically: true, encoding: .utf8)
+        try fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: config.path)
+
+        func resolve(_ host: String) throws -> [String] {
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: SSHKey.sshPath)
+            p.arguments = ["-F", config.path, "-G", host]
+            let out = Pipe()
+            p.standardOutput = out
+            p.standardError = FileHandle.nullDevice
+            try p.run()
+            let data = out.fileHandleForReading.readDataToEndOfFile()
+            p.waitUntilExit()
+            return String(decoding: data, as: UTF8.self).split(separator: "\n").map(String.init)
+        }
+
+        let gh = try resolve("github.com")
+        #expect(gh.first { $0.hasPrefix("identityfile ") } == "identityfile \(key)")
+        #expect(gh.contains("identitiesonly yes"))
+        #expect(gh.contains("hostname ssh.github.com"))   // the person's own settings still apply
+        #expect(gh.contains("port 443"))
+
+        let other = try resolve("example.com")
+        #expect(!other.contains("identityfile \(key)"))
+        #expect(other.contains("identitiesonly no"))
+        #expect(other.contains("user bob"))
+    }
+
+    /// ssh-keygen takes the passphrase on stdin and won't replace a file.
+    @Test func keygenReadsPassphraseFromStdin() throws {
+        let fm = FileManager.default
+        let dir = URL(fileURLWithPath: "/tmp").appendingPathComponent("gc-keygen-\(UUID().uuidString.prefix(8))")
+        try fm.createDirectory(at: dir, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        defer { try? fm.removeItem(at: dir) }
+        let path = dir.appendingPathComponent("k").path
+        let pass = SSHKey.newPassphrase()
+
+        func run(_ tool: String, _ args: [String], input: Data) throws -> Int32 {
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: tool)
+            p.arguments = args
+            let inPipe = Pipe()
+            p.standardInput = inPipe
+            p.standardOutput = FileHandle.nullDevice
+            p.standardError = FileHandle.nullDevice
+            try p.run()
+            inPipe.fileHandleForWriting.write(input)
+            try inPipe.fileHandleForWriting.close()
+            p.waitUntilExit()
+            return p.terminationStatus
+        }
+
+        let args = SSHKey.keygenArgs(path: path, comment: "test")
+        #expect(try run("/usr/bin/ssh-keygen", args, input: SSHKey.passphraseInput(pass, times: 2)) == 0)
+        #expect(try run("/usr/bin/ssh-keygen", ["-y", "-P", pass, "-f", path], input: Data()) == 0)
+        #expect(try run("/usr/bin/ssh-keygen", ["-y", "-P", "", "-f", path], input: Data()) != 0)
+
+        let before = try Data(contentsOf: URL(fileURLWithPath: path))
+        #expect(try run("/usr/bin/ssh-keygen", args, input: SSHKey.passphraseInput("other", times: 2)) != 0)
+        #expect(try Data(contentsOf: URL(fileURLWithPath: path)) == before)
     }
 }

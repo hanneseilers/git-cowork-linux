@@ -25,11 +25,13 @@ public enum DeviceFlow {
     }
 
     /// Scopes asked for at sign-in. GitHub needs `workflow` to push changes to
-    /// .github/workflows; `read:org` lists org repos later.
+    /// .github/workflows; `read:org` lists org repos later; `write:public_key`
+    /// adds an SSH key. GitLab has no scope narrower than `api` that can add
+    /// an SSH key (and creating merge requests needs it too).
     public static func scopes(_ kind: HostKind) -> String {
         switch kind {
-        case .github: "repo workflow read:org"
-        case .gitlab: "read_user read_api write_repository"
+        case .github: "repo workflow read:org write:public_key"
+        case .gitlab: "read_user api write_repository"
         case .gitea: ""
         }
     }

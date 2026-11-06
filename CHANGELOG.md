@@ -29,6 +29,13 @@ First public release.
   your repositories and your organizations' or groups' (newest activity
   first), with a filter. Pick one to fill in its HTTPS URL, or double-click
   to clone it right away.
+- Settings > Accounts > Create SSH Key: makes an ed25519 key in
+  `~/.ssh/git-cowork_<host>`, keeps its random passphrase in the Keychain and
+  adds it to your GitHub or GitLab account. git-cowork then uses it for SSH
+  remotes on that host; `~/.ssh/config` isn't changed (SSH Host Entry shows a
+  block to copy if the terminal should use the key too). Signing in now also
+  asks for GitHub's `write:public_key` and GitLab's `api` scope; older
+  sign-ins are asked to sign in again before adding a key.
 - Command log (⌘J) showing every git command the app runs.
 - Undo (⌘Z) for the last commit, amend, reset, checkout or branch delete,
   run as plain git commands; not offered once you've pushed.

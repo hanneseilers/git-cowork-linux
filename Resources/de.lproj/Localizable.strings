@@ -52,7 +52,7 @@
 "Add a description" = "Beschreibung hinzufügen";
 "Add a note (optional)" = "Notiz hinzufügen (optional)";
 "Add Access Token" = "Zugriffstoken hinzufügen";
-"Add an application under User settings > Applications on that server (GitLab 17.3 or later): untick \"Confidential\", allow the device code grant, scopes read_user, read_api and write_repository. Paste its application ID. Or use Add Token instead." = "Lege auf dem Server unter „User settings > Applications“ eine Anwendung an (GitLab 17.3 oder neuer): „Confidential“ abwählen, den Device-Code-Grant erlauben, Scopes read_user, read_api und write_repository. Füge ihre Application-ID hier ein. Oder nutze stattdessen „Token hinzufügen“.";
+"Add an application under User settings > Applications on that server (GitLab 17.3 or later): untick \"Confidential\", allow the device code grant, scopes read_user, api and write_repository. Paste its application ID. Or use Add Token instead." = "Lege auf dem Server unter „User settings > Applications“ eine Anwendung an (GitLab 17.3 oder neuer): „Confidential“ abwählen, den Device-Code-Grant erlauben, Scopes read_user, api und write_repository. Füge ihre Application-ID hier ein. Oder nutze stattdessen „Token hinzufügen“.";
 "Add label" = "Label hinzufügen";
 "Add Member" = "Mitglied hinzufügen";
 "Add reviewer" = "Reviewer hinzufügen";
@@ -158,16 +158,22 @@
 "Copy Review ID" = "Review-ID kopieren";
 "Copy SHA" = "SHA kopieren";
 "Copy Title" = "Titel kopieren";
+"Copy" = "Kopieren";
 "Couldn't create the task" = "Aufgabe konnte nicht erstellt werden";
+"Couldn't find a free file name for the key in ~/.ssh." = "In ~/.ssh wurde kein freier Dateiname für den Schlüssel gefunden.";
 "Couldn't request the review" = "Review konnte nicht angefragt werden";
 "Couldn't save the token in the Keychain." = "Das Token konnte nicht im Schlüsselbund gespeichert werden.";
 "Couldn't write the cowork merge" = "Cowork-Merge konnte nicht geschrieben werden";
 "Create %@ in its own folder and open it in a new tab, e.g. for an agent" = "%@ in einem eigenen Ordner erstellen und in einem neuen Tab öffnen, z. B. für einen Agent";
 "Create %@ on %@" = "%1$@ auf %2$@ erstellen";
+"Create a Token…" = "Token erstellen …";
 "Create Branch" = "Branch erstellen";
 "Create Branch Here…" = "Branch hier erstellen …";
 "Create First Task" = "Erste Aufgabe erstellen";
+"Create Key" = "Schlüssel erstellen";
 "Create one…" = "Eins erstellen …";
+"Create SSH Key" = "SSH-Schlüssel erstellen";
+"Create SSH Key…" = "SSH-Schlüssel erstellen …";
 "Create Tag" = "Tag erstellen";
 "Create Tag Here…" = "Tag hier erstellen …";
 "Create Task" = "Aufgabe erstellen";
@@ -175,6 +181,7 @@
 "Create Worktree Here…" = "Worktree hier erstellen …";
 "Create Worktree…" = "Worktree erstellen …";
 "Created by %@ · %@" = "Erstellt von %1$@ · %2$@";
+"Creating key…" = "Schlüssel wird erstellt …";
 "Date" = "Datum";
 "Delete" = "Löschen";
 "Delete %@ on %@?" = "%1$@ auf %2$@ löschen?";
@@ -229,6 +236,8 @@
 "Force Push (with lease)…" = "Force-Push (with lease) …";
 "From a URL into a new folder" = "Von einer URL in einen neuen Ordner";
 "Git allows a branch in one worktree at a time. It's open in %@. Open that worktree instead, or create a new branch." = "Git erlaubt einen Branch immer nur in einem Worktree. Er ist in %@ geöffnet. Öffne stattdessen diesen Worktree oder erstelle einen neuen Branch.";
+"git-cowork already uses this key. To use it in the terminal too, add this near the top of ~/.ssh/config:" = "git-cowork nutzt diesen Schlüssel bereits. Um ihn auch im Terminal zu nutzen, füge dies weit oben in ~/.ssh/config ein:";
+"git-cowork makes a new key, adds it to %@ on %@, and uses it for SSH remotes on %@." = "git-cowork erstellt einen neuen Schlüssel, fügt ihn %1$@ auf %2$@ hinzu und nutzt ihn für SSH-Remotes auf %3$@.";
 "git-cowork needs Apple's developer tools" = "git-cowork braucht die Entwicklerwerkzeuge von Apple";
 "git@github.com:org/repo.git or https://…" = "git@github.com:org/repo.git oder https://…";
 "Graph" = "Graph";
@@ -259,6 +268,7 @@
 "Loading repositories…" = "Repositorys werden geladen …";
 "Local" = "Lokal";
 "Locked" = "Gesperrt";
+"macOS's ssh-agent isn't available, so the key's passphrase can't be put in the Keychain." = "Der ssh-agent von macOS ist nicht verfügbar, daher kann die Passphrase des Schlüssels nicht im Schlüsselbund abgelegt werden.";
 "Mark All as Read" = "Alle als gelesen markieren";
 "Mark Resolved" = "Als gelöst markieren";
 "Merge %@ into %@" = "%1$@ in %2$@ mergen";
@@ -419,6 +429,7 @@
 "Right-click a branch and choose Request Review, or use the button above." = "Klicke mit der rechten Maustaste auf einen Branch und wähle „Review anfragen“, oder nutze den Button oben.";
 "Runs git fetch --all --prune for each open repository every 5 minutes while git-cowork is in front, so remote branches and ahead/behind stay current. It never asks for a password: if signing in fails, it pauses until you sign in under Accounts or a fetch, pull or push of yours works." = "Führt alle 5 Minuten git fetch --all --prune für jedes offene Repository aus, solange git-cowork im Vordergrund ist, damit Remote-Branches und Voraus/Zurück aktuell bleiben. Es fragt nie nach einem Passwort: Wenn die Anmeldung scheitert, pausiert es, bis du dich unter „Accounts“ anmeldest oder ein Fetch, Pull oder Push von dir klappt.";
 "Save Team" = "Team speichern";
+"Saved as %@, with its passphrase in the Keychain. Your ~/.ssh/config isn't changed." = "Gespeichert als %@, die Passphrase liegt im Schlüsselbund. Deine ~/.ssh/config bleibt unverändert.";
 "Saved in the repository for everyone. Handles are used for @mentions; emails match commits and git config user.email." = "Wird für alle im Repository gespeichert. Handles werden für @Erwähnungen verwendet; E-Mail-Adressen werden Commits und git config user.email zugeordnet.";
 "Saving…" = "Wird gespeichert …";
 "Search tasks" = "Aufgaben durchsuchen";
@@ -440,6 +451,7 @@
 "Show parent %@" = "Eltern-Commit %@ zeigen";
 "Show the review of %@" = "Review von %@ zeigen";
 "Show Uncommitted Changes" = "Nicht committete Änderungen zeigen";
+"Sign In Again…" = "Erneut anmelden …";
 "Sign In to %@" = "Bei %@ anmelden";
 "Sign In to GitHub…" = "Bei GitHub anmelden …";
 "Sign In to GitLab…" = "Bei GitLab anmelden …";
@@ -451,6 +463,8 @@
 "Sort by" = "Sortieren nach";
 "Sort files" = "Dateien sortieren";
 "Split" = "Nebeneinander";
+"SSH Host Entry" = "SSH-Host-Eintrag";
+"SSH Host Entry…" = "SSH-Host-Eintrag …";
 "Stage" = "Vormerken";
 "Stage All" = "Alle vormerken";
 "Stage All Changes" = "Alle Änderungen vormerken";
@@ -531,7 +545,7 @@
 "Use My Commit" = "Meinen Commit verwenden";
 "Use Theirs" = "Ihre verwenden";
 "Use Upstream" = "Upstream verwenden";
-"Used for HTTPS remotes on these servers, and only by git-cowork. Git in the terminal, SSH remotes and other servers keep your own setup. Tokens are kept in the Keychain." = "Wird für HTTPS-Remotes auf diesen Servern verwendet, und nur von git-cowork. Git im Terminal, SSH-Remotes und andere Server behalten deine eigene Einrichtung. Tokens liegen im Schlüsselbund.";
+"Used for HTTPS remotes on these servers, and for SSH remotes once you create an SSH key, only by git-cowork. Git in the terminal and other servers keep your own setup. Tokens and key passphrases are kept in the Keychain." = "Wird für HTTPS-Remotes auf diesen Servern genutzt und für SSH-Remotes, sobald du einen SSH-Schlüssel erstellst, und nur von git-cowork. Git im Terminal und andere Server behalten deine eigene Einrichtung. Tokens und Schlüssel-Passphrasen liegen im Schlüsselbund.";
 "Uses --force-with-lease: it overwrites the remote branch, but only if nobody else pushed to it since your last fetch." = "Nutzt --force-with-lease: Der Remote-Branch wird überschrieben, aber nur, wenn seit deinem letzten Fetch niemand sonst gepusht hat.";
 "View" = "Darstellung";
 "View Changes" = "Änderungen ansehen";

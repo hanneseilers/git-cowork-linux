@@ -14,7 +14,7 @@ struct GitError: LocalizedError {
     var errorDescription: String? {
         let err = result.stderr.trimmingCharacters(in: .whitespacesAndNewlines)
         if CredentialConfig.isAuthFailure(err) {
-            return err + "\n\nThe server wants you to sign in. Add your account under git-cowork > Settings > Accounts, or set up an SSH key or credential helper for git."
+            return err + "\n\nThe server wants you to sign in. Add your account under git-cowork > Settings > Accounts (for SSH remotes, also Create SSH Key there), or set up an SSH key or credential helper for git."
         }
         if !err.isEmpty { return err }
         let out = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -25,7 +25,8 @@ struct GitError: LocalizedError {
 /// Runs the git CLI. Every call is a plain `git <args>` in the repo folder,
 /// so behaviour matches the terminal: same config, SSH keys, credential
 /// helpers and hooks. The one addition: hosts signed in under Settings >
-/// Accounts get their token from the app (see Credentials).
+/// Accounts get their token (and SSH key, if one was made) from the app
+/// (see Credentials).
 final class GitRunner: @unchecked Sendable {
     static let shared = GitRunner()
 
@@ -117,12 +118,19 @@ final class GitRunner: @unchecked Sendable {
     /// non-UTF-8 content would corrupt patches built from it.
     func executeData(_ args: [String], in dir: URL, input: Data? = nil,
                      env extra: [String: String] = [:]) async -> (stdout: Data, stderr: Data, exitCode: Int32) {
-        let env = environment.merging(extra) { _, new in new }
+        var env = environment.merging(extra) { _, new in new }
         let gitPath = gitPath
         let credentials = Credentials.shared
         if CredentialConfig.needsCredentials(args) {
             await credentials.prepare(gitPath: gitPath, env: env)
+            // An SSH key made under Settings > Accounts, unless the person
+            // already picked an ssh command themselves.
+            if let ssh = credentials.sshCommand, env["GIT_SSH_COMMAND"] == nil, env["GIT_SSH"] == nil,
+               await tryRun(["config", "--get", "core.sshCommand"], in: dir) == nil {
+                env["GIT_SSH_COMMAND"] = ssh
+            }
         }
+        let processEnv = env
         let configArgs = GitDefaults.configArgs + credentials.configArgs
         return await withCheckedContinuation { cont in
             DispatchQueue.global(qos: .userInitiated).async {
@@ -130,7 +138,7 @@ final class GitRunner: @unchecked Sendable {
                 p.executableURL = URL(fileURLWithPath: gitPath)
                 p.arguments = configArgs + args
                 p.currentDirectoryURL = dir
-                p.environment = env
+                p.environment = processEnv
                 let out = Pipe(), err = Pipe()
                 p.standardOutput = out
                 p.standardError = err

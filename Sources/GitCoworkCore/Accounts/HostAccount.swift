@@ -12,15 +12,22 @@ public struct HostAccount: Codable, Hashable, Sendable, Identifiable {
     public var kind: HostKind
     public var username: String
     public var method: Method
+    /// Private key made by "Create SSH Key…" and added to this account on the
+    /// host. Nil when there is none (older saved accounts have no such field).
+    public var sshKey: String?
 
     public var id: String { host }
 
-    public init(host: String, kind: HostKind, username: String, method: Method) {
+    public init(host: String, kind: HostKind, username: String, method: Method, sshKey: String? = nil) {
         self.host = host.lowercased()
         self.kind = kind
         self.username = username
         self.method = method
+        self.sshKey = sshKey
     }
+
+    /// GitHub and GitLab can take an SSH key through their API.
+    public var canAddSSHKey: Bool { kind != .gitea }
 
     /// Username git sends over HTTPS. GitLab wants "oauth2" with OAuth tokens;
     /// everywhere else the account name works with the token as password.

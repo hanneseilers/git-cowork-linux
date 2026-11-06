@@ -11,6 +11,13 @@ final class AccountStore {
     private(set) var accounts: [HostAccount] = AccountList.load()
 
     func add(_ account: HostAccount, tokens: TokenSet) throws {
+        var account = account
+        // Signing in again (say, to grant a new scope) keeps the SSH key of
+        // the same account; another account on that host doesn't get it.
+        if account.sshKey == nil,
+           let old = accounts.first(where: { $0.host == account.host && $0.username == account.username }) {
+            account.sshKey = old.sshKey
+        }
         guard let data = try? JSONEncoder().encode(tokens), Keychain.save(data, host: account.host) else {
             throw SignInError(message: L("Couldn't save the token in the Keychain."))
         }
@@ -21,6 +28,15 @@ final class AccountStore {
         Credentials.shared.reload()
     }
 
+    /// Records the SSH key "Create SSH Key…" made and the host accepted.
+    func setSSHKey(_ path: String, for account: HostAccount) {
+        guard let i = accounts.firstIndex(where: { $0.host == account.host }) else { return }
+        accounts[i].sshKey = path
+        AccountList.save(accounts)
+        Credentials.shared.reload()
+    }
+
+    /// Key files stay in ~/.ssh and on the host; the app just stops using them.
     func signOut(_ account: HostAccount) {
         Keychain.delete(host: account.host)
         accounts.removeAll { $0.host == account.host }
@@ -45,7 +61,9 @@ enum AccountList {
 
 /// Puts tokens where git finds them: git's credential-cache daemon on a
 /// private socket, plus `-c` options that point signed-in hosts at it
-/// (see CredentialConfig). Used by GitRunner from any thread.
+/// (see CredentialConfig). Also writes the ssh config that gives SSH remotes
+/// on those hosts the account's key, if one was made (see SSHKey). Used by
+/// GitRunner from any thread.
 final class Credentials: @unchecked Sendable {
     static let shared = Credentials()
 
@@ -54,6 +72,7 @@ final class Credentials: @unchecked Sendable {
     private static let cacheTimeout = 3600
 
     let socketPath: String
+    private let sshConfigPath: String
     private let lock = NSLock()
     private var accounts: [HostAccount] = AccountList.load()
     private let refresher = Refresher()
@@ -64,6 +83,8 @@ final class Credentials: @unchecked Sendable {
                                                  attributes: [.posixPermissions: 0o700])
         try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: dir.path)
         socketPath = dir.appendingPathComponent("credentials.sock").path
+        sshConfigPath = dir.appendingPathComponent("ssh_config").path
+        writeSSHConfig()
     }
 
     private var current: [HostAccount] {
@@ -74,6 +95,39 @@ final class Credentials: @unchecked Sendable {
     func reload() {
         let list = AccountList.load()
         lock.lock(); accounts = list; lock.unlock()
+        writeSSHConfig()
+    }
+
+    /// Keys of signed-in accounts whose file is still there. A missing file
+    /// is left out: with IdentitiesOnly, ssh would otherwise offer no key at all.
+    private var sshKeys: [(host: String, keyPath: String)] {
+        current.compactMap { account in
+            guard let path = account.sshKey, FileManager.default.fileExists(atPath: path) else { return nil }
+            return (account.host, path)
+        }
+    }
+
+    private func writeSSHConfig() {
+        let keys = sshKeys
+        guard !keys.isEmpty else {
+            try? FileManager.default.removeItem(atPath: sshConfigPath)
+            return
+        }
+        let url = URL(fileURLWithPath: sshConfigPath)
+        try? Data(SSHKey.appConfig(keys: keys).utf8).write(to: url, options: .atomic)
+        try? FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: sshConfigPath)
+    }
+
+    /// `GIT_SSH_COMMAND` for network commands, or nil when no account has a key.
+    var sshCommand: String? {
+        guard !sshKeys.isEmpty else { return nil }
+        if !FileManager.default.fileExists(atPath: sshConfigPath) { writeSSHConfig() }   // temp folder was cleaned
+        return SSHKey.sshCommand(configPath: sshConfigPath)
+    }
+
+    /// A current access token for API calls, refreshed if it's about to expire.
+    func accessToken(for account: HostAccount) async -> String? {
+        await refresher.validTokens(for: account)?.access
     }
 
     /// Extra `-c` options for every git command. Empty when nobody signed in.
