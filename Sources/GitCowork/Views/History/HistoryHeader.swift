@@ -19,7 +19,7 @@ final class HistoryHeaderCell: NSTableHeaderCell {
         let title = stringValue as NSString
         let size = title.size(withAttributes: attrs)
         // Titles line up with the cell content below (first column uses the panel inset).
-        let inset = cellFrame.minX < 1 ? GraphStyle.Text.leadingPadding : GraphStyle.Text.padding
+        let inset = cellFrame.minX < 1 ? Theme.Metrics.panelPadding : GraphStyle.Text.padding
         let rect = NSRect(x: cellFrame.minX + inset, y: cellFrame.midY - size.height / 2,
                           width: max(0, cellFrame.width - inset - GraphStyle.Text.padding), height: size.height)
         title.draw(with: rect, options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], attributes: attrs)

@@ -11,7 +11,7 @@ struct PersonAvatar: View {
 
     var body: some View {
         if let person {
-            Avatar(name: person.name.isEmpty ? person.email : person.name, email: person.email, size: size)
+            Avatar(name: person.displayName, email: person.email, size: size)
                 .help("\(person.name) <\(person.email)>")
         } else {
             Image(systemName: "person.crop.circle.badge.questionmark")
@@ -70,5 +70,61 @@ struct TaskIDText: View {
             .font(Theme.Font.monoSmall.weight(.medium))
             .foregroundStyle(.secondary)
             .textSelection(.enabled)
+    }
+}
+
+// MARK: Pickers
+
+/// Assignee choices in one order everywhere: Unassigned, Me, then everyone
+/// else. `item` builds one entry (a menu button or a tagged picker row);
+/// `email` is nil for Unassigned.
+struct AssigneeOptions<Item: View>: View {
+    let store: CoworkStore
+    @ViewBuilder let item: (_ email: String?, _ title: String, _ icon: Image) -> Item
+
+    var body: some View {
+        item(nil, "Unassigned", Image(systemName: "person.crop.circle.badge.questionmark"))
+        if !store.me.email.isEmpty {
+            item(store.me.email, "Me (\(store.me.displayName))", menuPersonIcon(store.me))
+        }
+        let others = store.others
+        if !others.isEmpty {
+            Divider()
+            ForEach(others) { p in item(p.email, p.displayName, menuPersonIcon(p)) }
+        }
+    }
+}
+
+/// Picker of assignees; the selection is an email, "" for Unassigned.
+struct AssigneePicker: View {
+    let title: String
+    let store: CoworkStore
+    @Binding var selection: String
+
+    var body: some View {
+        Picker(title, selection: $selection) {
+            AssigneeOptions(store: store) { email, title, icon in
+                Label { Text(title) } icon: { icon }.tag(email ?? "")
+            }
+        }
+    }
+}
+
+/// Picker of task statuses, each with its colored icon.
+struct StatusPicker: View {
+    let title: String
+    @Binding var selection: TaskStatus
+
+    var body: some View {
+        Picker(title, selection: $selection) {
+            ForEach(TaskStatus.allCases, id: \.self) { $0.menuLabel.tag($0) }
+        }
+    }
+}
+
+extension TaskStatus {
+    /// Title with the colored status icon, for menus and pickers.
+    var menuLabel: some View {
+        Label { Text(title) } icon: { menuSymbol(symbol, color) }
     }
 }

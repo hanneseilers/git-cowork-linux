@@ -187,11 +187,8 @@ private struct TaskPanelContent: View {
                     guard new != savedBody else { return }
                     scheduleBodySave()
                 }
-            if focus == .body, let q = MentionCompletion.pendingQuery(in: bodyText) {
-                let people = MentionCompletion.candidates(q, people: store.people)
-                if !people.isEmpty {
-                    MentionSuggestions(people: people) { bodyText = MentionCompletion.complete(bodyText, with: $0) }
-                }
+            if focus == .body {
+                MentionSuggestions(text: $bodyText, people: store.people)
             }
         }
     }

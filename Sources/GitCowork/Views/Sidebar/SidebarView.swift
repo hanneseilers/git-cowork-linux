@@ -64,7 +64,7 @@ private struct SidebarContent: View, Equatable {
             .listStyle(.sidebar)
             // One solid color behind the filter bar and the list (set by RepoView).
             .scrollContentBackground(.hidden)
-            .environment(\.defaultMinListRowHeight, SidebarStyle.rowHeight)
+            .environment(\.defaultMinListRowHeight, Theme.Metrics.rowHeight)
             .environment(\.sidebarRowSize, .small)
             .contextMenu(forSelectionType: String.self) { ids in
                 if let id = ids.first { SidebarMenu(model: model, id: id, openHere: openHere, openInNewTab: openInNewTab) }

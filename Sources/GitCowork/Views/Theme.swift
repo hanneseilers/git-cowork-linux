@@ -53,6 +53,16 @@ enum Theme {
         static let mono = SwiftUI.Font.system(size: 12, design: .monospaced)
         static let monoSmall = SwiftUI.Font.system(size: 11, design: .monospaced)
         static let title = SwiftUI.Font.system(size: 15, weight: .semibold)
+        /// Bar titles and picker values ("Tasks", "Inbox", the toolbar's branch name).
+        static let headline = SwiftUI.Font.system(size: 13, weight: .semibold)
+    }
+
+    /// AppKit twins of `Font`, for views that draw their own text (graph, diff).
+    enum AppKitFont {
+        static let small = NSFont.systemFont(ofSize: 11)
+        static let caption = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        static let mono = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+        static let monoSmall = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
     }
 
     /// Layout rules shared by every panel, so edges line up across the window.
@@ -131,14 +141,6 @@ enum Theme {
         /// Needs attention: conflicts banner, sync errors, uncommitted counts.
         static let warning = Color(nsColor: .systemOrange)
     }
-
-    enum Diff {
-        static let addedBackground = NSColor.systemGreen.withAlphaComponent(0.14)
-        static let removedBackground = NSColor.systemRed.withAlphaComponent(0.14)
-        static let hunkBackground = NSColor.systemBlue.withAlphaComponent(0.10)
-        static let addedText = NSColor.labelColor
-        static let gutterText = NSColor.tertiaryLabelColor
-    }
 }
 
 extension Color {
@@ -165,7 +167,19 @@ enum Formatters {
         return f
     }()
 
-    /// "now", "5m", "3h", "2d", then a short date.
+    private static let day: DateFormatter = {
+        let f = DateFormatter()
+        f.setLocalizedDateFormatFromTemplate("ddMMyyyy")
+        return f
+    }()
+
+    private static let time: DateFormatter = {
+        let f = DateFormatter()
+        f.setLocalizedDateFormatFromTemplate("jjmm")
+        return f
+    }()
+
+    /// "now", "5m ago", "3h ago", "2d ago", then a short date ("6 Nov 26").
     static func relative(_ date: Date, now: Date = .now) -> String {
         let s = now.timeIntervalSince(date)
         if s < 60 { return "now" }
@@ -176,6 +190,11 @@ enum Formatters {
     }
 
     static func full(_ date: Date) -> String { dateTime.string(from: date) }
+
+    /// "06.11.2026, 14:01" (order and separators follow the user's locale).
+    static func stamp(_ date: Date) -> String {
+        "\(day.string(from: date)), \(time.string(from: date))"
+    }
 }
 
 

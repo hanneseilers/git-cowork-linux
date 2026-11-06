@@ -36,7 +36,7 @@ struct RequestReviewSheet: View {
         return names.filter { $0 != branch }.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
     }
 
-    private var candidates: [TeamMember] { store.people.filter { $0.id != store.me.id } }
+    private var candidates: [TeamMember] { store.others }
 
     private var openTasks: [CoworkTask] {
         store.tasks.filter { $0.status != .done || $0.id == taskID }

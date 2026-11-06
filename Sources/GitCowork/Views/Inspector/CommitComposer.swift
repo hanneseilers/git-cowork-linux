@@ -74,7 +74,7 @@ struct CommitComposer: View {
             .disabled(!canCommit)
             .help("Commit (⌘↩)")
         }
-        .padding(InspectorStyle.padding)
+        .padding(Theme.Metrics.panelPadding)
         .onAppear {
             if session.amend && !canAmend { session.resetAmend() }
             takeFocusRequest()

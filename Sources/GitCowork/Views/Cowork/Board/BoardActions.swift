@@ -76,25 +76,15 @@ struct BoardCardMenu: View {
     let task: CoworkTask
 
     var body: some View {
-        Picker("Move To", selection: Binding(
+        StatusPicker(title: "Move To", selection: Binding(
             get: { task.status },
-            set: { BoardActions.move(task.id, to: $0, model: model) })) {
-            ForEach(TaskStatus.allCases, id: \.self) { Text($0.title).tag($0) }
-        }
-        .pickerStyle(.menu)
+            set: { BoardActions.move(task.id, to: $0, model: model) }))
+            .pickerStyle(.menu)
 
-        Picker("Assign To", selection: Binding(
+        AssigneePicker(title: "Assign To", store: model.cowork, selection: Binding(
             get: { assigneeTag },
-            set: { BoardActions.assign(task.id, to: $0.isEmpty ? nil : $0, model: model) })) {
-            let me = model.cowork.me
-            if !me.email.isEmpty { Text("Me").tag(me.email) }
-            Text("Unassigned").tag("")
-            Divider()
-            ForEach(model.cowork.people.filter { $0.id != me.id }) { p in
-                Text(p.name.isEmpty ? p.email : p.name).tag(p.email)
-            }
-        }
-        .pickerStyle(.menu)
+            set: { BoardActions.assign(task.id, to: $0.isEmpty ? nil : $0, model: model) }))
+            .pickerStyle(.menu)
 
         Divider()
         if let ref = model.linkedBranch(of: task) {

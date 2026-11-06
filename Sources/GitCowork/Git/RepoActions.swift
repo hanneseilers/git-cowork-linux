@@ -292,20 +292,6 @@ extension RepoModel {
         }
     }
 
-    /// Discards every uncommitted change, including new files.
-    func discardAll() {
-        confirmation = Confirmation(
-            title: "Discard all changes?",
-            message: "Every uncommitted change and every new file in this worktree is lost. This can't be undone.",
-            confirmTitle: "Discard All"
-        ) { [weak self] in
-            guard let self else { return }
-            if await perform("Discard all", ["restore", "--staged", "--worktree", "--", "."]) {
-                await perform("Discard all", ["clean", "-fdq"])
-            }
-        }
-    }
-
     func commit(message: String, amend: Bool) async -> Bool {
         var args = ["commit"]
         if amend { args.append("--amend") }

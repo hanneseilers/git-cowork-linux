@@ -284,8 +284,8 @@ struct SheetScaffold<Content: View>: View {
 
 // MARK: Buttons
 
-/// The one button family used inside panels (the toolbar has its own flat
-/// `ChromeButtonStyle`):
+/// The one button family used inside panels (the toolbar and list rows use
+/// the flat `HoverFillStyle`):
 /// - `.primary`: filled with the tint, white text. The main action of a block
 ///   (New Task, Commit, Approve). Use at most one or two per block.
 /// - `.secondary`: small bordered button, tinted text on a soft tinted fill.
@@ -355,6 +355,50 @@ private struct ActionButtonBody<Label: View>: View {
         switch kind {
         case .primary: .clear
         case .secondary: tint == nil ? Color(nsColor: .separatorColor) : .clear  // tinted: the fill is enough
+        }
+    }
+}
+
+/// Plain button with a soft fill while hovered or pressed. `.row` for
+/// clickable list rows; `.chrome()` for the flat toolbar buttons, with a
+/// little padding and rounded corners. Dimmed when disabled.
+struct HoverFillStyle: ButtonStyle {
+    var hover = 0.05
+    var pressed = 0.10
+    var radius: CGFloat = 0
+    var padding = EdgeInsets()
+
+    static let row = HoverFillStyle()
+
+    static func chrome(horizontalPadding: CGFloat = Theme.Space.s) -> HoverFillStyle {
+        HoverFillStyle(hover: 0.08, pressed: 0.16, radius: Theme.Radius.control,
+                       padding: EdgeInsets(top: Theme.Space.xs, leading: horizontalPadding,
+                                           bottom: Theme.Space.xs, trailing: horizontalPadding))
+    }
+
+    func makeBody(configuration: Configuration) -> some View {
+        HoverFillBody(configuration: configuration, style: self)
+    }
+
+    private struct HoverFillBody: View {
+        let configuration: Configuration
+        let style: HoverFillStyle
+        @State private var hovering = false
+        @Environment(\.isEnabled) private var enabled
+
+        var body: some View {
+            configuration.label
+                .padding(style.padding)
+                .background(RoundedRectangle(cornerRadius: style.radius).fill(Color.primary.opacity(fill)))
+                .foregroundStyle(enabled ? .primary : .tertiary)
+                .contentShape(Rectangle())
+                .onHover { hovering = $0 }
+        }
+
+        private var fill: Double {
+            guard enabled else { return 0 }
+            if configuration.isPressed { return style.pressed }
+            return hovering ? style.hover : 0
         }
     }
 }

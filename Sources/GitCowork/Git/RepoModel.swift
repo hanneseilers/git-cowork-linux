@@ -178,7 +178,6 @@ final class RepoModel {
     var localBranches: [Ref] { refs.filter { $0.kind == .localBranch } }
     var remoteBranches: [Ref] { refs.filter { $0.kind == .remoteBranch } }
     var tags: [Ref] { refs.filter { $0.kind == .tag } }
-    var currentRef: Ref? { refs.first { $0.kind == .localBranch && $0.isHead } }
 
     // MARK: Loading
 
