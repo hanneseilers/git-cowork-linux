@@ -281,14 +281,16 @@ private struct ActionButtonBody<Label: View>: View {
     private var fill: Color {
         switch kind {
         case .primary: (tint ?? .accentColor).opacity(hovering && enabled ? 0.88 : 1)
-        case .secondary: color.opacity(hovering && enabled ? 0.16 : (tint == nil ? 0.05 : 0.10))
+        case .secondary: tint == nil
+            ? color.opacity(hovering && enabled ? 0.16 : 0.05)
+            : color.opacity(hovering && enabled ? Theme.Tint.chip + 0.07 : Theme.Tint.chip)
         }
     }
 
     private var border: Color {
         switch kind {
         case .primary: .clear
-        case .secondary: tint.map { $0.opacity(0.55) } ?? Color(nsColor: .separatorColor)
+        case .secondary: tint == nil ? Color(nsColor: .separatorColor) : .clear  // tinted: the fill is enough
         }
     }
 }

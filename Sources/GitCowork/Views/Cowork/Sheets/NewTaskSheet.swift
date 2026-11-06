@@ -27,7 +27,7 @@ struct NewTaskSheet: View {
         } content: {
             TextField("Title", text: $title, prompt: Text("What needs doing?"))
                 .textFieldStyle(.roundedBorder)
-            PlaceholderEditor(text: $details, placeholder: "Description (optional). Use @ to mention someone.",
+            PlaceholderEditor(text: $details, placeholder: "Description (optional)",
                               minHeight: 90, maxHeight: 90)
             if let q = MentionCompletion.pendingQuery(in: details) {
                 let people = MentionCompletion.candidates(q, people: model.cowork.people)

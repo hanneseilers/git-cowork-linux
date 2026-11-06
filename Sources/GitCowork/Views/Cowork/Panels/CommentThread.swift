@@ -197,7 +197,7 @@ private struct CommentRow: View {
 struct CommentComposer: View {
     let model: RepoModel
     let parent: String
-    var placeholder = "Write a comment… Use @ to mention someone."
+    var placeholder = "Write a comment"
 
     @State private var sending = false
     @FocusState private var focused: Bool
@@ -223,7 +223,7 @@ struct CommentComposer: View {
             PlaceholderEditor(text: draftBinding, placeholder: placeholder, minHeight: 56, maxHeight: 56, focused: focused)
                 .focused($focused)
             HStack(spacing: Theme.Space.m) {
-                Text("⌘↩ to send")
+                Text("⌘↩ to send · @ to mention")
                     .font(Theme.Font.small)
                     .foregroundStyle(.tertiary)
                 Spacer()

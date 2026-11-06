@@ -5,7 +5,7 @@ import SwiftUI
 struct WelcomeView: View {
     let open: (String) -> Void
     let clone: () -> Void
-    @State private var recents = Prefs.recentRepos.filter { FileManager.default.fileExists(atPath: $0) }
+    @State private var recents = Prefs.visibleRecents
 
     private enum Layout {
         static let contentWidth: CGFloat = 640

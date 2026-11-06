@@ -31,6 +31,15 @@ enum Prefs {
         set { UserDefaults.standard.set(Array(newValue.prefix(20)), forKey: Key.recentRepos) }
     }
 
+    /// Recent repositories worth showing: still on disk and not in a temporary
+    /// folder (throwaway repos from scripts and test runs).
+    static var visibleRecents: [String] {
+        let temp = [NSTemporaryDirectory(), "/tmp/", "/private/tmp/", "/private/var/folders/", "/var/folders/"]
+        return recentRepos.filter { path in
+            FileManager.default.fileExists(atPath: path) && !temp.contains { path.hasPrefix($0) }
+        }
+    }
+
     static func addRecent(_ path: String) {
         var list = recentRepos.filter { $0 != path }
         list.insert(path, at: 0)

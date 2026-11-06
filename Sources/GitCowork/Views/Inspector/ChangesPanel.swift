@@ -183,14 +183,14 @@ private struct FileLists: View {
             section("unstaged", title: "Unstaged files", files: unstaged) {
                 if !unstaged.isEmpty {
                     ViewThatFits(in: .horizontal) {
-                        unstagedButtons(discard: "Discard all", stage: "Stage all changes")
-                        unstagedButtons(discard: "Discard", stage: "Stage all")
+                        unstagedButtons(discard: "Discard All", stage: "Stage All Changes")
+                        unstagedButtons(discard: "Discard", stage: "Stage All")
                     }
                 }
             }
             section("staged", title: "Staged files", files: st.staged) {
                 if !st.staged.isEmpty {
-                    TintedButton(title: "Unstage all", symbol: "minus", tint: Theme.Status.deleted) {
+                    TintedButton(title: "Unstage All", symbol: "minus", tint: Theme.Status.deleted) {
                         Task { await model.unstageAll() }
                     }
                 }
@@ -275,7 +275,7 @@ private struct FileLists: View {
         case .staged:
             return RowAction(title: "Unstage", tint: Theme.Status.deleted) { toggle(files) }
         case .conflicted:
-            return RowAction(title: "Mark resolved", tint: Theme.Status.added) { toggle(files) }
+            return RowAction(title: "Mark Resolved", tint: Theme.Status.added) { toggle(files) }
         case .unstaged, .untracked:
             return RowAction(title: "Stage", tint: Theme.Status.added) { toggle(files) }
         }
@@ -303,7 +303,7 @@ private struct FileLists: View {
         if !changes.isEmpty {
             let staged = changes.filter { $0.area == .staged }
             let other = changes.filter { $0.area != .staged }
-            // Conflicted files are handled by Use Mine / Use Theirs / Mark resolved.
+            // Conflicted files are handled by Use Mine / Use Theirs / Mark Resolved.
             let discardable = changes.filter { $0.area == .unstaged || $0.area == .untracked }
             let conflictedOnly = !other.isEmpty && other.allSatisfy { $0.area == .conflicted }
             if !other.isEmpty { Button(conflictedOnly ? "Mark Resolved" : "Stage") { Task { await model.stage(other) } } }

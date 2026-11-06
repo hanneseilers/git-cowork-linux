@@ -181,7 +181,7 @@ private struct TaskPanelContent: View {
                     Text("Saving…").font(Theme.Font.small).foregroundStyle(.tertiary)
                 }
             }
-            PlaceholderEditor(text: $bodyText, placeholder: "Add a description… Use @ to mention someone.",
+            PlaceholderEditor(text: $bodyText, placeholder: "Add a description",
                               minHeight: 80, focused: focus == .body)
                 .focused($focus, equals: .body)
                 .onChange(of: bodyText) { _, new in

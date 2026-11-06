@@ -180,7 +180,7 @@ struct FileViewControls: View {
     }
 }
 
-/// Small bordered button tinted with a status color: "Stage all changes".
+/// Small button tinted with a status color: "Stage All Changes".
 struct TintedButton: View {
     let title: String
     var symbol: String?
