@@ -36,7 +36,7 @@ struct WelcomeView: View {
                     }
                     .padding(.horizontal, Theme.Space.m)
                     if recents.isEmpty {
-                        Text("Repositories you open show up here.")
+                        Text("Repositories you open show up here")
                             .font(Theme.Font.small)
                             .foregroundStyle(.tertiary)
                             .padding(Theme.Space.m)
@@ -55,7 +55,7 @@ struct WelcomeView: View {
                     }
                 }
 
-                Text("Tip: drop a folder anywhere in this window.")
+                Text("Tip: drop a folder anywhere in this window")
                     .font(Theme.Font.small)
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, Theme.Space.m)

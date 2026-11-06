@@ -149,7 +149,7 @@ private struct ReviewPanelContent: View {
                 if isRequester && review.status == .open { addReviewerMenu }
             }
             if review.reviewers.isEmpty {
-                Text("Nobody asked yet.").font(Theme.Font.small).foregroundStyle(.secondary)
+                Text("Nobody asked yet").font(Theme.Font.small).foregroundStyle(.secondary)
                     .frame(minHeight: Theme.Metrics.rowHeight)
             }
             ForEach(sortedReviewers, id: \.email) { r in

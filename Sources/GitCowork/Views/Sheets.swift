@@ -172,7 +172,7 @@ struct AddWorktreeSheet: View {
             .formStyle(.columns)
 
             if FileManager.default.fileExists(atPath: path) && !path.isEmpty {
-                Text("That folder already exists.").font(Theme.Font.small).foregroundStyle(.red)
+                Text("That folder already exists").font(Theme.Font.small).foregroundStyle(.red)
             }
             Toggle("Open in a new tab", isOn: $openAfter).toggleStyle(.checkbox)
         }

@@ -92,9 +92,9 @@ enum CommitText {
         return f
     }()
 
-    /// "06.11.2026 @ 14:01" (order and separators follow the user's locale).
+    /// "06.11.2026, 14:01" (order and separators follow the user's locale).
     static func stamp(_ date: Date) -> String {
-        "\(day.string(from: date)) @ \(time.string(from: date))"
+        "\(day.string(from: date)), \(time.string(from: date))"
     }
 }
 

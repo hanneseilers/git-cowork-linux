@@ -157,7 +157,7 @@ struct CommentList: View {
         VStack(alignment: .leading, spacing: Theme.Metrics.panelPadding) {
             CoworkSectionTitle("Comments", count: comments.count)
             if comments.isEmpty {
-                Text("No comments yet.")
+                Text("No comments yet")
                     .font(Theme.Font.small)
                     .foregroundStyle(.secondary)
             }

@@ -85,7 +85,6 @@ private struct TaskPanelContent: View {
     private var header: some View {
         CoworkPanelBar {
             TaskIDText(id: task.id)
-            StatusChip(status: task.status)
             Spacer()
             if copied {
                 Text("Copied").font(Theme.Font.small).foregroundStyle(.secondary)
