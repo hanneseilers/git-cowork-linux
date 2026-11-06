@@ -197,7 +197,7 @@ struct TokenSheet: View {
             TextField("Server", text: $host).textFieldStyle(.roundedBorder)
             SecureField("Token", text: $token).textFieldStyle(.roundedBorder)
             HStack(spacing: Theme.Space.s) {
-                Text("Needs the scopes \(HostAPI.tokenScopesHint(kind: kind)).")
+                Text("Needs the scopes \(kind.scopesHint).")
                 if let host = normalizedHost, let page = HostAPI.newTokenPage(kind: kind, host: host) {
                     Link("Create one…", destination: page)
                 }
