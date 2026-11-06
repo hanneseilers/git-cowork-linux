@@ -20,7 +20,7 @@ struct StatusMenu: View {
             HStack(spacing: Theme.Space.xs) {
                 StatusChip(status: status)
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 8, weight: .semibold))
+                    .font(Theme.Glyph.dropdown)
                     .foregroundStyle(.secondary)
             }
             .contentShape(Rectangle())
@@ -69,7 +69,7 @@ struct AssigneeMenu: View {
                     .foregroundStyle(assignee == nil ? .secondary : .primary)
                     .lineLimit(1)
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 8, weight: .semibold))
+                    .font(Theme.Glyph.dropdown)
                     .foregroundStyle(.secondary)
             }
             .contentShape(Rectangle())
@@ -93,7 +93,7 @@ struct RemovableLabelChip: View {
             Text(label).lineLimit(1)
             Button(action: onRemove) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 7, weight: .bold))
+                    .font(.system(size: 7, weight: .semibold))
                     .frame(width: 10, height: 10)
                     .contentShape(Rectangle())
             }
@@ -101,11 +101,11 @@ struct RemovableLabelChip: View {
             .help("Remove label")
         }
         .font(Theme.Font.small.weight(.medium))
-        .padding(.leading, 7)
-        .padding(.trailing, 5)
+        .padding(.leading, Theme.Space.m)
+        .padding(.trailing, Theme.Space.s)
         .frame(height: Theme.Metrics.chipHeight)
         .foregroundStyle(color)
-        .background(color.opacity(0.15), in: Capsule())
+        .background(color.opacity(Theme.Tint.chip), in: Capsule())
     }
 }
 
@@ -140,7 +140,7 @@ struct LabelEditor: View {
                     .textFieldStyle(.plain)
                     .font(Theme.Font.small)
                     .frame(width: 84, height: Theme.Metrics.chipHeight)
-                    .padding(.horizontal, 7)
+                    .padding(.horizontal, Theme.Space.m)
                     .overlay(Capsule().strokeBorder(Color(nsColor: .separatorColor), style: StrokeStyle(lineWidth: 1, dash: focused ? [] : [3, 2])))
                     .focused($focused)
                     .onSubmit { add(draft) }
@@ -150,12 +150,12 @@ struct LabelEditor: View {
                     ForEach(suggestions, id: \.self) { s in
                         Button { add(s) } label: {
                             HStack(spacing: Theme.Space.xs) {
-                                Image(systemName: "plus").font(.system(size: 7, weight: .bold))
+                                Image(systemName: "plus").font(.system(size: 7, weight: .semibold))
                                 Text(s)
                             }
                             .font(Theme.Font.small)
                             .foregroundStyle(.secondary)
-                            .padding(.horizontal, 7)
+                            .padding(.horizontal, Theme.Space.m)
                             .frame(height: Theme.Metrics.chipHeight)
                             .background(Color.primary.opacity(0.05), in: Capsule())
                             .contentShape(Capsule())

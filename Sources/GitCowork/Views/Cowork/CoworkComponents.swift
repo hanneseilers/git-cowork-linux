@@ -33,14 +33,14 @@ struct Chip: View {
 
     var body: some View {
         HStack(spacing: Theme.Space.s) {
-            if let symbol { Image(systemName: symbol).font(.system(size: 9, weight: .bold)) }
+            if let symbol { Image(systemName: symbol).font(.system(size: 9, weight: .semibold)) }
             Text(text).lineLimit(1)
         }
         .font(Theme.Font.small.weight(.medium))
-        .padding(.horizontal, 7)
+        .padding(.horizontal, Theme.Space.m)
         .frame(height: Theme.Metrics.chipHeight)
         .foregroundStyle(filled ? Color.white : color.readableTint(scheme))
-        .background(filled ? color : color.opacity(0.15), in: Capsule())
+        .background(filled ? color : color.opacity(Theme.Tint.chip), in: Capsule())
     }
 }
 

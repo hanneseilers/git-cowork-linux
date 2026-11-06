@@ -15,6 +15,9 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/GitCowork"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
+# Build number = the commit it's built from, so About shows "Version 0.1.0 (1448777)".
+BUILD="$(git describe --always --dirty --abbrev=7 --exclude '*' 2>/dev/null || echo unknown)"
+plutil -replace CFBundleVersion -string "$BUILD" "$APP/Contents/Info.plist"
 
 if [ ! -f .build/AppIcon.icns ]; then
   echo "→ Drawing icon"
@@ -31,4 +34,4 @@ cp .build/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
 echo "→ Signing (ad-hoc)"
 codesign --force --sign - --timestamp=none "$APP"
-echo "✓ Built $APP"
+echo "✓ Built $APP ($(Scripts/version.sh), $BUILD)"

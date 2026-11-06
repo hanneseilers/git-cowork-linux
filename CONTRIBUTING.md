@@ -27,6 +27,20 @@ No Xcode project and no third-party dependencies.
   use AppKit and draw directly.
 - Keep pull requests focused, and add a screenshot for UI changes.
 
+## Releasing (maintainers)
+
+The version lives in `Resources/Info.plist`. To cut a release:
+
+1. Make sure `CHANGELOG.md` has entries under `## [Unreleased]`.
+2. Run `make release VERSION=x.y.z` on a clean `main`. It runs the tests,
+   sets the version, dates the changelog section, commits and creates the
+   tag `vx.y.z`.
+3. Push: `git push origin main vx.y.z`. The Release workflow builds, tests
+   and publishes a GitHub release with the changelog notes.
+
+Bump PATCH for fixes, MINOR for new features, MAJOR for breaking changes
+(for example to the cowork file format on `refs/cowork/main`).
+
 ## Debug aids
 
 Render the window to a PNG without screen-recording permission:

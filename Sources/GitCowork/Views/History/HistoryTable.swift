@@ -88,9 +88,9 @@ enum HistoryColumn: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .refs: "Branch / Tag"
+        case .refs: "Branch / tag"
         case .graph: "Graph"
-        case .message: "Commit Message"
+        case .message: "Commit message"
         case .author: "Author"
         case .date: "Date"
         case .sha: "SHA"

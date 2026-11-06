@@ -16,7 +16,7 @@ struct CommitComposer: View {
         @Bindable var session = session
         VStack(alignment: .leading, spacing: Theme.Space.m) {
             HStack {
-                Text("COMMIT").font(Theme.Font.caption).foregroundStyle(.secondary)
+                Text("Commit").font(Theme.Font.caption).foregroundStyle(.secondary)
                 Spacer()
                 Toggle("Amend previous commit", isOn: $session.amend)
                     .toggleStyle(.checkbox)
@@ -35,13 +35,13 @@ struct CommitComposer: View {
                     .onSubmit { focus = .details }
                 Text("\(remaining)")
                     .font(Theme.Font.small.monospacedDigit())
-                    .foregroundStyle(remaining < 0 ? Theme.Status.modified : Color.secondary)
+                    .foregroundStyle(remaining < 0 ? Theme.Status.warning : Color.secondary)
                     .help("Characters left before \(InspectorStyle.summaryLimit)")
             }
             .font(Theme.Font.body)
             .padding(.horizontal, Theme.Space.m)
             .padding(.vertical, 6)
-            .modifier(FieldBox(focused: focus == .summary))
+            .modifier(EditorBox(focused: focus == .summary))
 
             TextEditor(text: $model.draftDetails)
                 .font(Theme.Font.body)
@@ -60,7 +60,7 @@ struct CommitComposer: View {
                             .allowsHitTesting(false)
                     }
                 }
-                .modifier(FieldBox(focused: focus == .details))
+                .modifier(EditorBox(focused: focus == .details))
 
             Button(action: commit) {
                 Text(buttonTitle)
@@ -157,19 +157,5 @@ struct CommitComposer: View {
         guard token != session.focusHandled else { return }
         session.focusHandled = token
         DispatchQueue.main.async { focus = .summary }
-    }
-}
-
-/// Text-field look for the composer: background, rounded border, accent when focused.
-private struct FieldBox: ViewModifier {
-    let focused: Bool
-
-    func body(content: Content) -> some View {
-        content
-            .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius))
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius)
-                    .strokeBorder(focused ? Color.accentColor.opacity(0.8) : Color(nsColor: .separatorColor),
-                                  lineWidth: focused ? 2 : 1))
     }
 }

@@ -59,10 +59,10 @@ struct ChangesPanel: View {
         Button { model.showTask(task.id) } label: {
             if compact {
                 Image(systemName: task.status.symbol)
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(task.status.color)
                     .frame(width: Theme.Metrics.chipHeight, height: Theme.Metrics.chipHeight)
-                    .background(task.status.color.opacity(0.15), in: Circle())
+                    .background(task.status.color.opacity(Theme.Tint.chip), in: Circle())
             } else {
                 Chip(text: task.id, symbol: task.status.symbol, color: task.status.color)
             }
@@ -187,9 +187,9 @@ private struct FileLists: View {
         let st = model.status
         List(selection: selectedID) {
             if !st.conflicted.isEmpty {
-                section("conflicts", title: "Conflicted Files", files: st.conflicted) { EmptyView() }
+                section("conflicts", title: "Conflicted files", files: st.conflicted) { EmptyView() }
             }
-            section("unstaged", title: "Unstaged Files", files: unstaged) {
+            section("unstaged", title: "Unstaged files", files: unstaged) {
                 if !unstaged.isEmpty {
                     ViewThatFits(in: .horizontal) {
                         unstagedButtons(discard: "Discard all", stage: "Stage all changes")
@@ -197,7 +197,7 @@ private struct FileLists: View {
                     }
                 }
             }
-            section("staged", title: "Staged Files", files: st.staged) {
+            section("staged", title: "Staged files", files: st.staged) {
                 if !st.staged.isEmpty {
                     TintedButton(title: "Unstage all", symbol: "minus", tint: Theme.Status.deleted) {
                         Task { await model.unstageAll() }
@@ -352,7 +352,7 @@ private struct OperationBanner: View {
         let conflicts = model.status.conflicted.count
         HStack(spacing: Theme.Space.m) {
             Image(systemName: conflicts > 0 ? "exclamationmark.triangle.fill" : "arrow.triangle.merge")
-                .foregroundStyle(conflicts > 0 ? Theme.Status.modified : Color.accentColor)
+                .foregroundStyle(conflicts > 0 ? Theme.Status.warning : Color.accentColor)
             VStack(alignment: .leading, spacing: 0) {
                 Text("\(operation.rawValue) in progress").font(Theme.Font.body.weight(.semibold))
                 Text(conflicts > 0 ? "\(conflicts) conflicted file\(conflicts == 1 ? "" : "s"): resolve, then stage." : "No conflicts left.")
@@ -370,8 +370,7 @@ private struct OperationBanner: View {
                 .disabled(conflicts > 0)
         }
         .padding(Theme.Metrics.cardPadding)
-        .background(Theme.Status.modified.opacity(0.10), in: RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius).strokeBorder(Theme.Status.modified.opacity(0.35)))
+        .background(Theme.Status.warning.opacity(Theme.Tint.banner), in: RoundedRectangle(cornerRadius: Theme.Radius.card))
         .padding(.horizontal, InspectorStyle.padding)
         .padding(.top, InspectorStyle.padding)
     }

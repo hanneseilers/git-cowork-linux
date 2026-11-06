@@ -20,7 +20,7 @@ struct CoworkPanelBar<Content: View>: View {
     }
 }
 
-/// Small uppercase caption above a group: "DESCRIPTION", "COMMENTS 3".
+/// Small caption above a group: "Description", "Comments 3".
 struct CoworkSectionTitle<Trailing: View>: View {
     let title: String
     var count: Int?
@@ -28,7 +28,7 @@ struct CoworkSectionTitle<Trailing: View>: View {
 
     var body: some View {
         HStack(spacing: Theme.Space.m) {
-            Text(title.uppercased())
+            Text(title)
                 .font(Theme.Font.caption)
                 .foregroundStyle(.secondary)
             if let count { CountBadge(count: count) }
@@ -101,11 +101,11 @@ struct EditorBox: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+            .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: Theme.Radius.control))
             .overlay(
-                RoundedRectangle(cornerRadius: Theme.Radius.card)
-                    .strokeBorder(focused ? Color.accentColor.opacity(0.6) : Color(nsColor: .separatorColor),
-                                  lineWidth: Theme.Metrics.hairline))
+                RoundedRectangle(cornerRadius: Theme.Radius.control)
+                    .strokeBorder(focused ? Color.accentColor.opacity(0.8) : Color(nsColor: .separatorColor),
+                                  lineWidth: focused ? 2 : Theme.Metrics.hairline))
     }
 }
 

@@ -110,7 +110,7 @@ private struct CoworkSyncStatus: View {
                     ProgressView().controlSize(.mini)
                 } else if store.syncError != nil {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(Color(nsColor: .systemOrange))
+                        .foregroundStyle(Theme.Status.warning)
                 } else {
                     Image(systemName: "arrow.triangle.2.circlepath")
                         .foregroundStyle(.tertiary)

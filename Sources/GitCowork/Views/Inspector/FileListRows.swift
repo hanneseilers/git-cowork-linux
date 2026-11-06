@@ -91,7 +91,7 @@ struct FolderRow: View {
     var body: some View {
         HStack(spacing: Theme.Space.s) {
             Image(systemName: "chevron.right")
-                .font(.system(size: 9, weight: .bold))
+                .font(Theme.Glyph.chevron)
                 .rotationEffect(.degrees(folder.collapsed ? 0 : 90))
                 .foregroundStyle(.secondary)
                 .frame(width: 10)

@@ -293,7 +293,7 @@ final class HistoryCell: NSTableCellView {
         let h = GraphStyle.WIP.boxHeight
         let box = NSRect(x: pad, y: midY - h / 2, width: boxWidth, height: h)
 
-        let path = NSBezierPath(roundedRect: box.insetBy(dx: 0.5, dy: 0.5), xRadius: Theme.Radius.card, yRadius: Theme.Radius.card)
+        let path = NSBezierPath(roundedRect: box.insetBy(dx: 0.5, dy: 0.5), xRadius: Theme.Radius.control, yRadius: Theme.Radius.control)
         NSColor.textBackgroundColor.withAlphaComponent(0.7).setFill()
         path.fill()
         NSColor.tertiaryLabelColor.setStroke()
@@ -308,9 +308,8 @@ final class HistoryCell: NSTableCellView {
 
     private func drawOtherWIPMessage(_ w: HistoryWIPInfo) {
         let pad = GraphStyle.Text.padding
-        let italic = NSFontManager.shared.convert(GraphStyle.Text.body, toHaveTrait: .italicFontMask)
         var x = pad
-        x = drawInline("// WIP", font: italic, color: primaryText, x: x) + GraphStyle.WIP.countSpacing
+        x = drawInline("// WIP", font: GraphStyle.Text.wip, color: primaryText, x: x) + GraphStyle.WIP.countSpacing
         x = drawCount(WIPCount(symbol: "pencil", color: .systemOrange, count: w.changes), x: x) + GraphStyle.WIP.countSpacing
         if let branch = w.branch {
             let s = NSMutableAttributedString(string: "on ", attributes: [.font: GraphStyle.Text.small, .foregroundColor: secondaryText])
@@ -324,13 +323,13 @@ final class HistoryCell: NSTableCellView {
 
     private func countWidth(_ c: WIPCount) -> CGFloat {
         let text = ("\(c.count)" as NSString).size(withAttributes: [.font: Self.countFont]).width
-        return GraphSymbols.width(c.symbol, size: Self.countIconSize, weight: .bold) + 3 + text + GraphStyle.WIP.countSpacing
+        return GraphSymbols.width(c.symbol, size: Self.countIconSize, weight: .semibold) + 3 + text + GraphStyle.WIP.countSpacing
     }
 
     /// Icon + number in the icon's color. Returns the x after it.
     private func drawCount(_ c: WIPCount, x: CGFloat) -> CGFloat {
         let alpha: CGFloat = dimmed ? GraphStyle.dimmedAlpha + 0.2 : 1
-        let w = GraphSymbols.draw(c.symbol, x: x, midY: midY, size: Self.countIconSize, color: c.color, weight: .bold, alpha: alpha)
+        let w = GraphSymbols.draw(c.symbol, x: x, midY: midY, size: Self.countIconSize, color: c.color, weight: .semibold, alpha: alpha)
         return drawInline("\(c.count)", font: Self.countFont, color: c.color.withAlphaComponent(alpha), x: x + w + 3)
     }
 
@@ -446,7 +445,7 @@ final class HistoryCell: NSTableCellView {
         if let review = info.review {
             // Keeps its verdict color on the selected band too; the color is the message.
             x += GraphSymbols.draw(review.symbol, x: x, midY: midY, size: style.iconSize, color: review.color,
-                                   weight: .bold, alpha: alpha, hierarchical: true)
+                                   weight: .semibold, alpha: alpha, hierarchical: true)
             x += style.gap - 2
         }
         for (n, task) in info.tasks.prefix(2).enumerated() {

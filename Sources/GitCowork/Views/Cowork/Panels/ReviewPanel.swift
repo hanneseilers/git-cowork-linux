@@ -221,7 +221,7 @@ private struct ReviewPanelContent: View {
                         .lineLimit(1)
                     Spacer(minLength: Theme.Space.s)
                     if let task { StatusChip(status: task.status) }
-                    Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold)).foregroundStyle(.tertiary)
+                    Image(systemName: "chevron.right").font(Theme.Glyph.chevron).foregroundStyle(.tertiary)
                 }
                 .font(Theme.Font.body)
                 .frame(height: Theme.Metrics.rowHeight)
@@ -259,8 +259,8 @@ private struct ReviewPanelContent: View {
             .disabled(sending)
         }
         .padding(Theme.Metrics.cardPadding)
-        .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius).strokeBorder(Color.primary.opacity(0.08)))
+        .background(Theme.cardFill, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(Theme.cardBorder))
     }
 
     private func verdict(_ v: ReviewVerdict) {
@@ -367,7 +367,7 @@ private struct ReviewPanelContent: View {
                 .padding(.horizontal, Theme.Space.s)
                 .frame(height: Theme.Metrics.rowHeight)
                 .contentShape(Rectangle())
-                .background(selected ? Color.accentColor.opacity(0.18) : .clear,
+                .background(selected ? Color.accentColor.opacity(Theme.Tint.selection) : .clear,
                             in: RoundedRectangle(cornerRadius: Theme.Radius.badge))
         }
         .buttonStyle(HoverRowStyle())

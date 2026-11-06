@@ -129,8 +129,8 @@ struct MessageCard: View {
         }
         .scrollIndicators(.automatic)
         .frame(height: min(height, InspectorStyle.messageMaxHeight))
-        .background(InspectorStyle.cardBackground, in: RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius).strokeBorder(InspectorStyle.cardBorder))
+        .background(InspectorStyle.cardBackground, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(InspectorStyle.cardBorder))
     }
 }
 

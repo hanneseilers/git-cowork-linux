@@ -61,11 +61,13 @@ enum GraphStyle {
         /// Leading inset of the first column (header title and badge), same as other panels.
         static let leadingPadding: CGFloat = Theme.Metrics.panelPadding
         static let subject = NSFont.systemFont(ofSize: 13)
-        static let body = NSFont.systemFont(ofSize: 12.5)
+        static let body = NSFont.systemFont(ofSize: 12)
         static let small = NSFont.systemFont(ofSize: 12)
-        static let sha = NSFont.monospacedSystemFont(ofSize: 11.5, weight: .regular)
-        static let initials = NSFont.systemFont(ofSize: 8.5, weight: .bold)
+        static let sha = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+        static let initials = NSFont.systemFont(ofSize: 9, weight: .semibold)
         static let header = NSFont.systemFont(ofSize: 11, weight: .semibold)  // = Theme.Font.caption
+        /// The "// WIP" marker.
+        static let wip = NSFontManager.shared.convert(NSFont.systemFont(ofSize: 12), toHaveTrait: .italicFontMask)
         static let bodySeparator = "   "
     }
 
@@ -75,8 +77,8 @@ enum GraphStyle {
         static let iconSize: CGFloat = 9.5
         static let iconSpacing: CGFloat = 4
         static let gap: CGFloat = 4
-        static let font = NSFont.systemFont(ofSize: 11.5, weight: .semibold)
-        static let moreFont = NSFont.systemFont(ofSize: 10.5, weight: .bold)
+        static let font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        static let moreFont = NSFont.systemFont(ofSize: 10, weight: .semibold)
         static let remoteOnlyAlpha: CGFloat = 0.5
         static let fillDarken: CGFloat = 0.2           // local badges: lane color, slightly darker for text contrast
         static let connectorWidth: CGFloat = 1.5
@@ -91,9 +93,9 @@ enum GraphStyle {
 
     enum Cowork {
         static let chipHeight: CGFloat = 18
-        static let chipPadding: CGFloat = 5
-        static let chipFont = NSFont.monospacedSystemFont(ofSize: 10.5, weight: .semibold)
-        static let chipFillAlpha: CGFloat = 0.18
+        static let chipPadding: CGFloat = 4
+        static let chipFont = NSFont.monospacedSystemFont(ofSize: 10, weight: .semibold)
+        static let chipFillAlpha = CGFloat(Theme.Tint.chip)
         static let iconSize: CGFloat = 11
         static let gap: CGFloat = 6
     }

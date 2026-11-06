@@ -106,7 +106,7 @@ private struct InboxRow: View {
                 ZStack(alignment: .bottomTrailing) {
                     PersonAvatar(person: actor, size: 24)
                     Image(systemName: symbol)
-                        .font(.system(size: 8, weight: .bold))
+                        .font(.system(size: 8, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 14, height: 14)
                         .background(color, in: Circle())

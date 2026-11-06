@@ -19,8 +19,8 @@ enum InspectorStyle {
     static let rowHeight = Theme.Metrics.rowHeight
     static let summaryLimit = 72
     static let descriptionHeight: CGFloat = 72
-    static let cardBackground = Color.primary.opacity(0.05)
-    static let cardBorder = Color.primary.opacity(0.08)
+    static let cardBackground = Theme.cardFill
+    static let cardBorder = Theme.cardBorder
     static let bannerTint = Color.accentColor
     static let commitTint = Color(nsColor: .systemGreen)
 }
@@ -31,7 +31,7 @@ struct ChangeIcon: View {
 
     var body: some View {
         Image(systemName: Self.symbol(status))
-            .font(.system(size: 10, weight: .bold))
+            .font(.system(size: 10, weight: .semibold))
             .foregroundStyle(Self.color(status))
             .frame(width: InspectorStyle.iconWidth, height: InspectorStyle.iconWidth)
             .help(Self.label(status))
@@ -213,14 +213,12 @@ struct WorkingCopyBanner: View {
         }
         .padding(.horizontal, InspectorStyle.padding)
         .padding(.vertical, Theme.Space.m)
-        .background(InspectorStyle.bannerTint.opacity(0.16))
-        .overlay(alignment: .bottom) {
-            InspectorStyle.bannerTint.opacity(0.35).frame(height: 1)
-        }
+        .background(InspectorStyle.bannerTint.opacity(Theme.Tint.banner))
+        .overlay(alignment: .bottom) { Divider() }
     }
 }
 
-/// "Unstaged Files (3)" with a collapse chevron and trailing buttons.
+/// "Unstaged files (3)" with a collapse chevron and trailing buttons.
 struct SectionHeader<Trailing: View>: View {
     let title: String
     let count: Int
@@ -234,11 +232,11 @@ struct SectionHeader<Trailing: View>: View {
             } label: {
                 HStack(spacing: Theme.Space.s) {
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 9, weight: .bold))
+                        .font(Theme.Glyph.chevron)
                         .rotationEffect(.degrees(collapsed ? 0 : 90))
                         .foregroundStyle(.secondary)
                         .frame(width: 10)
-                    Text(title.uppercased())
+                    Text(title)
                         .font(Theme.Font.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)

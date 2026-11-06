@@ -31,7 +31,7 @@ struct WelcomeView: View {
 
                 VStack(alignment: .leading, spacing: Theme.Space.s) {
                     HStack(spacing: Theme.Space.m) {
-                        Text("RECENT").font(Theme.Font.caption).foregroundStyle(.secondary)
+                        Text("Recent").font(Theme.Font.caption).foregroundStyle(.secondary)
                         CountBadge(count: recents.count)
                     }
                     .padding(.horizontal, Theme.Space.m)
@@ -104,8 +104,8 @@ private struct WelcomeTile: View {
             }
             .padding(Theme.Space.l)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: Theme.Radius.card).fill(Color.primary.opacity(ChromeStyle.cardFill)))
-            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(Color.primary.opacity(ChromeStyle.cardStroke)))
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.control).fill(Theme.cardFill))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control).strokeBorder(Theme.cardBorder))
         }
         .buttonStyle(ChromeButtonStyle(horizontalPadding: 0))
     }

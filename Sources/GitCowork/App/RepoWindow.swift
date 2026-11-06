@@ -41,7 +41,7 @@ struct RepoWindow: View {
         } isTargeted: { dropTargeted = $0 }
         .overlay {
             if dropTargeted {
-                RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius)
+                RoundedRectangle(cornerRadius: Theme.Radius.card)
                     .strokeBorder(Color.accentColor, lineWidth: 2)
                     .padding(Theme.Space.s)
                     .allowsHitTesting(false)

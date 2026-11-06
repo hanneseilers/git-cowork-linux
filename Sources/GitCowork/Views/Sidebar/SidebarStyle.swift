@@ -12,7 +12,6 @@ enum SidebarStyle {
     static let chevronWidth: CGFloat = 10
     static let iconWidth: CGFloat = 16
     static let iconSize: CGFloat = 11
-    static let chevronSize: CGFloat = 8
     static let currentDot: CGFloat = 6
     static let avatarSize: CGFloat = 16
     /// Width reserved for section counts so they right-align in one column.
@@ -26,10 +25,10 @@ enum SidebarStyle {
     static let detailFont = Theme.Font.small
 
     /// Band behind the checked-out branch and the current worktree.
-    static let currentBand = Color.accentColor.opacity(0.16)
+    static let currentBand = Color.accentColor.opacity(Theme.Tint.selection)
     /// Padding the sidebar list adds inside each row on top of rowInsets.
     static let listCellPadding: CGFloat = 8
     /// The band covers the same area as the list's selection highlight.
     static let bandInset = EdgeInsets(top: 1, leading: -Theme.Space.s, bottom: 1, trailing: -Theme.Space.s)
-    static let bandRadius: CGFloat = 5
+    static let bandRadius: CGFloat = 6
 }

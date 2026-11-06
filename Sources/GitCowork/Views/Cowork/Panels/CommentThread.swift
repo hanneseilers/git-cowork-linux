@@ -115,15 +115,15 @@ struct MentionSuggestions: View {
                     }
                     .font(Theme.Font.small)
                     .padding(.horizontal, Theme.Space.m)
-                    .frame(height: 22)
+                    .frame(height: Theme.Metrics.buttonHeight)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(HoverRowStyle())
             }
         }
         .padding(.vertical, Theme.Space.xs)
-        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: Theme.Radius.card))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(Color(nsColor: .separatorColor)))
+        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: Theme.Radius.control))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control).strokeBorder(Color(nsColor: .separatorColor)))
     }
 }
 

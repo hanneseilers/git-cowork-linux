@@ -42,7 +42,7 @@ struct BoardCard: View, Equatable {
                     .fixedSize()
                 Spacer(minLength: 0)
                 if comments > 0 {
-                    HStack(spacing: 3) {
+                    HStack(spacing: Theme.Space.s) {
                         Image(systemName: "bubble.left")
                             .font(.system(size: 10))
                         Text(verbatim: "\(comments)")
@@ -56,19 +56,14 @@ struct BoardCard: View, Equatable {
             .frame(height: 18)
         }
         .padding(Theme.Metrics.cardPadding)
-        .padding(.leading, Self.accentWidth)
         .background(background)
-        .overlay(alignment: .leading) {
-            Rectangle().fill(task.status.color).frame(width: Self.accentWidth)
-        }
         .clipShape(shape)
         .overlay(shape.strokeBorder(borderColor, lineWidth: selected ? 2 : Theme.Metrics.hairline))
         .contentShape(shape)
         .onHover { hovered = $0 }
     }
 
-    static let accentWidth: CGFloat = 3
-    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius) }
+    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: Theme.Radius.card) }
 
     private var background: some View {
         Color(nsColor: .controlBackgroundColor)

@@ -15,14 +15,40 @@ enum Theme {
     }
 
     enum Radius {
+        /// Chips, branch badges, status glyphs.
         static let badge: CGFloat = 4
-        static let card: CGFloat = 6
+        /// Buttons, segments, text fields and editors.
+        static let control: CGFloat = 6
+        /// Cards and banners.
+        static let card: CGFloat = 8
     }
+
+    /// Small SF Symbol glyphs that appear in many places.
+    enum Glyph {
+        /// Disclosure and "go to" chevrons (chevron.right).
+        static let chevron = SwiftUI.Font.system(size: 9, weight: .semibold)
+        /// Pop-up and menu chevrons (chevron.down).
+        static let dropdown = SwiftUI.Font.system(size: 8, weight: .semibold)
+    }
+
+    /// Opacity of a color laid under tinted content, so every tint has the same strength.
+    enum Tint {
+        /// Chips, capsules, status glyphs, branch badges.
+        static let chip: Double = 0.15
+        /// Banners and notice boxes.
+        static let banner: Double = 0.12
+        /// Selected or current rows.
+        static let selection: Double = 0.16
+    }
+
+    /// Quiet card surface (commit message, review summary, recent repos).
+    static let cardFill = Color.primary.opacity(0.04)
+    static let cardBorder = Color.primary.opacity(0.08)
 
     enum Font {
         static let body = SwiftUI.Font.system(size: 13)
         static let small = SwiftUI.Font.system(size: 11)
-        /// Uppercase section titles ("LOCAL", "DESCRIPTION", "UNSTAGED FILES") and their counts.
+        /// Section titles ("Local", "Description", "Unstaged files") and their counts.
         static let caption = SwiftUI.Font.system(size: 11, weight: .semibold)
         static let mono = SwiftUI.Font.system(size: 12, design: .monospaced)
         static let monoSmall = SwiftUI.Font.system(size: 11, design: .monospaced)
@@ -42,7 +68,6 @@ enum Theme {
         static let rowHeight: CGFloat = 26
         /// Padding inside cards (task cards, message card, banners).
         static let cardPadding: CGFloat = 10
-        static let cardRadius: CGFloat = 8
         /// Height of chips (status, labels, verdicts).
         static let chipHeight: CGFloat = 20
         /// Height of every small action button (`ActionButtonStyle`).
@@ -95,6 +120,8 @@ enum Theme {
         static let renamed = Color(nsColor: .systemBlue)
         static let conflicted = Color(nsColor: .systemPink)
         static let untracked = Color(nsColor: .systemTeal)
+        /// Needs attention: conflicts banner, sync errors, uncommitted counts.
+        static let warning = Color(nsColor: .systemOrange)
     }
 
     enum Diff {

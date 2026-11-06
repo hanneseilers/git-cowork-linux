@@ -83,9 +83,9 @@ struct BoardView: View {
             }
         } label: {
             HStack(spacing: Theme.Space.s) {
-                Image(systemName: "tag").font(.system(size: 9, weight: .bold))
+                Image(systemName: "tag").font(.system(size: 9, weight: .semibold))
                 Text(labelFilter ?? "Labels")
-                Image(systemName: "chevron.down").font(.system(size: 8, weight: .bold))
+                Image(systemName: "chevron.down").font(Theme.Glyph.dropdown)
             }
             .actionButtonLabel(tint: labelFilter == nil ? nil : .accentColor)
         }
@@ -118,8 +118,8 @@ struct BoardView: View {
         .padding(.horizontal, Theme.Space.m)
         .frame(minWidth: 100, idealWidth: 200, maxWidth: 200)
         .frame(height: Theme.Metrics.buttonHeight)
-        .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: Theme.Radius.card))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).strokeBorder(Color(nsColor: .separatorColor)))
+        .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: Theme.Radius.control))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control).strokeBorder(Color(nsColor: .separatorColor)))
     }
 
     // MARK: Columns
@@ -204,10 +204,10 @@ struct BoardView: View {
         }
         .frame(maxHeight: .infinity, alignment: .top)
         .background(
-            RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius + 2)
-                .fill(targeted ? Color.accentColor.opacity(0.08) : Color.primary.opacity(0.04)))
+            RoundedRectangle(cornerRadius: Theme.Radius.card + 2)
+                .fill(targeted ? Color.accentColor.opacity(0.08) : Theme.cardFill))
         .overlay(
-            RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius + 2)
+            RoundedRectangle(cornerRadius: Theme.Radius.card + 2)
                 .strokeBorder(Color.accentColor.opacity(dropSpot == .column(status) ? 0.6 : 0), lineWidth: 1.5))
         .dropDestination(for: String.self) { ids, _ in
             defer { endDrag() }
@@ -242,7 +242,7 @@ struct BoardView: View {
             .help("New task in \(status.title)")
         }
         // Icon lines up with the card titles below.
-        .padding(.leading, Theme.Space.m + BoardCard.accentWidth + Theme.Metrics.cardPadding)
+        .padding(.leading, Theme.Space.m + Theme.Metrics.cardPadding)
         .padding(.trailing, Theme.Space.s)
         .frame(height: Theme.Metrics.panelHeaderHeight)
     }

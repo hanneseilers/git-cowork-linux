@@ -25,8 +25,8 @@ body:
   - type: input
     id: commit
     attributes:
-      label: git-cowork commit
-      description: Output of `git rev-parse --short HEAD` in your git-cowork checkout.
+      label: git-cowork version
+      description: From git-cowork › About git-cowork, e.g. "0.1.0 (1448777)".
   - type: input
     id: host
     attributes:

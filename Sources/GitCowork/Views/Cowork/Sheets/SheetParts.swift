@@ -47,6 +47,6 @@ struct SheetNotice<Trailing: View>: View {
             trailing
         }
         .padding(Theme.Metrics.cardPadding)
-        .background(color.opacity(0.10), in: RoundedRectangle(cornerRadius: Theme.Metrics.cardRadius))
+        .background(color.opacity(Theme.Tint.banner), in: RoundedRectangle(cornerRadius: Theme.Radius.card))
     }
 }

@@ -4,11 +4,11 @@ import SwiftUI
 enum ChromeStyle {
     static let caption = Font.system(size: 10)
     static let pickerTitle = Font.system(size: 13, weight: .semibold)
-    static let pickerChevron = Font.system(size: 8, weight: .bold)
+    static let pickerChevron = Theme.Glyph.dropdown
     static let icon = Font.system(size: 15)
     static let label = Font.system(size: 10)
     static let badge = Font.system(size: 9, weight: .semibold).monospacedDigit()
-    static let menuChevron = Font.system(size: 8, weight: .bold)
+    static let menuChevron = Theme.Glyph.dropdown
 
     static let iconHeight: CGFloat = 18
     static let buttonMinWidth: CGFloat = 40
@@ -29,8 +29,6 @@ enum ChromeStyle {
     static let hoverFill = 0.08
     static let pressedFill = 0.16
     static let disabledOpacity = 0.4
-    static let cardFill = 0.04
-    static let cardStroke = 0.08
     static let tileIcon = Font.system(size: 18)
 }
 
@@ -52,7 +50,7 @@ struct ChromeButtonStyle: ButtonStyle {
             configuration.label
                 .padding(.vertical, ChromeStyle.buttonPadding.top)
                 .padding(.horizontal, horizontalPadding)
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.card).fill(Color.primary.opacity(fill)))
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.control).fill(Color.primary.opacity(fill)))
                 .foregroundStyle(enabled ? .primary : .tertiary)
                 .contentShape(Rectangle())
                 .onHover { hovering = $0 }
@@ -212,7 +210,7 @@ struct CenterModeSwitch: View {
             }
         }
         .padding(ChromeStyle.segmentInset)
-        .background(RoundedRectangle(cornerRadius: Theme.Radius.card + ChromeStyle.segmentInset)
+        .background(RoundedRectangle(cornerRadius: Theme.Radius.control + ChromeStyle.segmentInset)
             .fill(Color.primary.opacity(ChromeStyle.segmentTrackFill)))
         .fixedSize()
     }
@@ -232,7 +230,7 @@ struct CenterModeSwitch: View {
                 .padding(.horizontal, Theme.Space.m)
                 .frame(height: ChromeStyle.segmentHeight)
                 .foregroundStyle(selected ? Color.accentColor : (hovering ? Color.primary : Color.secondary))
-                .background(RoundedRectangle(cornerRadius: Theme.Radius.card)
+                .background(RoundedRectangle(cornerRadius: Theme.Radius.control)
                     .fill(Color.accentColor.opacity(selected ? ChromeStyle.segmentSelectedFill : 0)))
                 .contentShape(Rectangle())
             }

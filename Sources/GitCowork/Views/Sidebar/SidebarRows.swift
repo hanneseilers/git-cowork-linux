@@ -34,7 +34,7 @@ struct DisclosureChevron: View {
 
     var body: some View {
         Image(systemName: "chevron.right")
-            .font(.system(size: SidebarStyle.chevronSize, weight: .bold))
+            .font(Theme.Glyph.chevron)
             .foregroundStyle(.secondary)
             .rotationEffect(.degrees(expanded ? 90 : 0))
     }
@@ -97,10 +97,9 @@ struct SidebarSectionHeader<Trailing: View>: View {
             if let expanded { DisclosureChevron(expanded: expanded) }
         } content: {
             SidebarIcon(symbol: section.symbol)
-            Text(section.title.uppercased())
+            Text(section.title)
                 .font(SidebarStyle.headerFont)
                 .foregroundStyle(.secondary)
-                .kerning(0.3)
             Spacer(minLength: Theme.Space.s)
             SidebarTrailing {
                 trailing
@@ -132,8 +131,8 @@ struct SidebarCount: View {
         Text(verbatim: "\(count)")
             .font(Theme.Font.caption.monospacedDigit())
             .foregroundStyle(highlight ? Color.white : Color.secondary)
-            .padding(.horizontal, highlight ? 5 : 0)
-            .frame(minWidth: SidebarStyle.countWidth, minHeight: 15, alignment: highlight ? .center : .trailing)
+            .padding(.horizontal, highlight ? Theme.Space.s : 0)
+            .frame(minWidth: SidebarStyle.countWidth, minHeight: 16, alignment: highlight ? .center : .trailing)
             .background {
                 if highlight { Capsule().fill(Color.accentColor) }
             }
@@ -304,10 +303,10 @@ struct ChangeCountPill: View {
     var body: some View {
         Text(verbatim: "\(count)")
             .font(Theme.Font.caption.monospacedDigit())
-            .padding(.horizontal, 5)
+            .padding(.horizontal, Theme.Space.s)
             .padding(.vertical, 1)
-            .background(Theme.Status.modified.opacity(0.2), in: Capsule())
-            .foregroundStyle(Theme.Status.modified)
+            .background(Theme.Status.warning.opacity(Theme.Tint.chip), in: Capsule())
+            .foregroundStyle(Theme.Status.warning)
             .help("\(count) uncommitted changes")
     }
 }
@@ -467,10 +466,10 @@ struct SidebarFilterField: View {
         }
         .font(Theme.Font.body)
         .padding(.horizontal, Theme.Space.m)
-        .frame(height: 26)
-        .background(Color(nsColor: .quaternaryLabelColor).opacity(0.5), in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+        .frame(height: Theme.Metrics.rowHeight)
+        .background(Color(nsColor: .quaternaryLabelColor).opacity(0.5), in: RoundedRectangle(cornerRadius: Theme.Radius.control))
         .overlay {
-            RoundedRectangle(cornerRadius: Theme.Radius.card)
+            RoundedRectangle(cornerRadius: Theme.Radius.control)
                 .strokeBorder(focus.wrappedValue ? Color.accentColor.opacity(0.6) : .clear)
         }
     }

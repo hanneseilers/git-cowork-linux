@@ -163,11 +163,11 @@ private struct TaskPanelContent: View {
                 LabelEditor(labels: task.labels, known: store.allLabels,
                             onAdd: { new in update { t in t.labels += new.filter { n in !t.labels.contains { $0.lowercased() == n.lowercased() } } } },
                             onRemove: { l in update { $0.labels.removeAll { $0 == l } } })
-                    .padding(.vertical, 3)
+                    .padding(.vertical, Theme.Space.s)
             }
             PropertyRow(label: "Branch") {
                 TaskBranchRow(model: model, task: task) { b in update { $0.branch = b } }
-                    .padding(.vertical, 3)
+                    .padding(.vertical, Theme.Space.s)
             }
         }
     }
@@ -310,7 +310,7 @@ private struct TaskBranchRow: View {
             } label: {
                 HStack(spacing: Theme.Space.s) {
                     Text("Link Branch")
-                    Image(systemName: "chevron.down").font(.system(size: 8, weight: .bold))
+                    Image(systemName: "chevron.down").font(Theme.Glyph.dropdown)
                 }
                 .actionButtonLabel()
             }

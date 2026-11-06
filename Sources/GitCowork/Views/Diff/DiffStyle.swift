@@ -20,7 +20,7 @@ enum DiffStyle {
     static let buttonHeight: CGFloat = Theme.Metrics.buttonHeight
     static let buttonPadding: CGFloat = Theme.Space.m + Theme.Space.xs
     static let buttonSpacing: CGFloat = Theme.Space.s + Theme.Space.xs
-    static let buttonRadius: CGFloat = Theme.Radius.card
+    static let buttonRadius: CGFloat = Theme.Radius.control
 
     /// Longer lines are cut when drawn (copying still gets the full line).
     static let maxDrawnColumns = 2_000

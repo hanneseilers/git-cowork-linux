@@ -19,8 +19,7 @@ struct RefBadge: View {
         .font(Theme.Font.small.weight(ref.isHead ? .semibold : .regular))
         .padding(.horizontal, 6)
         .padding(.vertical, 2)
-        .background(color.opacity(0.18), in: RoundedRectangle(cornerRadius: Theme.Radius.badge))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.badge).strokeBorder(color.opacity(0.45)))
+        .background(color.opacity(Theme.Tint.chip), in: RoundedRectangle(cornerRadius: Theme.Radius.badge))
         .help(ref.name)
     }
 }
@@ -67,10 +66,10 @@ struct StatusGlyph: View {
 
     var body: some View {
         Text(String(status == .untracked ? "+" : status.rawValue))
-            .font(.system(size: 10, weight: .bold, design: .monospaced))
+            .font(.system(size: 10, weight: .semibold, design: .monospaced))
             .foregroundStyle(color)
             .frame(width: 16, height: 16)
-            .background(color.opacity(0.15), in: RoundedRectangle(cornerRadius: 3))
+            .background(color.opacity(Theme.Tint.chip), in: RoundedRectangle(cornerRadius: Theme.Radius.badge))
             .help(label)
     }
 
@@ -131,7 +130,7 @@ extension String {
     }
 }
 
-/// Header for a block inside the inspector: "STAGED  3   [Unstage all]"
+/// Header for a block inside the inspector: "Staged  3   [Unstage all]"
 struct PanelHeader<Trailing: View>: View {
     let title: String
     var count: Int?
@@ -139,7 +138,7 @@ struct PanelHeader<Trailing: View>: View {
 
     var body: some View {
         HStack(spacing: Theme.Space.m) {
-            Text(title.uppercased())
+            Text(title)
                 .font(Theme.Font.caption)
                 .foregroundStyle(.secondary)
             if let count { CountBadge(count: count) }
@@ -265,7 +264,7 @@ private struct ActionButtonBody<Label: View>: View {
     @State private var hovering = false
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: Theme.Radius.card)
+        let shape = RoundedRectangle(cornerRadius: Theme.Radius.control)
         label
             .labelStyle(ActionLabelStyle())
             .font(Theme.Font.small.weight(kind == .primary ? .semibold : .medium))
@@ -310,7 +309,7 @@ private struct ActionButtonBody<Label: View>: View {
 private struct ActionLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: Theme.Space.s) {
-            configuration.icon.font(.system(size: 9, weight: .bold))
+            configuration.icon.font(.system(size: 9, weight: .semibold))
             configuration.title
         }
     }

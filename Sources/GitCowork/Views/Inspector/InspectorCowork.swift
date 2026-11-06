@@ -70,7 +70,7 @@ struct CoworkLinkRow<Chip: View>: View {
                     .underline(hovering)
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(Theme.Glyph.chevron)
                     .foregroundStyle(.tertiary)
             }
             .frame(height: Theme.Metrics.rowHeight)

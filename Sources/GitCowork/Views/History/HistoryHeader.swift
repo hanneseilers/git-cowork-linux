@@ -1,6 +1,6 @@
 import AppKit
 
-/// Flat header cell: small uppercase grey title, thin divider on the right.
+/// Flat header cell: small grey title, thin divider on the right.
 final class HistoryHeaderCell: NSTableHeaderCell {
     override func draw(withFrame cellFrame: NSRect, in controlView: NSView) {
         NSColor.controlBackgroundColor.setFill()
@@ -15,9 +15,8 @@ final class HistoryHeaderCell: NSTableHeaderCell {
         let attrs: [NSAttributedString.Key: Any] = [
             .font: GraphStyle.Text.header,
             .foregroundColor: NSColor.secondaryLabelColor,
-            .kern: 0.4,
         ]
-        let title = stringValue.uppercased() as NSString
+        let title = stringValue as NSString
         let size = title.size(withAttributes: attrs)
         // Titles line up with the cell content below (first column uses the panel inset).
         let inset = cellFrame.minX < 1 ? GraphStyle.Text.leadingPadding : GraphStyle.Text.padding

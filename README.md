@@ -57,12 +57,26 @@ git clone https://github.com/OWNER/git-cowork.git && cd git-cowork
 make install                    # builds and copies git-cowork.app to /Applications
 ```
 
-`make install PREFIX=~/Applications` installs just for you. To update:
-`git pull && make install`.
+**Update** later from the same folder:
+
+```bash
+make update
+```
 
 The app is built on your own Mac and signed ad-hoc, so Gatekeeper doesn't
 block it and no Apple Developer account is needed. (A built `.app` shared by
 AirDrop or zip *does* trigger Gatekeeper — build from source instead.)
+
+**[INSTALL.md](INSTALL.md)** has the details: installing just for your
+user, staying on stable releases instead of `main`, installing a specific
+version, uninstalling, and troubleshooting.
+
+### Versions
+
+Releases follow [Semantic Versioning](https://semver.org) and are tagged
+`vX.Y.Z`; see [Releases](https://github.com/OWNER/git-cowork/releases) and
+[CHANGELOG.md](CHANGELOG.md). **About git-cowork** shows your version and
+the commit it was built from, e.g. "Version 0.1.0 (1448777)".
 
 ### Open a repo from the terminal
 
@@ -161,6 +175,7 @@ through your own `git`.
 make run        # debug build, run from the terminal
 make test       # unit tests (parsers, graph layout, diff, host links, cowork)
 make app        # build dist/git-cowork.app
+make version    # print the version
 ```
 
 Builds with the Command Line Tools only; no Xcode project, no dependencies.
@@ -185,8 +200,13 @@ How it stays light:
 - History reloads only when refs, HEAD or stashes actually change.
 - Heavy lists (graph, diff) are AppKit views that draw directly.
 
-See [PLAN.md](PLAN.md) for the design and roadmap, and
-[CONTRIBUTING.md](CONTRIBUTING.md) for debug flags and how to send changes.
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for guidelines and debug flags, and
+[PLAN.md](PLAN.md) for the design and roadmap. Please follow the
+[code of conduct](CODE_OF_CONDUCT.md), and report security problems
+privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
