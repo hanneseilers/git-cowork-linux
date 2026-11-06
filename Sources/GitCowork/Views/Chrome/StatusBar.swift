@@ -174,7 +174,7 @@ private struct AutoFetchStatus: View {
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
             .disabled(model.busy != nil)
-            .help("Automatic fetch couldn't sign in and stopped, so it doesn't retry with the same credentials:\n\(reason)\n\nClick to fetch now. It resumes after a fetch, pull or push works.")
+            .help("Automatic fetch couldn't sign in and stopped, so it doesn't retry with the same credentials:\n\(reason)\n\nClick to fetch now. It resumes after you sign in under Settings › Accounts or a fetch, pull or push works.")
         }
     }
 }

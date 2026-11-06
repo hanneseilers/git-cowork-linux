@@ -285,6 +285,9 @@ final class RepoModel {
     /// Why background fetching stopped (a sign-in problem), with git's message.
     /// Cleared by the next fetch, pull or push that works.
     private(set) var autoFetchPaused: String?
+    /// Signed-in accounts when the pause started. Signing in under Settings ›
+    /// Accounts changes them and ends the pause.
+    private var accountsAtPause: [HostAccount] = []
     private var fetchTimer: Task<Void, Never>?
     private let openedAt = Date()
 
@@ -317,6 +320,9 @@ final class RepoModel {
             try? await Task.sleep(for: .seconds(AutoFetch.firstDelay))
             while !Task.isCancelled {
                 guard let self else { return }
+                if self.autoFetchPaused != nil, AccountStore.shared.accounts != self.accountsAtPause {
+                    self.autoFetchPaused = nil
+                }
                 let conditions = AutoFetch.Conditions(
                     enabled: Prefs.autoFetch, appActive: NSApp.isActive, hasRemotes: !self.remotes.isEmpty,
                     actionRunning: self.busy != nil || self.autoFetching, pausedForSignIn: self.autoFetchPaused != nil,
@@ -342,6 +348,7 @@ final class RepoModel {
         } catch let error as GitError {
             if AutoFetch.classify(error.result.stderr) == .signIn {
                 autoFetchPaused = error.localizedDescription
+                accountsAtPause = AccountStore.shared.accounts
             }
             // Offline and other errors stay in the command log; the next tick retries.
         } catch {}

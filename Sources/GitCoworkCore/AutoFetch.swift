@@ -61,23 +61,16 @@ public enum AutoFetch {
     /// English (the app runs git with LC_ALL=en_US.UTF-8).
     public static func classify(_ stderr: String) -> Failure {
         let s = stderr.lowercased()
-        let signIn = [
-            "authentication failed",
-            "terminal prompts disabled",        // could not read Username/Password
-            "could not read username",
-            "could not read password",
-            "permission denied (publickey",
-            "permission denied, please try again",
+        // Same list as the sign-in hint on errors, plus cases that need the
+        // user just as much (unknown SSH host key, other servers' wording).
+        let alsoSignIn = [
             "host key verification failed",
-            "http basic: access denied",       // GitLab
-            "invalid username or password",
+            "permission denied, please try again",
             "access denied",
             "returned error: 401",
             "returned error: 403",
-            "the requested url returned error: 401",
-            "the requested url returned error: 403",
         ]
-        if signIn.contains(where: s.contains) { return .signIn }
+        if CredentialConfig.isAuthFailure(stderr) || alsoSignIn.contains(where: s.contains) { return .signIn }
         let network = [
             "could not resolve host",
             "could not resolve hostname",

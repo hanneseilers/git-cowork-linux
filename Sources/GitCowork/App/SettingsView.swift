@@ -32,7 +32,7 @@ struct SettingsView: View {
             }
             Section("Git") {
                 Toggle("Fetch automatically", isOn: $autoFetch)
-                Text("Runs git fetch --all --prune for each open repository every 5 minutes while git-cowork is in front, so remote branches and ahead/behind stay current. It never asks for a password: if signing in fails, it pauses until a fetch, pull or push of yours works.")
+                Text("Runs git fetch --all --prune for each open repository every 5 minutes while git-cowork is in front, so remote branches and ahead/behind stay current. It never asks for a password: if signing in fails, it pauses until you sign in under Accounts or a fetch, pull or push of yours works.")
                     .font(Theme.Font.small).foregroundStyle(.secondary)
                 LabeledContent("Executable", value: GitRunner.shared.gitPath)
             }
