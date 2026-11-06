@@ -92,7 +92,7 @@ struct CloneRepoList: View {
         }
     }
 
-    private func label(_ account: HostAccount) -> String { "\(account.username) on \(account.host)" }
+    private func label(_ account: HostAccount) -> String { String(localized: "\(account.username) on \(account.host)") }
 
     private func load() async {
         guard let account, loaded[account.host] == nil, errors[account.host] == nil else { return }

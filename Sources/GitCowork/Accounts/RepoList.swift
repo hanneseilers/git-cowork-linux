@@ -8,7 +8,7 @@ enum RepoList {
     static func fetch(for account: HostAccount) async throws -> [HostRepo] {
         let host = account.host
         guard let tokens = await Credentials.shared.tokens(for: account) else {
-            throw SignInError(message: "No token for \(host) in the Keychain. Sign in again in Settings › Accounts.")
+            throw SignInError(message: String(localized: "No token for \(host) in the Keychain. Sign in again in Settings › Accounts."))
         }
         var request = HostAPI.reposRequest(kind: account.kind, host: host, token: tokens.access)
         var repos: [HostRepo] = []
@@ -20,10 +20,10 @@ enum RepoList {
             let http = response as? HTTPURLResponse
             let status = http?.statusCode ?? 0
             if status == 401 || status == 403 {
-                throw SignInError(message: "\(host) didn't accept the token. Sign in again in Settings › Accounts.")
+                throw SignInError(message: String(localized: "\(host) didn't accept the token. Sign in again in Settings › Accounts."))
             }
             guard (200..<300).contains(status), let page = HostAPI.parseRepos(data, kind: account.kind, host: host) else {
-                throw SignInError(message: "\(host) didn't return a repository list (HTTP \(status)).")
+                throw SignInError(message: String(localized: "\(host) didn't return a repository list (HTTP \(status))."))
             }
             // Offset pages can shift while we read them; keep the first copy.
             repos += page.filter { seen.insert($0.id).inserted }
