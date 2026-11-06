@@ -143,6 +143,9 @@ final class RepoModel {
     var sheet: SheetKind?
     var openDiff: DiffTarget?
     var showCommandLog = false
+    /// The last git action Edit > Undo can take back (one level). Set by the
+    /// actions in RepoActions, cleared by most other commands (see RepoUndo).
+    var lastUndo: UndoRecord?
     /// History graph, task board or review list in the middle.
     var centerMode: CenterMode = .history
     /// Task or review shown in the right panel while on Board / Reviews.

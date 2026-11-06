@@ -24,10 +24,6 @@ enum PullMode: String, CaseIterable {
     }
 }
 
-enum ResetMode: String, CaseIterable {
-    case soft, mixed, hard
-}
-
 /// Everything the user can do to a repo. Each action is one or two plain git
 /// commands; they all show up in the command log.
 extension RepoModel {
@@ -37,6 +33,7 @@ extension RepoModel {
     func perform(_ label: String, _ args: [String], okCodes: Set<Int32> = [0]) async -> Bool {
         guard beginBusy(label) else { return false }
         defer { endBusy(label) }
+        if !UndoRecord.survives(args) { lastUndo = nil }
         do {
             try await git.run(args, in: root, logged: true, okCodes: okCodes)
             await refresh()
@@ -112,23 +109,24 @@ extension RepoModel {
                               message: "Git allows a branch in one worktree at a time. It's open in \(wt.path). Open that worktree instead, or create a new branch.")
             return
         }
+        let args: [String]
         switch ref.kind {
         case .localBranch:
-            await perform("Checkout", ["switch", ref.name])
+            args = ["switch", ref.name]
         case .remoteBranch:
-            let local = ref.branchNameWithoutRemote
             if localBranches.contains(where: { $0.name == local }) {
-                await perform("Checkout", ["switch", local])
+                args = ["switch", local]
             } else {
-                await perform("Checkout", ["switch", "--track", ref.name])
+                args = ["switch", "--track", ref.name]
             }
         case .tag:
-            await perform("Checkout", ["switch", "--detach", ref.name])
+            args = ["switch", "--detach", ref.name]
         }
+        await performUndoable(.checkout, "Checkout", args)
     }
 
     func checkoutCommit(_ sha: String) async {
-        await perform("Checkout", ["switch", "--detach", sha])
+        await performUndoable(.checkout, "Checkout", ["switch", "--detach", sha])
     }
 
     /// `--no-track`: a new branch made from e.g. origin/main shouldn't use main as its upstream.
@@ -172,13 +170,18 @@ extension RepoModel {
             endBusy("Delete branch")
             if r.exitCode == 0 {
                 CommandLog.shared.add(.init(args: ["branch", "-d", ref.name], directory: root, start: .now, duration: 0, result: r))
+                lastUndo = nil
                 await refresh()
+                recordDeletedBranch(ref)
             } else if r.stderr.contains("not fully merged") {
                 confirmation = Confirmation(
                     title: "\(ref.name) is not fully merged",
-                    message: "Its commits aren't in your current branch or its upstream. Delete it anyway? The commits can only be recovered via reflog.",
+                    message: "Its commits aren't in your current branch or its upstream. Delete it anyway? Edit > Undo brings it back until you run another git command.",
                     confirmTitle: "Delete Anyway"
-                ) { [weak self] in await self?.perform("Delete branch", ["branch", "-D", ref.name]) }
+                ) { [weak self] in
+                    guard let self, await perform("Delete branch", ["branch", "-D", ref.name]) else { return }
+                    recordDeletedBranch(ref)
+                }
             } else {
                 alert = AlertItem(title: "Delete branch failed", message: GitError(command: "", result: r).localizedDescription)
             }
@@ -215,11 +218,11 @@ extension RepoModel {
         if mode == .hard {
             confirmation = Confirmation(
                 title: "Hard reset \(branch) to \(short)?",
-                message: "All uncommitted changes are lost, and commits after \(short) leave the branch.",
+                message: "All uncommitted changes are lost, and commits after \(short) leave the branch. Edit > Undo can move the branch back, but not restore uncommitted changes.",
                 confirmTitle: "Reset"
-            ) { [weak self] in await self?.perform("Reset", ["reset", "--hard", sha]) }
+            ) { [weak self] in await self?.performUndoable(.reset(.hard), "Reset", ["reset", "--hard", sha]) }
         } else {
-            Task { await perform("Reset", ["reset", "--\(mode.rawValue)", sha]) }
+            Task { await performUndoable(.reset(mode), "Reset", ["reset", "--\(mode.rawValue)", sha]) }
         }
     }
 
@@ -310,11 +313,14 @@ extension RepoModel {
         var args = ["commit"]
         if amend { args.append("--amend") }
         if message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            if amend { args.append("--no-edit") } else { args.append("--no-edit") }
+            args.append("--no-edit")
         } else {
             args += ["-m", message]
         }
-        return await perform(amend ? "Amend" : "Commit", args)
+        // A commit that concludes a merge or cherry-pick isn't offered for undo:
+        // a soft reset would silently drop the operation's state.
+        if operation != nil { return await perform(amend ? "Amend" : "Commit", args) }
+        return await performUndoable(amend ? .amend : .commit, amend ? "Amend" : "Commit", args)
     }
 
     /// Resolves a conflict with one whole side. `mine` is the user's own

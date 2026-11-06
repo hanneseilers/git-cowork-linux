@@ -19,6 +19,8 @@ First public release.
 - Pull, push, fetch, branch, stash, merge and rebase with conflict handling.
 - Links to create pull/merge requests on GitHub, GitLab, Gitea and Forgejo.
 - Command log (⌘J) showing every git command the app runs.
+- Undo (⌘Z) for the last commit, amend, reset, checkout or branch delete,
+  run as plain git commands; not offered once you've pushed.
 - The app's own git calls ignore a repository's `core.fsmonitor` setting,
   so opening a repo can't start a program named in its config.
 
