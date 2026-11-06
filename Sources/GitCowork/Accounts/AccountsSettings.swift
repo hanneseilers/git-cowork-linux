@@ -2,14 +2,17 @@ import AppKit
 import GitCoworkCore
 import SwiftUI
 
-/// Settings > Accounts: signed-in servers, sign in, add a token.
+/// Settings > Accounts: signed-in servers, sign in, add a token, SSH keys.
 struct AccountsSection: View {
     private enum SheetKind: Identifiable {
-        case browser(HostKind), token
+        case browser(HostKind, host: String?), token
+        case createKey(HostAccount), hostEntry(HostAccount)
         var id: String {
             switch self {
-            case .browser(let kind): "browser-\(kind.rawValue)"
+            case .browser(let kind, let host): "browser-\(kind.rawValue)-\(host ?? "")"
             case .token: "token"
+            case .createKey(let account): "key-\(account.host)"
+            case .hostEntry(let account): "entry-\(account.host)"
             }
         }
     }
@@ -21,25 +24,35 @@ struct AccountsSection: View {
         Section("Accounts") {
             ForEach(store.accounts) { account in
                 LabeledContent {
-                    Button("Sign Out") { store.signOut(account) }
+                    HStack(spacing: Theme.Space.m) {
+                        if account.sshKey != nil {
+                            Button("SSH Host Entry…") { sheet = .hostEntry(account) }
+                        } else if account.canAddSSHKey {
+                            Button("Create SSH Key…") { sheet = .createKey(account) }
+                        }
+                        Button("Sign Out") { store.signOut(account) }
+                    }
                 } label: {
                     Text(account.username)
-                    Text("\(account.kind.title) · \(account.host)")
+                    Text("\(account.kind.title) · \(account.host)" + (account.sshKey != nil ? " · SSH key" : ""))
                 }
             }
             HStack {
-                Button("Sign In to GitHub…") { sheet = .browser(.github) }
-                Button("Sign In to GitLab…") { sheet = .browser(.gitlab) }
+                Button("Sign In to GitHub…") { sheet = .browser(.github, host: nil) }
+                Button("Sign In to GitLab…") { sheet = .browser(.gitlab, host: nil) }
                 Spacer()
                 Button("Add Token…") { sheet = .token }
             }
-            Text("Used for HTTPS remotes on these servers, and only by git-cowork. Git in the terminal, SSH remotes and other servers keep your own setup. Tokens are kept in the Keychain.")
+            Text("Used for HTTPS remotes on these servers, and for SSH remotes once you create an SSH key, only by git-cowork. Git in the terminal and other servers keep your own setup. Tokens and key passphrases are kept in the Keychain.")
                 .font(Theme.Font.small).foregroundStyle(.secondary)
         }
         .sheet(item: $sheet) { kind in
             switch kind {
-            case .browser(let host): BrowserSignInSheet(kind: host)
+            case .browser(let kind, let host): BrowserSignInSheet(kind: kind, host: host)
             case .token: TokenSheet()
+            case .createKey(let account):
+                CreateSSHKeySheet(account: account) { sheet = .browser(account.kind, host: account.host) }
+            case .hostEntry(let account): SSHHostEntrySheet(account: account)
             }
         }
     }
@@ -91,9 +104,9 @@ struct BrowserSignInSheet: View {
 
     private static let codeFont = Font.system(size: 26, weight: .semibold, design: .monospaced)
 
-    init(kind: HostKind) {
+    init(kind: HostKind, host: String? = nil) {
         self.kind = kind
-        _host = State(initialValue: defaultHost(kind))
+        _host = State(initialValue: host ?? defaultHost(kind))
     }
 
     private var normalizedHost: String? { HostAccount.normalizeHost(host) }
@@ -135,7 +148,7 @@ struct BrowserSignInSheet: View {
     private var clientIDHelp: String {
         switch kind {
         case .github: "Register an OAuth app under Settings > Developer settings > OAuth Apps on that server, tick \"Enable Device Flow\", and paste its client ID. Or use Add Token instead."
-        default: "Add an application under User settings > Applications on that server (GitLab 17.3 or later): untick \"Confidential\", allow the device code grant, scopes read_user, read_api and write_repository. Paste its application ID. Or use Add Token instead."
+        default: "Add an application under User settings > Applications on that server (GitLab 17.3 or later): untick \"Confidential\", allow the device code grant, scopes read_user, api and write_repository. Paste its application ID. Or use Add Token instead."
         }
     }
 
@@ -229,6 +242,102 @@ struct TokenSheet: View {
             } catch {
                 self.error = error.localizedDescription
             }
+        }
+    }
+}
+
+/// Makes an SSH key for one account and adds it on the host.
+struct CreateSSHKeySheet: View {
+    let account: HostAccount
+    /// Opens browser sign-in for this host, for tokens from before SSH keys.
+    let signInAgain: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var working = false
+    @State private var error: SSHKeyError?
+    @State private var task: Task<Void, Never>?
+
+    private var shownPath: String {
+        let path = SSHKeys.plannedPath(for: account) ?? SSHKeys.sshDir + "/git-cowork_\(SSHKey.sshHost(account.host))"
+        return path.replacingOccurrences(of: NSHomeDirectory(), with: "~")
+    }
+
+    var body: some View {
+        AccountSheetFrame(title: "Create SSH Key", error: error?.message) {
+            Text("git-cowork makes a new key, adds it to \(account.username) on \(account.host), and uses it for SSH remotes on \(SSHKey.sshHost(account.host)).")
+                .fixedSize(horizontal: false, vertical: true)
+            Text("Saved as \(shownPath), with its passphrase in the Keychain. Your ~/.ssh/config isn't changed.")
+                .font(Theme.Font.small).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            if working {
+                HStack(spacing: Theme.Space.m) {
+                    ProgressView().controlSize(.small)
+                    Text("Creating key…").font(Theme.Font.small).foregroundStyle(.secondary)
+                }
+            }
+        } buttons: {
+            if error?.needsSignIn == true {
+                if account.method == .oauth {
+                    Button("Sign In Again…") { signInAgain() }
+                } else if let page = HostAPI.newTokenPage(kind: account.kind, host: account.host) {
+                    Link("Create a Token…", destination: page)
+                }
+            }
+            Button("Cancel") { task?.cancel(); dismiss() }
+                .keyboardShortcut(.cancelAction)
+            Button("Create Key") { create() }
+                .keyboardShortcut(.defaultAction)
+                .disabled(working)
+        }
+    }
+
+    private func create() {
+        error = nil
+        working = true
+        task = Task {
+            defer { working = false }
+            do {
+                let path = try await SSHKeys.create(for: account)
+                AccountStore.shared.setSSHKey(path, for: account)
+                dismiss()
+            } catch let e as SSHKeyError {
+                error = e
+            } catch {
+                self.error = SSHKeyError(message: error.localizedDescription)
+            }
+        }
+    }
+}
+
+/// The `Host` entry for ~/.ssh/config, for people who want ssh in the
+/// terminal to use the key too. The app never writes that file itself.
+struct SSHHostEntrySheet: View {
+    let account: HostAccount
+    @Environment(\.dismiss) private var dismiss
+    @State private var copied = false
+
+    private var entry: String {
+        account.sshKey.flatMap { SSHKey.hostEntry(host: account.host, keyPath: $0, home: NSHomeDirectory()) } ?? ""
+    }
+
+    var body: some View {
+        AccountSheetFrame(title: "SSH Host Entry", error: nil) {
+            Text("git-cowork already uses this key. To use it in the terminal too, add this near the top of ~/.ssh/config:")
+                .fixedSize(horizontal: false, vertical: true)
+            Text(entry)
+                .font(Theme.Font.mono)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(Theme.Metrics.cardPadding)
+                .background(Theme.cardFill, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
+                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).stroke(Theme.cardBorder))
+        } buttons: {
+            Button(copied ? "Copied" : "Copy") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(entry, forType: .string)
+                copied = true
+            }
+            Button("Done") { dismiss() }
+                .keyboardShortcut(.defaultAction)
         }
     }
 }

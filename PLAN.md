@@ -252,8 +252,10 @@ Status: sign-in and "making git use the token" are built (Settings >
 Accounts; code in `Sources/GitCowork/Accounts` and
 `Sources/GitCoworkCore/Accounts`). Browser sign-in on github.com and
 gitlab.com needs our OAuth apps registered and their client IDs filled into
-`OAuthApps.swift`; until then it asks for a client ID, and tokens work. Not
-built yet: the SSH key and the API features below.
+`OAuthApps.swift`; until then it asks for a client ID, and tokens work. The
+optional SSH key is built too (Settings > Accounts > Create SSH Key; tested
+against a local sshd, not yet against a real GitHub/GitLab account). Not
+built yet: the API features below.
 
 How git gets the token: `git credential-cache` on a private socket, plus
 `-c credential.https://<host>.helper=` (clears the person's helpers for that
@@ -299,6 +301,22 @@ credential helper just fails. That's the gap this fills first.
   `IdentitiesOnly=yes`. It doesn't edit `~/.ssh/config`. A button can add the
   `Host` entry for people who want the terminal to use the key too.
 - HTTPS plus a token is the default. The SSH key is an extra.
+- As built: the key goes to `~/.ssh/git-cowork_<host>` (`_2`, `_3` if taken)
+  with a random passphrase that `ssh-add --apple-use-keychain` keeps; the key
+  is then removed from ssh-agent so the terminal doesn't offer it everywhere.
+  `GIT_SSH_COMMAND` is `/usr/bin/ssh -F <app config>`, where the app config
+  has a `Host <host>` block (`IdentityFile`, `IdentitiesOnly yes`,
+  `UseKeychain yes`) and then includes `~/.ssh/config` and
+  `/etc/ssh/ssh_config`, so only that host's remotes change, and remotes
+  using an alias from the person's config are untouched. Skipped when the
+  person sets `GIT_SSH_COMMAND`, `GIT_SSH` or `core.sshCommand`. "SSH Host
+  Entry…" shows the block to copy instead of writing `~/.ssh/config`.
+- Scopes: GitHub `write:public_key` (added to sign-in); GitLab has nothing
+  narrower than `api`, which sign-in now asks for (MRs need it too). Older
+  tokens get "sign in again". Code: `SSHKey` and `HostAPI.addSSHKeyRequest`
+  in core, `SSHKeys` (keygen, upload) and `Credentials.sshCommand` in the app.
+- Not handled: SSH hosts with a different name than the web host (some
+  self-hosted GitLab setups), and Gitea/Forgejo keys.
 
 ### What signing in unlocks
 

@@ -8,6 +8,18 @@ Keychain. While git-cowork runs, it's handed to git through git's own
 `credential-cache` daemon on a socket in a folder only you can read, and only
 for the hosts you signed in to. Quitting the app stops the daemon.
 
+Create SSH Key (Settings > Accounts) writes an ed25519 key to
+`~/.ssh/git-cowork_<host>`, encrypted with a random passphrase that
+`ssh-add --apple-use-keychain` stores in your login Keychain; the passphrase
+is passed on stdin, never on a command line. The key is taken out of
+ssh-agent again right away, and an existing file is never overwritten. If
+adding the key to your account fails, the key and its Keychain entry are
+removed. git-cowork's own network commands then run
+`/usr/bin/ssh -F <config>`: that config (next to the credential socket, only
+you can read it) gives the signed-in host the key with `IdentitiesOnly yes`
+and includes your own `~/.ssh/config` for everything else. It isn't used if
+you set `GIT_SSH_COMMAND`, `GIT_SSH` or `core.sshCommand` yourself.
+
 ## Supported versions
 
 Fixes go into the newest release and `main`. Please update with

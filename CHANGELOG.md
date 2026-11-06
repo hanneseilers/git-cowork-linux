@@ -25,6 +25,13 @@ First public release.
   access token (also for Gitea and Forgejo), and HTTPS push and pull work
   without setting up git. Tokens are kept in the Keychain and used only by
   git-cowork; git in the terminal and SSH remotes are unchanged.
+- Settings > Accounts > Create SSH Key: makes an ed25519 key in
+  `~/.ssh/git-cowork_<host>`, keeps its random passphrase in the Keychain and
+  adds it to your GitHub or GitLab account. git-cowork then uses it for SSH
+  remotes on that host; `~/.ssh/config` isn't changed (SSH Host Entry shows a
+  block to copy if the terminal should use the key too). Signing in now also
+  asks for GitHub's `write:public_key` and GitLab's `api` scope; older
+  sign-ins are asked to sign in again before adding a key.
 - Command log (⌘J) showing every git command the app runs.
 - The app's own git calls ignore a repository's `core.fsmonitor` setting,
   so opening a repo can't start a program named in its config.

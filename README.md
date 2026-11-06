@@ -106,7 +106,7 @@ also drop a folder onto any window.
 | **Diff** | Hunk or split view, intra-line highlights, stage / unstage / discard single hunks. |
 | **Merge / rebase** | Banner with Continue / Skip / Abort, conflicted files, "use mine / theirs". |
 | **Hosts** | "Create pull/merge request" and "Open on …" for GitHub, GitLab, Gitea and Forgejo, including self-hosted. |
-| **Accounts** | Optional. Sign in to GitHub or GitLab in the browser, or paste an access token (also Gitea / Forgejo), and HTTPS push and pull just work. Settings > Accounts. Tokens stay in the Keychain and only git-cowork uses them. |
+| **Accounts** | Optional. Sign in to GitHub or GitLab in the browser, or paste an access token (also Gitea / Forgejo), and HTTPS push and pull just work. Settings > Accounts. Tokens stay in the Keychain and only git-cowork uses them. For SSH remotes, Create SSH Key makes a key, adds it to your GitHub or GitLab account and uses it in git-cowork without touching `~/.ssh/config`. |
 | **Board** | Shared tasks in Backlog / To Do / In Progress / In Review / Done, with assignee, labels, linked branch and comments. "Start Task" creates the branch. |
 | **Reviews** | Review requests for a branch: reviewers, verdicts (approved / changes requested), comments, and the branch's changes. |
 | **Inbox** | Tasks assigned to you, review requests, verdicts, @mentions and replies — also as macOS notifications. |
