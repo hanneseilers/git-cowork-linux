@@ -69,7 +69,7 @@ enum SignIn {
         return tokens
     }
 
-    private static func send(_ request: URLRequest, host: String) async throws -> (Data, URLResponse) {
+    static func send(_ request: URLRequest, host: String) async throws -> (Data, URLResponse) {
         do {
             return try await URLSession.shared.data(for: request)
         } catch let error as URLError where error.code == .cancelled {
