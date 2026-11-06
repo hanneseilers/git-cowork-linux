@@ -10,9 +10,12 @@ import SwiftUI
 enum DebugSnapshot {
     /// GITCOWORK_DEBUG_SELECT = "commit:<n>" (nth commit) | "diff" (first changed file) | "commitdiff:<n>"
     /// GITCOWORK_DEBUG_MODE = "board" | "reviews", optionally ":<n>" to select the nth task / review.
+    /// GITCOWORK_DEBUG_LOG = "1" opens the command log.
     @MainActor
     static func applySelection(_ model: RepoModel) async {
         applyMode(model)
+        // GITCOWORK_DEBUG_LOG = "1": open the command log.
+        if ProcessInfo.processInfo.environment["GITCOWORK_DEBUG_LOG"] != nil { model.showCommandLog = true }
         guard let sel = ProcessInfo.processInfo.environment["GITCOWORK_DEBUG_SELECT"] else { return }
         let parts = sel.split(separator: ":")
         let n = parts.count > 1 ? Int(parts[1]) ?? 0 : 0
@@ -52,12 +55,23 @@ enum DebugSnapshot {
         case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
         default: break
         }
+        // GITCOWORK_DEBUG_SETTINGS=1: open the Settings window (to snapshot it).
+        if ProcessInfo.processInfo.environment["GITCOWORK_DEBUG_SETTINGS"] != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                // Same as choosing git-cowork > Settings… (⌘,).
+                guard let menu = NSApp.mainMenu?.items.first?.submenu,
+                      let i = menu.items.firstIndex(where: { $0.keyEquivalent == "," }) else { return }
+                menu.performActionForItem(at: i)
+            }
+        }
         guard let path = ProcessInfo.processInfo.environment["GITCOWORK_SNAPSHOT"] else { return }
         let delay = Double(ProcessInfo.processInfo.environment["GITCOWORK_SNAPSHOT_DELAY"] ?? "") ?? 4
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             // The app usually isn't active when run from a terminal, so there's no key
             // window; take the selected tab of the frontmost window group.
-            let candidate = NSApp.keyWindow ?? NSApp.mainWindow
+            let settings = ProcessInfo.processInfo.environment["GITCOWORK_DEBUG_SETTINGS"] == nil ? nil
+                : NSApp.windows.first { $0.isVisible && (($0.identifier?.rawValue ?? "") + $0.title).localizedCaseInsensitiveContains("settings") }
+            let candidate = settings ?? NSApp.keyWindow ?? NSApp.mainWindow
                 ?? NSApp.orderedWindows.first(where: { $0.isVisible && $0.contentView != nil })
                 ?? NSApp.windows.first(where: { $0.isVisible && $0.contentView != nil })
             guard let window = candidate?.tabGroup?.selectedWindow ?? candidate,

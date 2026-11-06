@@ -89,19 +89,22 @@ struct MentionText: View {
     }
 }
 
-extension CoworkStore {
-    /// Lowercased handles that resolve to a person, for highlighting.
-    var mentionHandles: Set<String> {
-        Set(people.map { $0.mentionHandle.lowercased() })
-    }
-}
-
-/// Small list of people to complete an @mention with.
+/// People to complete the "@par" being typed at the end of `text` with;
+/// picking one completes it. Shows nothing when no mention is being typed.
 struct MentionSuggestions: View {
+    @Binding var text: String
     let people: [TeamMember]
-    let pick: (TeamMember) -> Void
 
     var body: some View {
+        if let q = MentionCompletion.pendingQuery(in: text) {
+            let matches = MentionCompletion.candidates(q, people: people)
+            if !matches.isEmpty {
+                list(matches) { text = MentionCompletion.complete(text, with: $0) }
+            }
+        }
+    }
+
+    private func list(_ people: [TeamMember], pick: @escaping (TeamMember) -> Void) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(people) { p in
                 Button { pick(p) } label: {
@@ -118,31 +121,12 @@ struct MentionSuggestions: View {
                     .frame(height: Theme.Metrics.buttonHeight)
                     .contentShape(Rectangle())
                 }
-                .buttonStyle(HoverRowStyle())
+                .buttonStyle(HoverFillStyle.row)
             }
         }
         .padding(.vertical, Theme.Space.xs)
         .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: Theme.Radius.control))
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.control).strokeBorder(Color(nsColor: .separatorColor)))
-    }
-}
-
-/// Plain button with a light highlight while hovered or pressed.
-struct HoverRowStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        HoverRow(pressed: configuration.isPressed) { configuration.label }
-    }
-
-    private struct HoverRow<Label: View>: View {
-        let pressed: Bool
-        @ViewBuilder var label: Label
-        @State private var hovering = false
-
-        var body: some View {
-            label
-                .background(Color.primary.opacity(pressed ? 0.10 : hovering ? 0.05 : 0))
-                .onHover { hovering = $0 }
-        }
     }
 }
 
@@ -214,12 +198,7 @@ struct CommentComposer: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.m) {
-            if let q = MentionCompletion.pendingQuery(in: draft) {
-                let people = MentionCompletion.candidates(q, people: model.cowork.people)
-                if !people.isEmpty {
-                    MentionSuggestions(people: people) { draft = MentionCompletion.complete(draft, with: $0) }
-                }
-            }
+            MentionSuggestions(text: draftBinding, people: model.cowork.people)
             PlaceholderEditor(text: draftBinding, placeholder: placeholder, minHeight: 56, maxHeight: 56, focused: focused)
                 .focused($focused)
             HStack(spacing: Theme.Space.m) {

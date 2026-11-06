@@ -3,6 +3,7 @@ import AppKit
 /// Sizes, fonts and alphas for the history table and its graph.
 /// Lane colors come from Theme.lane so the sidebar and graph match.
 enum GraphStyle {
+    /// Taller than `Theme.Metrics.rowHeight`: rows hold 20pt nodes and badges.
     static let rowHeight: CGFloat = 34
 
     // Graph geometry
@@ -31,11 +32,6 @@ enum GraphStyle {
         max(x(0), min(x(lane), width - laneWidth / 2))
     }
 
-    /// Fill color for an author's node: the same color the Avatar view uses.
-    static func authorColor(email: String) -> NSColor {
-        Theme.personColor(email)
-    }
-
     /// Opaque color of the selected band as it looks over the table background.
     static func selectedBandColor(_ lane: NSColor, emphasized: Bool) -> NSColor {
         let alpha = Band.selectedAlpha * (emphasized ? 1 : Band.unemphasizedFactor)
@@ -58,14 +54,14 @@ enum GraphStyle {
 
     enum Text {
         static let padding: CGFloat = 8
-        /// Leading inset of the first column (header title and badge), same as other panels.
-        static let leadingPadding: CGFloat = Theme.Metrics.panelPadding
         static let subject = NSFont.systemFont(ofSize: 13)
         static let body = NSFont.systemFont(ofSize: 12)
+        /// Author and date. 12pt rather than Theme's 11pt small: it sits on
+        /// 34pt rows beside 13pt subjects, where 11pt looks too faint.
         static let small = NSFont.systemFont(ofSize: 12)
-        static let sha = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+        static let sha = Theme.AppKitFont.monoSmall
         static let initials = NSFont.systemFont(ofSize: 9, weight: .semibold)
-        static let header = NSFont.systemFont(ofSize: 11, weight: .semibold)  // = Theme.Font.caption
+        static let header = Theme.AppKitFont.caption
         /// The "// WIP" marker.
         static let wip = NSFontManager.shared.convert(NSFont.systemFont(ofSize: 12), toHaveTrait: .italicFontMask)
         static let bodySeparator = "   "
@@ -95,7 +91,6 @@ enum GraphStyle {
         static let chipHeight: CGFloat = 18
         static let chipPadding: CGFloat = 4
         static let chipFont = NSFont.monospacedSystemFont(ofSize: 10, weight: .semibold)
-        static let chipFillAlpha = CGFloat(Theme.Tint.chip)
         static let iconSize: CGFloat = 11
         static let gap: CGFloat = 6
     }
@@ -114,7 +109,6 @@ enum GraphStyle {
         let luminance = 0.2126 * c.redComponent + 0.7152 * c.greenComponent + 0.0722 * c.blueComponent
         return luminance > 0.62 ? NSColor(white: 0.1, alpha: 1) : .white
     }
-
 
     /// Fill for a local branch badge.
     static func badgeFill(_ lane: NSColor) -> NSColor {

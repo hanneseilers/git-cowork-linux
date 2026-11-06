@@ -103,7 +103,7 @@ private struct BranchReviewBar: View {
                               help: "Show the review of \(review.branch)") {
                     VerdictChip(verdict: review.overall)
                 } action: { model.showReview(review.id) }
-                .padding(.horizontal, InspectorStyle.padding)
+                .padding(.horizontal, Theme.Metrics.panelPadding)
                 .padding(.vertical, Theme.Space.s)
             } else if let branch, let ahead, ahead.count > 0 {
                 Divider()
@@ -120,7 +120,7 @@ private struct BranchReviewBar: View {
                         .fixedSize()
                         .help("Ask teammates to review \(branch)")
                 }
-                .padding(.horizontal, InspectorStyle.padding)
+                .padding(.horizontal, Theme.Metrics.panelPadding)
                 .frame(height: Theme.Metrics.rowHeight + Theme.Space.m)
             }
         }
@@ -195,7 +195,7 @@ private struct FileLists: View {
             }
         }
         .listStyle(.plain)
-        .environment(\.defaultMinListRowHeight, InspectorStyle.rowHeight)
+        .environment(\.defaultMinListRowHeight, Theme.Metrics.rowHeight)
         .contextMenu(forSelectionType: String.self) { ids in
             menu(for: changes(ids))
         } primaryAction: { ids in
@@ -363,7 +363,7 @@ private struct OperationBanner: View {
         }
         .padding(Theme.Metrics.cardPadding)
         .background(Theme.Status.warning.opacity(Theme.Tint.banner), in: RoundedRectangle(cornerRadius: Theme.Radius.card))
-        .padding(.horizontal, InspectorStyle.padding)
-        .padding(.top, InspectorStyle.padding)
+        .padding(.horizontal, Theme.Metrics.panelPadding)
+        .padding(.top, Theme.Metrics.panelPadding)
     }
 }

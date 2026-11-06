@@ -31,6 +31,7 @@ extension RepoModel {
     /// Errors are shown as an alert with git's own message.
     @discardableResult
     func perform(_ label: String, _ args: [String], okCodes: Set<Int32> = [0]) async -> Bool {
+        await waitForAutoFetch()
         guard beginBusy(label) else { return false }
         defer { endBusy(label) }
         if !UndoRecord.survives(args) { lastUndo = nil }
@@ -66,12 +67,14 @@ extension RepoModel {
     // MARK: Remote
 
     func fetch() async {
-        await perform("Fetch", ["fetch", "--all", "--prune"])
+        let ok = await perform("Fetch", ["fetch", "--all", "--prune"])
+        noteRemoteAction(fetched: true, succeeded: ok)
         await syncCowork()
     }
 
     func pull(_ mode: PullMode = .default) async {
-        await perform("Pull", mode.args)
+        let ok = await perform("Pull", mode.args)
+        noteRemoteAction(fetched: true, succeeded: ok)
     }
 
     func push(force: Bool = false) async {
@@ -84,7 +87,9 @@ extension RepoModel {
             }
             args += ["-u", remote, "HEAD"]
         }
-        await perform(force ? "Force push" : "Push", args)
+        if await perform(force ? "Force push" : "Push", args) {
+            noteRemoteAction(fetched: false, succeeded: true)
+        }
     }
 
     func confirmForcePush() {
@@ -292,20 +297,6 @@ extension RepoModel {
             let tracked = changes.filter { $0.area != .untracked && $0.area != .conflicted }.map(\.path)
             if !tracked.isEmpty { await perform("Discard", ["restore", "--"] + tracked) }
             if !untracked.isEmpty { await perform("Discard", ["clean", "-fdq", "--"] + untracked) }
-        }
-    }
-
-    /// Discards every uncommitted change, including new files.
-    func discardAll() {
-        confirmation = Confirmation(
-            title: "Discard all changes?",
-            message: "Every uncommitted change and every new file in this worktree is lost. This can't be undone.",
-            confirmTitle: "Discard All"
-        ) { [weak self] in
-            guard let self else { return }
-            if await perform("Discard all", ["restore", "--staged", "--worktree", "--", "."]) {
-                await perform("Discard all", ["clean", "-fdq"])
-            }
         }
     }
 

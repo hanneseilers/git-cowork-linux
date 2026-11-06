@@ -13,6 +13,9 @@ struct GitError: LocalizedError {
 
     var errorDescription: String? {
         let err = result.stderr.trimmingCharacters(in: .whitespacesAndNewlines)
+        if CredentialConfig.isAuthFailure(err) {
+            return err + "\n\nThe server wants you to sign in. Add your account under git-cowork > Settings > Accounts, or set up an SSH key or credential helper for git."
+        }
         if !err.isEmpty { return err }
         let out = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
         return out.isEmpty ? "git exited with code \(result.exitCode)" : out
@@ -21,7 +24,8 @@ struct GitError: LocalizedError {
 
 /// Runs the git CLI. Every call is a plain `git <args>` in the repo folder,
 /// so behaviour matches the terminal: same config, SSH keys, credential
-/// helpers and hooks.
+/// helpers and hooks. The one addition: hosts signed in under Settings >
+/// Accounts get their token from the app (see Credentials).
 final class GitRunner: @unchecked Sendable {
     static let shared = GitRunner()
 
@@ -115,11 +119,16 @@ final class GitRunner: @unchecked Sendable {
                      env extra: [String: String] = [:]) async -> (stdout: Data, stderr: Data, exitCode: Int32) {
         let env = environment.merging(extra) { _, new in new }
         let gitPath = gitPath
+        let credentials = Credentials.shared
+        if CredentialConfig.needsCredentials(args) {
+            await credentials.prepare(gitPath: gitPath, env: env)
+        }
+        let configArgs = GitDefaults.configArgs + credentials.configArgs
         return await withCheckedContinuation { cont in
             DispatchQueue.global(qos: .userInitiated).async {
                 let p = Process()
                 p.executableURL = URL(fileURLWithPath: gitPath)
-                p.arguments = GitDefaults.configArgs + args
+                p.arguments = configArgs + args
                 p.currentDirectoryURL = dir
                 p.environment = env
                 let out = Pipe(), err = Pipe()

@@ -17,7 +17,14 @@ First public release.
 - Changes panel with staging per file or hunk, discard, commit and amend.
 - Diff in hunk or split view with intra-line highlights.
 - Pull, push, fetch, branch, stash, merge and rebase with conflict handling.
+- Background fetch of every open repository every 5 minutes while the app is
+  in front (Settings › Git › Fetch automatically). It never asks for
+  credentials and pauses after a failed sign-in.
 - Links to create pull/merge requests on GitHub, GitLab, Gitea and Forgejo.
+- Settings > Accounts: sign in to GitHub or GitLab in the browser, or add an
+  access token (also for Gitea and Forgejo), and HTTPS push and pull work
+  without setting up git. Tokens are kept in the Keychain and used only by
+  git-cowork; git in the terminal and SSH remotes are unchanged.
 - Command log (⌘J) showing every git command the app runs.
 - Undo (⌘Z) for the last commit, amend, reset, checkout or branch delete,
   run as plain git commands; not offered once you've pushed.

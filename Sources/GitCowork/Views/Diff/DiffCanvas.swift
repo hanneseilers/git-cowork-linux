@@ -1,60 +1,41 @@
 import GitCoworkCore
 import AppKit
 
-enum HunkAction: Hashable {
-    case stage, unstage, discard
-
-    /// Same tints as the Stage / Unstage / Discard buttons in the changes panel.
-    var tint: NSColor {
-        switch self {
-        case .stage: .systemGreen
-        case .unstage, .discard: .systemRed
-        }
-    }
-
-    var title: String {
-        switch self {
-        case .stage: "Stage Hunk"
-        case .unstage: "Unstage Hunk"
-        case .discard: "Discard Hunk"
-        }
-    }
-}
-
 /// Draws a diff directly: one row per line, only the visible rows are drawn,
 /// so 20k-line diffs scroll fast. Hunk rows carry custom-drawn buttons.
 /// Rows are selected with click / shift-click / drag and copied with ⌘C.
 /// Gutters stay put while the code scrolls sideways.
 final class DiffCanvas: NSView, NSMenuItemValidation {
     var onHunkAction: ((HunkAction, Int) -> Void)?
+    // State below is shared with the input handling in DiffCanvasInput.swift.
 
-    private enum Side { case left, right }
-    private struct ButtonHit: Equatable {
+    enum Side { case left, right }
+    struct ButtonHit: Equatable {
         let row: Int
         let action: HunkAction
     }
 
-    private var doc = DiffDocument()
+    var doc = DiffDocument()
     private var version = -1
     private var documentID = ""
-    private var mode: DiffMode = .hunk
-    private var actions: [HunkAction] = []
-    private var actionsEnabled = true
+    var mode: DiffMode = .hunk
+    var actions: [HunkAction] = []
+    var actionsEnabled = true
 
     /// Top of each row plus the end of the last one.
     private var rowTops: [CGFloat] = [0]
-    private var hOffset: CGFloat = 0
-    private var selection: ClosedRange<Int>?
-    private var anchor: Int?
-    private var selectionSide: Side = .right
-    private var hover: ButtonHit?
-    private var pressed: ButtonHit?
+    var hOffset: CGFloat = 0
+    var selection: ClosedRange<Int>?
+    var anchor: Int?
+    var selectionSide: Side = .right
+    var hover: ButtonHit?
+    var pressed: ButtonHit?
 
     private var textCache: [Int: NSAttributedString] = [:]
     private var changeCache: [Int: (CGFloat, CGFloat)] = [:]
     private var buttonTitles: [HunkAction: NSAttributedString] = [:]
 
-    private let charWidth = ("0" as NSString).size(withAttributes: [.font: DiffStyle.font]).width
+    let charWidth = ("0" as NSString).size(withAttributes: [.font: DiffStyle.font]).width
     private let gutterCharWidth = ("0" as NSString).size(withAttributes: [.font: DiffStyle.gutterFont]).width
     private let textHeight = ceil(DiffStyle.font.ascender - DiffStyle.font.descender)
     private let gutterTextHeight = ceil(DiffStyle.gutterFont.ascender - DiffStyle.gutterFont.descender)
@@ -96,7 +77,7 @@ final class DiffCanvas: NSView, NSMenuItemValidation {
         needsDisplay = true
     }
 
-    private var rowCount: Int { mode == .hunk ? doc.lines.count : doc.splitRows.count }
+    var rowCount: Int { mode == .hunk ? doc.lines.count : doc.splitRows.count }
 
     private func computeRows() {
         var tops = [CGFloat]()
@@ -134,7 +115,7 @@ final class DiffCanvas: NSView, NSMenuItemValidation {
     }
 
     /// Hunk index when row `r` is a hunk header row.
-    private func hunkIndex(row r: Int) -> Int? {
+    func hunkIndex(row r: Int) -> Int? {
         switch mode {
         case .hunk:
             let line = doc.lines[r]
@@ -147,7 +128,7 @@ final class DiffCanvas: NSView, NSMenuItemValidation {
     }
 
     /// Hunk that row `r` belongs to (header or body).
-    private func owningHunk(row r: Int) -> Int? {
+    func owningHunk(row r: Int) -> Int? {
         let index: Int? = switch mode {
         case .hunk: r
         case .split: doc.splitRows[r].left ?? doc.splitRows[r].right
@@ -156,7 +137,7 @@ final class DiffCanvas: NSView, NSMenuItemValidation {
         return doc.lines[index].hunk
     }
 
-    private func row(atY y: CGFloat, clamped: Bool) -> Int? {
+    func row(atY y: CGFloat, clamped: Bool) -> Int? {
         let count = rowCount
         guard count > 0 else { return nil }
         if y < 0 { return clamped ? 0 : nil }
@@ -169,7 +150,7 @@ final class DiffCanvas: NSView, NSMenuItemValidation {
         return lo
     }
 
-    private func rowRect(_ r: Int) -> NSRect {
+    func rowRect(_ r: Int) -> NSRect {
         NSRect(x: 0, y: rowTops[r], width: bounds.width, height: rowTops[r + 1] - rowTops[r])
     }
 
@@ -179,7 +160,7 @@ final class DiffCanvas: NSView, NSMenuItemValidation {
         CGFloat(max(3, String(doc.maxLineNumber).count)) * gutterCharWidth + DiffStyle.numberPadding * 2
     }
 
-    private var splitMid: CGFloat { floor(bounds.width / 2) }
+    var splitMid: CGFloat { floor(bounds.width / 2) }
 
     /// Width available to code text (after the sign) in the current mode.
     private var codeWidth: CGFloat {
@@ -189,12 +170,12 @@ final class DiffCanvas: NSView, NSMenuItemValidation {
         }
     }
 
-    private var maxHOffset: CGFloat {
+    var maxHOffset: CGFloat {
         let text = CGFloat(min(doc.maxColumns, DiffStyle.maxDrawnColumns)) * charWidth + DiffStyle.textInset * 2
         return max(0, ceil(text - codeWidth))
     }
 
-    private func clampHOffset() {
+    func clampHOffset() {
         hOffset = min(max(0, hOffset), maxHOffset)
     }
 
@@ -427,7 +408,7 @@ final class DiffCanvas: NSView, NSMenuItemValidation {
         return result.reversed()
     }
 
-    private func buttonHit(at p: NSPoint) -> ButtonHit? {
+    func buttonHit(at p: NSPoint) -> ButtonHit? {
         guard !actions.isEmpty, let r = row(atY: p.y, clamped: false), hunkIndex(row: r) != nil else { return nil }
         guard let (action, _) = buttonRects(in: rowRect(r)).first(where: { $0.1.contains(p) }) else { return nil }
         return ButtonHit(row: r, action: action)
@@ -467,195 +448,5 @@ final class DiffCanvas: NSView, NSMenuItemValidation {
         let x1 = s.attributedSubstring(from: NSRange(location: 0, length: end)).size().width
         changeCache[index] = (x0, x1)
         return (x0, x1)
-    }
-
-    // MARK: Mouse
-
-    override func updateTrackingAreas() {
-        super.updateTrackingAreas()
-        for area in trackingAreas { removeTrackingArea(area) }
-        addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
-                                       owner: self, userInfo: nil))
-    }
-
-    override func mouseMoved(with event: NSEvent) {
-        setHover(buttonHit(at: convert(event.locationInWindow, from: nil)))
-    }
-
-    override func mouseExited(with event: NSEvent) {
-        setHover(nil)
-    }
-
-    private func setHover(_ hit: ButtonHit?) {
-        guard hit != hover else { return }
-        for r in [hover?.row, hit?.row].compactMap({ $0 }) { setNeedsDisplay(rowRect(r)) }
-        hover = hit
-    }
-
-    override func mouseDown(with event: NSEvent) {
-        window?.makeFirstResponder(self)
-        let p = convert(event.locationInWindow, from: nil)
-        if let hit = buttonHit(at: p) {
-            pressed = hit
-            setNeedsDisplay(rowRect(hit.row))
-            return
-        }
-        guard let r = row(atY: p.y, clamped: false) else {
-            selection = nil
-            needsDisplay = true
-            return
-        }
-        if mode == .split { selectionSide = p.x < splitMid ? .left : .right }
-        if event.modifierFlags.contains(.shift), let a = anchor {
-            selection = min(a, r)...max(a, r)
-        } else {
-            anchor = r
-            selection = r...r
-        }
-        needsDisplay = true
-    }
-
-    override func mouseDragged(with event: NSEvent) {
-        let p = convert(event.locationInWindow, from: nil)
-        if pressed != nil {
-            setHover(buttonHit(at: p))
-            return
-        }
-        guard let a = anchor, let r = row(atY: p.y, clamped: true) else { return }
-        autoscroll(with: event)
-        selection = min(a, r)...max(a, r)
-        needsDisplay = true
-    }
-
-    override func mouseUp(with event: NSEvent) {
-        guard let hit = pressed else { return }
-        pressed = nil
-        setNeedsDisplay(rowRect(hit.row))
-        let p = convert(event.locationInWindow, from: nil)
-        guard actionsEnabled, buttonHit(at: p) == hit, let hunk = hunkIndex(row: hit.row) else { return }
-        onHunkAction?(hit.action, hunk)
-    }
-
-    override func scrollWheel(with event: NSEvent) {
-        let dx = event.hasPreciseScrollingDeltas ? event.scrollingDeltaX : event.scrollingDeltaX * DiffStyle.lineHeight
-        if dx != 0, maxHOffset > 0 {
-            hOffset -= dx
-            clampHOffset()
-            needsDisplay = true
-        }
-        super.scrollWheel(with: event)
-    }
-
-    override func menu(for event: NSEvent) -> NSMenu? {
-        let p = convert(event.locationInWindow, from: nil)
-        guard let r = row(atY: p.y, clamped: false) else { return nil }
-        if selection?.contains(r) != true {
-            anchor = r
-            selection = r...r
-            if mode == .split { selectionSide = p.x < splitMid ? .left : .right }
-            needsDisplay = true
-        }
-        let menu = NSMenu()
-        menu.addItem(withTitle: "Copy", action: #selector(copy(_:)), keyEquivalent: "c")
-        menu.addItem(withTitle: "Select All", action: #selector(selectAll(_:)), keyEquivalent: "a")
-        if let hunk = owningHunk(row: r), !actions.isEmpty {
-            menu.addItem(.separator())
-            for action in actions {
-                let item = menu.addItem(withTitle: action.title + (action == .discard ? "…" : ""),
-                                        action: #selector(menuHunkAction(_:)), keyEquivalent: "")
-                item.representedObject = [action, hunk] as [Any]
-                item.target = self
-                item.isEnabled = actionsEnabled
-            }
-        }
-        return menu
-    }
-
-    @objc private func menuHunkAction(_ sender: NSMenuItem) {
-        guard let pair = sender.representedObject as? [Any], let action = pair.first as? HunkAction,
-              let hunk = pair.last as? Int else { return }
-        onHunkAction?(action, hunk)
-    }
-
-    // MARK: Keyboard and copy
-
-    override func keyDown(with event: NSEvent) {
-        guard let clip = enclosingScrollView?.contentView else { return super.keyDown(with: event) }
-        let page = clip.bounds.height - DiffStyle.lineHeight * 2
-        var y = clip.bounds.minY
-        switch event.specialKey {
-        case .upArrow: y -= DiffStyle.lineHeight * 3
-        case .downArrow: y += DiffStyle.lineHeight * 3
-        case .pageUp: y -= page
-        case .pageDown: y += page
-        case .home: y = 0
-        case .end: y = bounds.height
-        case .leftArrow, .rightArrow:
-            hOffset += (event.specialKey == .leftArrow ? -1 : 1) * charWidth * 8
-            clampHOffset()
-            needsDisplay = true
-            return
-        default:
-            if event.charactersIgnoringModifiers == " " {
-                y += event.modifierFlags.contains(.shift) ? -page : page
-            } else {
-                return super.keyDown(with: event)
-            }
-        }
-        y = min(max(0, y), max(0, bounds.height - clip.bounds.height))
-        clip.scroll(to: NSPoint(x: 0, y: y))
-        enclosingScrollView?.reflectScrolledClipView(clip)
-    }
-
-    override func becomeFirstResponder() -> Bool {
-        needsDisplay = true
-        return super.becomeFirstResponder()
-    }
-
-    override func resignFirstResponder() -> Bool {
-        needsDisplay = true
-        return super.resignFirstResponder()
-    }
-
-    /// Copies the selected lines with their original content (tabs kept, no
-    /// signs). Hunk headers and notes are left out unless nothing else is selected.
-    @objc func copy(_ sender: Any?) {
-        guard let selection else { return }
-        var code: [String] = [], other: [String] = []
-        for r in selection {
-            switch mode {
-            case .hunk:
-                let line = doc.lines[r]
-                if line.kind == .hunk || line.kind == .meta { other.append(line.text) }
-                else { code.append(doc.sourceText(ofLine: r)) }
-            case .split:
-                let row = doc.splitRows[r]
-                switch row.kind {
-                case .code:
-                    if let i = selectionSide == .left ? row.left : row.right { code.append(doc.sourceText(ofLine: i)) }
-                case .hunk, .meta:
-                    if let l = row.left { other.append(doc.lines[l].text) }
-                case .note:
-                    if let i = selectionSide == .left ? row.left : row.right { other.append(doc.lines[i].text) }
-                }
-            }
-        }
-        External.copy((code.isEmpty ? other : code).joined(separator: "\n"))
-    }
-
-    override func selectAll(_ sender: Any?) {
-        guard rowCount > 0 else { return }
-        anchor = 0
-        selection = 0...(rowCount - 1)
-        needsDisplay = true
-    }
-
-    func validateMenuItem(_ item: NSMenuItem) -> Bool {
-        switch item.action {
-        case #selector(copy(_:)): selection != nil
-        case #selector(selectAll(_:)): rowCount > 0
-        case #selector(menuHunkAction(_:)): actionsEnabled
-        default: true
-        }
     }
 }

@@ -22,13 +22,13 @@ struct RepoToolbar: ToolbarContent {
                         .frame(height: ChromeStyle.iconHeight)
                         .padding(.vertical, Theme.Space.xs)
                 }
-                .buttonStyle(ChromeButtonStyle())
+                .buttonStyle(HoverFillStyle.chrome())
                 .help("Show or hide the sidebar (⌃⌘S)")
                 .keyboardShortcut("s", modifiers: [.command, .control])
                 .padding(.trailing, Theme.Space.m)
                 RepositoryPicker(model: model, openHere: openHere, openInNewTab: openInNewTab)
                 Image(systemName: "chevron.right")
-                    .font(ChromeStyle.pickerChevron)
+                    .font(Theme.Glyph.dropdown)
                     .foregroundStyle(.tertiary)
                 BranchPicker(model: model, openHere: openHere)
                 CenterModeSwitch(model: model)
@@ -68,7 +68,7 @@ private struct InboxButton: View {
                 }
                 .padding(.vertical, Theme.Space.xs)
         }
-        .buttonStyle(ChromeButtonStyle())
+        .buttonStyle(HoverFillStyle.chrome())
         .help(unread > 0 ? "Inbox: \(unread) new" : "Inbox")
         .popover(isPresented: $shown, arrowEdge: .bottom) {
             InboxPopover(model: model)

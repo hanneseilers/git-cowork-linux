@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Bottom bar. Left: what's running or what last ran.
-/// Right: task sync, upstream sync, commit count, worktree path, command log toggle.
+/// Right: paused background fetch, task sync, upstream sync, commit count, worktree path, command log toggle.
 struct StatusBar: View {
     @Bindable var model: RepoModel
     private let log = CommandLog.shared
@@ -10,6 +10,7 @@ struct StatusBar: View {
         HStack(spacing: Theme.Space.l) {
             activity
             Spacer(minLength: Theme.Space.l)
+            AutoFetchStatus(model: model)
             CoworkSyncStatus(model: model)
             upstream
             Text(commitCount)
@@ -31,7 +32,7 @@ struct StatusBar: View {
         }
         .font(Theme.Font.small)
         .padding(.horizontal, Theme.Metrics.panelPadding)
-        .frame(height: ChromeStyle.statusBarHeight)
+        .frame(height: Theme.Metrics.rowHeight)   // lines up with list rows above
         .background(.bar)
     }
 
@@ -142,7 +143,7 @@ private struct CoworkSyncStatus: View {
     }
 
     static func synced(_ date: Date, now: Date) -> String {
-        now.timeIntervalSince(date) < 60 ? "Tasks synced just now" : "Tasks synced \(Formatters.relative(date, now: now))"
+        "Tasks synced \(Formatters.relative(date, now: now))"
     }
 
     private func help(_ store: CoworkStore) -> String {
@@ -150,5 +151,30 @@ private struct CoworkSyncStatus: View {
         let remote = store.remote.map { " with \($0)" } ?? " (no remote: tasks stay on this Mac)"
         if let last = store.lastSync { return "Tasks and reviews synced\(remote) at \(Formatters.full(last)). Click to sync now." }
         return "Sync tasks and reviews\(remote) now"
+    }
+}
+
+/// Shown only when background fetching paused because signing in failed.
+/// Click to fetch now (which also resumes it once it works).
+private struct AutoFetchStatus: View {
+    let model: RepoModel
+
+    var body: some View {
+        if let reason = model.autoFetchPaused {
+            Button {
+                Task { await model.fetch() }
+            } label: {
+                HStack(spacing: Theme.Space.s) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(Theme.Status.warning)
+                    Text("Auto-fetch paused")
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .disabled(model.busy != nil)
+            .help("Automatic fetch couldn't sign in and stopped, so it doesn't retry with the same credentials:\n\(reason)\n\nClick to fetch now. It resumes after you sign in under Settings › Accounts or a fetch, pull or push works.")
+        }
     }
 }

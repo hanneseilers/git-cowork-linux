@@ -109,7 +109,7 @@ struct ReviewsView: View {
 
     private var header: some View {
         PanelBar {
-            Text("Reviews").font(InspectorStyle.headerFont)
+            Text("Reviews").font(Theme.Font.headline)
             Spacer(minLength: Theme.Space.m)
             Picker("Filter", selection: filterSelection) {
                 ForEach(Filter.allCases) { f in
