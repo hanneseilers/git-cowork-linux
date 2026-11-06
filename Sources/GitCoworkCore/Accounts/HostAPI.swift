@@ -103,15 +103,6 @@ public enum HostAPI {
         }
     }
 
-    /// Scopes to tick when making a token by hand.
-    public static func tokenScopesHint(kind: HostKind) -> String {
-        switch kind {
-        case .github: "repo, workflow, read:org and write:public_key"
-        case .gitlab: "read_user, api and write_repository"
-        case .gitea: "read:user and write:repository"
-        }
-    }
-
     /// Adds the token and Accept header each host wants.
     static func authorized(_ url: URL, kind: HostKind, token: String) -> URLRequest {
         var r = URLRequest(url: url)

@@ -87,7 +87,7 @@ enum SSHKeys {
             let scope = account.kind == .github ? "write:public_key" : "api"
             let fix = account.method == .oauth
                 ? L("Sign in again to allow it.")
-                : String(localized: "Make a new token with the scopes \(HostAPI.tokenScopesHint(kind: account.kind)) and add it with Add Token.")
+                : String(localized: "Make a new token with the scopes \(account.kind.scopesHint) and add it with Add Token.")
             throw SSHKeyError(message: String(localized: "Your sign-in on \(account.host) isn't allowed to add SSH keys (needs the \(scope) scope).") + " " + fix,
                               needsSignIn: true)
         case .signedOut:

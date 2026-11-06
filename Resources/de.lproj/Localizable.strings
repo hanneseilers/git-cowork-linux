@@ -7,17 +7,22 @@
 " and its comment" = " und der Kommentar dazu";
 "%@ asked you to review %@\n%@" = "%1$@ bittet dich um ein Review von %2$@\n%3$@";
 "%@ commits" = "%@ Commits";
+"%@ didn't accept the token. Check that it's current and has the scopes %@." = "%1$@ hat das Token nicht akzeptiert. Prüfe, ob es noch gültig ist und die Scopes %2$@ hat.";
 "%@ didn't accept the token. Sign in again in Settings › Accounts." = "%@ hat das Token nicht akzeptiert. Melde dich unter Einstellungen › Accounts neu an.";
+"%@ didn't answer like a %@ server (HTTP %lld). Check the server type." = "%1$@ hat nicht wie ein %2$@-Server geantwortet (HTTP %3$lld). Prüfe den Server-Typ.";
 "%@ didn't return a repository list (HTTP %lld)." = "%@ hat keine Repository-Liste geliefert (HTTP %lld).";
+"%@ doesn't offer browser sign-in for this app. Check the client ID, or add an access token instead." = "%@ bietet für diese App keine Anmeldung im Browser an. Prüfe die Client-ID oder füge stattdessen ein Zugriffstoken hinzu.";
 "%@ failed" = "%@ fehlgeschlagen";
 "%@ in progress" = "%@ läuft";
 "%@ into %@" = "%1$@ in %2$@";
 "%@ is checked out in another worktree" = "%@ ist in einem anderen Worktree ausgecheckt";
 "%@ is not fully merged" = "%@ ist nicht vollständig gemergt";
+"%@ isn't a valid server name." = "%@ ist kein gültiger Servername.";
 "%@ isn't on the remote yet. Push it so reviewers can fetch it." = "%@ ist noch nicht auf dem Remote. Pushe den Branch, damit die Reviewer ihn abrufen können.";
 "%@ isn't possible anymore" = "%@ ist nicht mehr möglich";
 "%@ not started" = "%@ nicht gestartet";
 "%@ on %@" = "%@ auf %@";
+"%@ refused the sign-in: %@" = "%1$@ hat die Anmeldung abgelehnt: %2$@";
 "%@ — in %@" = "%1$@ – in %2$@";
 "%@ → %@\n\nAll changes on the branch since its merge base %@." = "%1$@ → %2$@\n\nAlle Änderungen auf dem Branch seit seiner Merge-Basis %3$@.";
 "%@+ commits" = "%@+ Commits";
@@ -161,6 +166,7 @@
 "Copy" = "Kopieren";
 "Couldn't create the task" = "Aufgabe konnte nicht erstellt werden";
 "Couldn't find a free file name for the key in ~/.ssh." = "In ~/.ssh wurde kein freier Dateiname für den Schlüssel gefunden.";
+"Couldn't reach %@: %@" = "%1$@ ist nicht erreichbar: %2$@";
 "Couldn't request the review" = "Review konnte nicht angefragt werden";
 "Couldn't save the token in the Keychain." = "Das Token konnte nicht im Schlüsselbund gespeichert werden.";
 "Couldn't write the cowork merge" = "Cowork-Merge konnte nicht geschrieben werden";
@@ -386,6 +392,8 @@
 "Push failed" = "Push fehlgeschlagen";
 "Push Tag" = "Tag pushen";
 "Push to %@" = "Nach %@ pushen";
+"read:user and write:repository" = "read:user und write:repository";
+"read_user, api and write_repository" = "read_user, api und write_repository";
 "Rebase %@ onto %@" = "%1$@ auf %2$@ rebasen";
 "Recent" = "Zuletzt geöffnet";
 "Redo" = "Wiederholen";
@@ -407,6 +415,7 @@
 "renamed from %@" = "umbenannt von %@";
 "Rename…" = "Umbenennen …";
 "Reopen Review" = "Review wieder öffnen";
+"repo, workflow, read:org and write:public_key" = "repo, workflow, read:org und write:public_key";
 "Repositories you open show up here" = "Repositorys, die du öffnest, erscheinen hier";
 "Repository" = "Repository";
 "repository" = "Repository";
@@ -456,6 +465,7 @@
 "Sign In to GitHub…" = "Bei GitHub anmelden …";
 "Sign In to GitLab…" = "Bei GitLab anmelden …";
 "Sign Out" = "Abmelden";
+"Sign-in failed: %@" = "Anmeldung fehlgeschlagen: %@";
 "Sign-in was declined in the browser." = "Die Anmeldung wurde im Browser abgelehnt.";
 "since %@" = "seit %@";
 "Skip" = "Überspringen";
