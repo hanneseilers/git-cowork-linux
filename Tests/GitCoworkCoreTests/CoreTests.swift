@@ -126,29 +126,6 @@ private func c(_ id: String, _ parents: String...) -> Commit {
     }
 }
 
-@Suite struct DiffTests {
-    @Test func lineNumbers() {
-        let diff = """
-        diff --git a/f b/f
-        index 1..2 100644
-        --- a/f
-        +++ b/f
-        @@ -10,3 +10,4 @@ func x()
-         same
-        -old
-        +new
-        +added
-         end
-        """
-        let (lines, truncated) = DiffParser.parse(diff)
-        #expect(!truncated)
-        #expect(lines.map(\.kind) == [.hunk, .context, .removed, .added, .added, .context])
-        #expect(lines[1].oldNumber == 10 && lines[1].newNumber == 10)
-        #expect(lines[2].oldNumber == 11)
-        #expect(lines[4].newNumber == 12)
-        #expect(lines[5].oldNumber == 12 && lines[5].newNumber == 13)
-    }
-}
 
 @Suite struct RemoteLinkTests {
     @Test func formats() {

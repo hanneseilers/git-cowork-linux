@@ -18,9 +18,9 @@ struct RequestReviewSheet: View {
     init(model: RepoModel, branch: String) {
         self.model = model
         self.branch = branch
-        let defaultBase = model.defaultBranch(remote: nil) ?? "main"
+        let defaultBase = model.baseBranch()?.name ?? "main"
         _base = State(initialValue: defaultBase == branch ? "" : defaultBase)
-        let tip = branchRef(branch, in: model)?.target
+        let tip = model.branch(named: branch)?.target
         _title = State(initialValue: tip.flatMap { model.commit($0)?.subject } ?? branch)
         _taskID = State(initialValue: model.cowork.tasks.first { $0.branch == branch }?.id ?? "")
     }
@@ -31,7 +31,7 @@ struct RequestReviewSheet: View {
     /// Local branches plus the remote's default, without the branch under review.
     private var baseOptions: [String] {
         var names = model.localBranches.map(\.name)
-        if let d = model.defaultBranch(remote: nil), !names.contains(d) { names.append(d) }
+        if let d = model.baseBranch()?.name, !names.contains(d) { names.append(d) }
         if !base.isEmpty, !names.contains(base) { names.append(base) }
         return names.filter { $0 != branch }.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
     }
@@ -151,14 +151,14 @@ struct RequestReviewSheet: View {
     }
 
     private func push() {
-        guard let remote = model.defaultRemote else { return }
+        guard model.defaultRemote != nil else { return }
         pushing = true
         let b = branch
         Task {
             if model.currentBranch == b {
                 await model.push()
             } else {
-                await model.perform("Push", ["push", "-u", remote, b])
+                await model.push(branch: b)
             }
             pushing = false
         }

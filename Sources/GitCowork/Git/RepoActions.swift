@@ -326,6 +326,38 @@ extension RepoModel {
         await perform("Resolve", ["add", "--", change.path])
     }
 
+    /// Stages, unstages or discards one hunk (a patch from DiffDocument.patch(forHunk:)).
+    @discardableResult
+    func applyHunk(_ patch: Data, _ action: HunkAction, zeroContext: Bool) async -> Bool {
+        // --whitespace=nowarn also overrides apply.whitespace=fix, which would
+        // otherwise rewrite the staged lines.
+        var args = ["apply", "--whitespace=nowarn"]
+        switch action {
+        case .stage: args += ["--cached"]
+        case .unstage: args += ["--cached", "--reverse"]
+        case .discard: args += ["--reverse"]
+        }
+        if zeroContext { args.append("--unidiff-zero") }   // diff.context=0
+        args.append("-")
+        guard beginBusy(action.title) else { return false }
+        defer { endBusy(action.title) }
+        do {
+            try await git.run(args, in: root, logged: true, input: patch)
+            await refresh()
+            return true
+        } catch {
+            await refresh()
+            alert = AlertItem(title: "\(action.title) failed", message: error.localizedDescription)
+            return false
+        }
+    }
+
+    /// Clones `url` into `dest` (a folder that doesn't exist yet). Used before a repo window exists.
+    static func clone(_ url: String, into dest: String) async throws {
+        let parent = URL(fileURLWithPath: dest).deletingLastPathComponent()
+        try await GitRunner.shared.run(["clone", url, dest], in: parent, logged: true)
+    }
+
     // MARK: Merge / rebase in progress
 
     func continueOperation() async {

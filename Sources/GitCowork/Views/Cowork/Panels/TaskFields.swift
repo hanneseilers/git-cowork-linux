@@ -88,7 +88,7 @@ struct RemovableLabelChip: View {
     let onRemove: () -> Void
 
     var body: some View {
-        let color = Color(nsColor: Theme.lane(label.lowercased().hashValueStable))
+        let color = Color(nsColor: Theme.labelColor(label))
         HStack(spacing: Theme.Space.s) {
             Text(label).lineLimit(1)
             Button(action: onRemove) {

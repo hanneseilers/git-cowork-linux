@@ -156,7 +156,7 @@ struct SidebarMenu: View {
     @ViewBuilder
     private func hostLinks(branch: String, remote: String?) -> some View {
         if let links = model.links(for: remote) {
-            let base = model.defaultBranch(remote: remote)
+            let base = model.baseBranch()?.name
             if branch != base, let url = links.newPullRequestURL(branch: branch, base: base) {
                 Button("Create \(links.pullRequestTerm) on \(links.host)") { External.browse(url) }
             }

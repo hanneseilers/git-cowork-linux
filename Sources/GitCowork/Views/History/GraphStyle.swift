@@ -33,7 +33,7 @@ enum GraphStyle {
 
     /// Fill color for an author's node: the same color the Avatar view uses.
     static func authorColor(email: String) -> NSColor {
-        Theme.lane(abs(email.lowercased().hashValueStable))
+        Theme.personColor(email)
     }
 
     /// Opaque color of the selected band as it looks over the table background.
@@ -115,12 +115,6 @@ enum GraphStyle {
         return luminance > 0.62 ? NSColor(white: 0.1, alpha: 1) : .white
     }
 
-    /// "Anna Berg" -> "AB", "claude" -> "C". Same rule as the Avatar view.
-    static func initials(_ name: String) -> String {
-        let parts = name.split(whereSeparator: { $0 == " " || $0 == "." || $0 == "-" || $0 == "_" })
-        let letters = parts.prefix(2).compactMap(\.first).map { String($0).uppercased() }
-        return letters.isEmpty ? "?" : letters.joined()
-    }
 
     /// Fill for a local branch badge.
     static func badgeFill(_ lane: NSColor) -> NSColor {

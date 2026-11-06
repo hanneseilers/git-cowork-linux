@@ -357,7 +357,7 @@ final class HistoryTableCoordinator: NSObject, NSTableViewDataSource, NSTableVie
 
     func initials(_ name: String) -> String {
         if let hit = initialsCache[name] { return hit }
-        let s = GraphStyle.initials(name)
+        let s = name.initials
         initialsCache[name] = s
         return s
     }

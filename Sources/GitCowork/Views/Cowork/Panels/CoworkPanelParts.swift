@@ -154,7 +154,7 @@ func menuSymbol(_ name: String, _ color: Color) -> Image {
 
 /// Person icon in their avatar color, for menu items.
 func menuPersonIcon(_ person: TeamMember) -> Image {
-    menuSymbol("person.crop.circle.fill", Color(nsColor: Theme.lane(abs(person.email.lowercased().hashValueStable))))
+    menuSymbol("person.crop.circle.fill", Color(nsColor: Theme.personColor(person.email)))
 }
 
 extension TeamMember {
@@ -191,19 +191,3 @@ func openCoworkTarget(_ target: String, model: RepoModel) {
     }
 }
 
-/// The remote-tracking ref for a branch name: on the default remote, else any remote.
-@MainActor
-func remoteBranchRef(_ name: String, in model: RepoModel) -> Ref? {
-    let remote = model.defaultRemote ?? "origin"
-    return model.remoteBranches.first { $0.name == "\(remote)/\(name)" }
-        ?? model.remoteBranches.first { $0.branchNameWithoutRemote == name && !$0.name.hasSuffix("/HEAD") }
-}
-
-/// Local or remote-tracking ref for a branch name.
-@MainActor
-func branchRef(_ name: String, in model: RepoModel) -> Ref? {
-    if let local = model.localBranches.first(where: { $0.name == name }) { return local }
-    let remote = model.defaultRemote ?? "origin"
-    return model.remoteBranches.first { $0.name == "\(remote)/\(name)" }
-        ?? model.remoteBranches.first { $0.branchNameWithoutRemote == name }
-}

@@ -22,13 +22,6 @@ struct RepoSheet: View {
     }
 }
 
-/// Git's own rules for branch names, checked locally so the button can be disabled.
-func isValidRefName(_ name: String) -> Bool {
-    let n = name.trimmingCharacters(in: .whitespaces)
-    guard !n.isEmpty, !n.hasPrefix("-"), !n.hasPrefix("/"), !n.hasSuffix("/"), !n.hasSuffix("."), !n.hasSuffix(".lock") else { return false }
-    let bad: [String] = ["..", "~", "^", ":", "?", "*", "[", "\\", " ", "@{", "//"]
-    return !bad.contains { n.contains($0) }
-}
 
 struct NewBranchSheet: View {
     let model: RepoModel
@@ -39,7 +32,7 @@ struct NewBranchSheet: View {
 
     var body: some View {
         SheetScaffold(title: "New Branch", confirmTitle: "Create Branch",
-                      confirmDisabled: !isValidRefName(name) || model.localBranches.contains { $0.name == name } || model.busy != nil) {
+                      confirmDisabled: !RefName.isValid(name) || model.localBranches.contains { $0.name == name } || model.busy != nil) {
             Task { await model.createBranch(name, from: start, checkout: checkout) }
         } content: {
             TextField("Branch name", text: $name)
@@ -57,7 +50,7 @@ struct NewTagSheet: View {
     @State private var message = ""
 
     var body: some View {
-        SheetScaffold(title: "New Tag", confirmTitle: "Create Tag", confirmDisabled: !isValidRefName(name) || model.busy != nil) {
+        SheetScaffold(title: "New Tag", confirmTitle: "Create Tag", confirmDisabled: !RefName.isValid(name) || model.busy != nil) {
             Task { await model.createTag(name, at: sha, message: message) }
         } content: {
             TextField("Tag name, e.g. v1.2.0", text: $name).textFieldStyle(.roundedBorder)
@@ -79,7 +72,7 @@ struct RenameBranchSheet: View {
     }
 
     var body: some View {
-        SheetScaffold(title: "Rename \(old)", confirmTitle: "Rename", confirmDisabled: !isValidRefName(name) || name == old || model.busy != nil) {
+        SheetScaffold(title: "Rename \(old)", confirmTitle: "Rename", confirmDisabled: !RefName.isValid(name) || name == old || model.busy != nil) {
             Task { await model.renameBranch(old, to: name) }
         } content: {
             TextField("New name", text: $name).textFieldStyle(.roundedBorder)
@@ -141,7 +134,7 @@ struct AddWorktreeSheet: View {
     private var valid: Bool {
         guard !path.isEmpty, !FileManager.default.fileExists(atPath: path) else { return false }
         if mode == .newBranch {
-            return isValidRefName(branch) && !model.localBranches.contains { $0.name == branch }
+            return RefName.isValid(branch) && !model.localBranches.contains { $0.name == branch }
         }
         return !existing.isEmpty
     }
@@ -266,8 +259,7 @@ struct CloneSheet: View {
         let dest = parent + "/" + folderName
         Task {
             do {
-                try await GitRunner.shared.run(["clone", url.trimmingCharacters(in: .whitespaces), dest],
-                                               in: URL(fileURLWithPath: parent), logged: true)
+                try await RepoModel.clone(url.trimmingCharacters(in: .whitespaces), into: dest)
                 running = false
                 dismiss()
                 onCloned(dest)

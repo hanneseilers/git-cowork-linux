@@ -156,15 +156,6 @@ private struct RepoContainer: View {
     }
 }
 
-enum RepoLocator {
-    /// Top-level folder of the worktree containing `path`, or nil if it isn't in a git repo.
-    static func resolve(_ path: String) async -> String? {
-        let out = await GitRunner.shared.tryRun(["rev-parse", "--show-toplevel"], in: URL(fileURLWithPath: path))
-        let top = out?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return top.isEmpty ? nil : top
-    }
-}
-
 /// Sets up the window chrome once and makes new windows join the opener's tab group.
 struct WindowAccessor: NSViewRepresentable {
     /// Window the next new window should join as a tab. Weak and one-shot: if

@@ -102,6 +102,16 @@ final class GitRunner: @unchecked Sendable {
     /// `input` is written to git's stdin; `extra` adds environment variables
     /// (e.g. GIT_INDEX_FILE for writing trees without touching the real index).
     func execute(_ args: [String], in dir: URL, input: Data? = nil, env extra: [String: String] = [:]) async -> GitResult {
+        let r = await executeData(args, in: dir, input: input, env: extra)
+        return GitResult(stdout: String(decoding: r.stdout, as: UTF8.self),
+                         stderr: String(decoding: r.stderr, as: UTF8.self),
+                         exitCode: r.exitCode)
+    }
+
+    /// Like `execute`, but stdout stays raw bytes. Diffs need this: decoding
+    /// non-UTF-8 content would corrupt patches built from it.
+    func executeData(_ args: [String], in dir: URL, input: Data? = nil,
+                     env extra: [String: String] = [:]) async -> (stdout: Data, stderr: Data, exitCode: Int32) {
         let env = environment.merging(extra) { _, new in new }
         let gitPath = gitPath
         return await withCheckedContinuation { cont in
@@ -119,7 +129,7 @@ final class GitRunner: @unchecked Sendable {
                 do {
                     try p.run()
                 } catch {
-                    cont.resume(returning: GitResult(stdout: "", stderr: error.localizedDescription, exitCode: -1))
+                    cont.resume(returning: (Data(), Data(error.localizedDescription.utf8), -1))
                     return
                 }
                 if let inPipe, let input {
@@ -140,10 +150,7 @@ final class GitRunner: @unchecked Sendable {
                 let outData = out.fileHandleForReading.readDataToEndOfFile()
                 group.wait()
                 p.waitUntilExit()
-                cont.resume(returning: GitResult(
-                    stdout: String(decoding: outData, as: UTF8.self),
-                    stderr: String(decoding: errData, as: UTF8.self),
-                    exitCode: p.terminationStatus))
+                cont.resume(returning: (outData, errData, p.terminationStatus))
             }
         }
     }

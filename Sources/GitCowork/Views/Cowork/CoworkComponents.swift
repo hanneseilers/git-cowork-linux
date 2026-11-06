@@ -58,7 +58,7 @@ struct VerdictChip: View {
 struct LabelChip: View {
     let label: String
     var body: some View {
-        Chip(text: label, color: Color(nsColor: Theme.lane(label.lowercased().hashValueStable)))
+        Chip(text: label, color: Color(nsColor: Theme.labelColor(label)))
     }
 }
 

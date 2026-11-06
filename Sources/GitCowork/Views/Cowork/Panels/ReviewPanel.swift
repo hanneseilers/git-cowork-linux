@@ -71,7 +71,7 @@ private struct ReviewPanelContent: View {
             Divider()
             CommentComposer(model: model, parent: review.commentParent)
         }
-        .task(id: changesKey) { changes = await BranchChanges.load(review: review, model: model) }
+        .task(id: changesKey) { changes = await model.branchChanges(branch: review.branch, base: review.base) }
     }
 
     // MARK: Header
@@ -286,7 +286,7 @@ private struct ReviewPanelContent: View {
 
     @ViewBuilder
     private var links: some View {
-        let branch = branchRef(review.branch, in: model)
+        let branch = model.branch(named: review.branch)
         let web = model.links(for: nil)
         let pr = web?.newPullRequestURL(branch: review.branch, base: review.base)
         if branch != nil || pr != nil {
@@ -319,7 +319,7 @@ private struct ReviewPanelContent: View {
     private var changesKey: String {
         func targets(_ name: String) -> String {
             let local = model.localBranches.first { $0.name == name }?.target ?? ""
-            let remote = remoteBranchRef(name, in: model)?.target ?? ""
+            let remote = model.remoteBranch(named: name)?.target ?? ""
             return "\(name)@\(local)/\(remote)"
         }
         return targets(review.branch) + "|" + targets(review.base)
@@ -372,78 +372,5 @@ private struct ReviewPanelContent: View {
         }
         .buttonStyle(HoverRowStyle())
         .help(f.path)
-    }
-}
-
-/// Files changed on a review's branch since it left its base, plus a synthetic
-/// commit (tip with the merge base as parent) so the diff viewer can show them.
-struct BranchChanges {
-    var loaded = false
-    var files: [FileChange] = []
-    var detail: CommitDetail?
-    var error: String?
-
-    @MainActor
-    static func load(review: ReviewRequest, model: RepoModel) async -> BranchChanges {
-        let git = GitRunner.shared
-        let root = model.root
-        func sha(_ rev: String) async -> String? {
-            let out = await git.tryRun(["rev-parse", "--verify", "-q", rev + "^{commit}"], in: root)
-            let s = out?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return s.isEmpty ? nil : s
-        }
-        /// The pushed (remote-tracking) branch, unless the local one is at or
-        /// ahead of it (e.g. the requester's own branch with unpushed commits).
-        /// A reviewer's stale local `main` or old checkout of the branch must
-        /// not decide what the review shows.
-        func resolve(_ name: String) async -> String? {
-            let local = model.localBranches.first { $0.name == name }.map(\.name)
-            let remote = remoteBranchRef(name, in: model)?.name
-            let l = await local.asyncMap(sha), r = await remote.asyncMap(sha)
-            switch (l, r) {
-            case let (l?, r?):
-                let localAhead = await git.execute(["merge-base", "--is-ancestor", r, l], in: root).exitCode == 0
-                return localAhead ? l : r
-            case let (l?, nil): return l
-            case let (nil, r?): return r
-            case (nil, nil): return await sha(name)
-            }
-        }
-        var result = BranchChanges(loaded: true)
-        guard let tip = await resolve(review.branch) else {
-            result.error = "Branch \(review.branch) isn't here yet. Fetch to get it."
-            return result
-        }
-        guard let base = await resolve(review.base) else {
-            result.error = "Base branch \(review.base) not found."
-            return result
-        }
-        let mb = (await git.tryRun(["merge-base", base, tip], in: root) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !mb.isEmpty else {
-            result.error = "\(review.branch) and \(review.base) have no common history."
-            return result
-        }
-        let out = await git.tryRun(["diff", "--name-status", "-z", "-M", mb, tip], in: root) ?? ""
-        result.files = Parsers.parseNameStatus(out)
-        result.detail = await syntheticDetail(tip: tip, parent: mb, title: "\(review.branch) → \(review.base)", root: root)
-        return result
-    }
-
-    /// The tip commit's metadata with `parent` as its only parent.
-    private static func syntheticDetail(tip: String, parent: String, title: String, root: URL) async -> CommitDetail? {
-        guard let out = await GitRunner.shared.tryRun(["show", "-s", Parsers.detailFormat, tip], in: root),
-              let d = Parsers.parseCommitDetail(out) else { return nil }
-        let sep = "\u{1f}"
-        let fields = [d.id, parent, d.authorName, d.authorEmail, "\(Int(d.authorDate.timeIntervalSince1970))",
-                      d.committerName, d.committerEmail, "\(Int(d.committerDate.timeIntervalSince1970))",
-                      title + "\n\nAll changes on the branch since its merge base " + String(parent.prefix(7)) + "."]
-        return Parsers.parseCommitDetail(fields.joined(separator: sep))
-    }
-}
-
-private extension Optional {
-    func asyncMap<T>(_ f: (Wrapped) async -> T?) async -> T? {
-        guard let w = self else { return nil }
-        return await f(w)
     }
 }

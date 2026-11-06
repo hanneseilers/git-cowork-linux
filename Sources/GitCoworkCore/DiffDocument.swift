@@ -1,80 +1,76 @@
 import Foundation
 
-enum DiffMode: String, CaseIterable {
-    case hunk, split
-
-    var title: String { self == .hunk ? "Hunk" : "Split" }
-}
-
 /// One file's diff. Keeps git's output as raw bytes (single-hunk patches for
 /// staging are cut from those, so non-UTF-8 content survives byte for byte)
 /// next to decoded display lines for the unified and split views.
-struct DiffDocument: Sendable {
-    struct Hunk: Sendable {
+public struct DiffDocument: Sendable {
+    public struct Hunk: Sendable {
         /// The "@@ … @@" line, decoded for display.
-        let header: String
-        let oldStart: Int
-        let newStart: Int
+        public let header: String
+        public let oldStart: Int
+        public let newStart: Int
         /// Bytes of the file header this hunk belongs to ("diff --git" … "+++ b/x").
-        let fileHeader: Range<Int>
+        public let fileHeader: Range<Int>
         /// Bytes from the "@@" line to the end of the hunk's last line.
-        var body: Range<Int>
+        public var body: Range<Int>
         /// Has unchanged context lines (a zero-context hunk needs --unidiff-zero).
-        var hasContext = false
+        public var hasContext = false
     }
 
-    enum Kind: UInt8, Sendable { case context, added, removed, hunk, meta }
+    public enum Kind: UInt8, Sendable { case context, added, removed, hunk, meta }
 
-    struct Line: Sendable {
-        let kind: Kind
-        let old: Int?
-        let new: Int?
+    public struct Line: Sendable {
+        public let kind: Kind
+        public let old: Int?
+        public let new: Int?
         /// Display text: no +/- sign, tabs expanded, no trailing CR.
-        let text: String
+        public let text: String
         /// Index into `hunks`, or -1 outside any hunk.
-        let hunk: Int
+        public let hunk: Int
         /// Bytes of the original content in `raw` (no sign; tabs kept), for copying.
         /// Empty for hunk and meta rows.
-        var source: Range<Int> = 0..<0
+        public var source: Range<Int> = 0..<0
         /// Changed span (UTF-16) for paired removed/added lines.
-        var change: NSRange?
+        public var change: NSRange?
     }
 
     /// One row of the side-by-side view. `left`/`right` index into `lines`.
     /// Hunk and file-level meta rows span both sides and use `left`; a note
     /// ("No newline at end of file") sits on the side(s) it belongs to.
-    struct SplitRow: Sendable {
-        enum Kind: UInt8, Sendable { case code, hunk, meta, note }
-        let kind: Kind
-        let left: Int?
-        let right: Int?
+    public struct SplitRow: Sendable {
+        public enum Kind: UInt8, Sendable { case code, hunk, meta, note }
+        public let kind: Kind
+        public let left: Int?
+        public let right: Int?
     }
 
+    public init() {}
+
     /// git's output, untouched.
-    var raw = Data()
-    var hunks: [Hunk] = []
-    var lines: [Line] = []
-    var splitRows: [SplitRow] = []
-    var truncated = false
-    var added = 0
-    var removed = 0
+    public var raw = Data()
+    public var hunks: [Hunk] = []
+    public var lines: [Line] = []
+    public var splitRows: [SplitRow] = []
+    public var truncated = false
+    public var added = 0
+    public var removed = 0
     /// Number of "diff " sections. A type change (symlink ↔ file) prints a
     /// deletion and an addition; a single hunk of those can't be staged alone.
-    var sections = 0
+    public var sections = 0
     /// Longest display line in UTF-16 units, for horizontal scrolling.
-    var maxColumns = 0
+    public var maxColumns = 0
     /// Highest line number, for the gutter width.
-    var maxLineNumber = 0
+    public var maxLineNumber = 0
 
     /// No text changes (binary, empty, or mode-only diffs).
-    var isEmpty: Bool { hunks.isEmpty }
+    public var isEmpty: Bool { hunks.isEmpty }
 
     /// Hunks can be staged, unstaged or discarded one by one.
-    var supportsHunkActions: Bool { sections <= 1 && !hunks.isEmpty }
+    public var supportsHunkActions: Bool { sections <= 1 && !hunks.isEmpty }
 
     /// A patch with the file header and only hunk `index`, for `git apply`.
     /// Built from the raw bytes, never from decoded text.
-    func patch(forHunk index: Int) -> Data? {
+    public func patch(forHunk index: Int) -> Data? {
         guard hunks.indices.contains(index) else { return nil }
         let h = hunks[index]
         guard !h.fileHeader.isEmpty, h.fileHeader.upperBound <= raw.count, h.body.upperBound <= raw.count else { return nil }
@@ -101,7 +97,7 @@ struct DiffDocument: Sendable {
     }
 
     /// The original bytes of a line (tabs and non-UTF-8 kept, trailing CR dropped), for copying.
-    func sourceText(ofLine index: Int) -> String {
+    public func sourceText(ofLine index: Int) -> String {
         let line = lines[index]
         guard !line.source.isEmpty else { return line.text }
         var bytes = raw[(raw.startIndex + line.source.lowerBound)..<(raw.startIndex + line.source.upperBound)]
@@ -110,7 +106,7 @@ struct DiffDocument: Sendable {
     }
 
     /// First and last line number of a hunk on the new side, for messages.
-    func newRange(ofHunk index: Int) -> ClosedRange<Int>? {
+    public func newRange(ofHunk index: Int) -> ClosedRange<Int>? {
         let numbers = lines.lazy.filter { $0.hunk == index }.compactMap { $0.new ?? $0.old }
         guard let lo = numbers.min(), let hi = numbers.max() else { return nil }
         return lo...hi
@@ -132,17 +128,17 @@ extension DiffDocument {
 
     /// Text for display: UTF-8 when valid, otherwise Latin-1 (every byte maps
     /// to a character, so nothing is shown as U+FFFD and nothing is lost).
-    static func decode<C: Collection>(_ bytes: C) -> String where C.Element == UInt8 {
+    public static func decode<C: Collection>(_ bytes: C) -> String where C.Element == UInt8 {
         let s = String(decoding: bytes, as: UTF8.self)
         if s.utf8.count == bytes.count, s.utf8.elementsEqual(bytes) { return s }
         return String(bytes: Array(bytes), encoding: .isoLatin1) ?? s
     }
 
-    static func parse(_ text: String, maxLines: Int = 20_000) -> DiffDocument {
+    public static func parse(_ text: String, maxLines: Int = 20_000) -> DiffDocument {
         parse(Data(text.utf8), maxLines: maxLines)
     }
 
-    static func parse(_ data: Data, maxLines: Int = 20_000) -> DiffDocument {
+    public static func parse(_ data: Data, maxLines: Int = 20_000) -> DiffDocument {
         var doc = DiffDocument()
         doc.raw = data
         data.withUnsafeBytes { (buf: UnsafeRawBufferPointer) in
@@ -252,13 +248,13 @@ extension DiffDocument {
     }
 
     /// "@@ -12,5 +12,7 @@ ..." -> (12, 12). Combined diffs have several "-" ranges; the first wins.
-    static func parseHunkHeader(_ line: Substring) -> (Int, Int) {
+    public static func parseHunkHeader(_ line: Substring) -> (Int, Int) {
         let r = parseHunkRanges(line)
         return (r.oldStart, r.newStart)
     }
 
     /// Starts and line counts of a hunk header; a missing count means 1.
-    static func parseHunkRanges(_ line: Substring) -> (oldStart: Int, oldCount: Int, newStart: Int, newCount: Int) {
+    public static func parseHunkRanges(_ line: Substring) -> (oldStart: Int, oldCount: Int, newStart: Int, newCount: Int) {
         func range(_ part: Substring) -> (Int, Int)? {
             let nums = part.dropFirst().split(separator: ",", omittingEmptySubsequences: false)
             guard let a = nums.first.flatMap({ Int($0) }) else { return nil }
@@ -274,7 +270,7 @@ extension DiffDocument {
     }
 
     /// Drops a trailing CR and expands tabs to 4-column stops.
-    static func displayText(_ s: Substring) -> String {
+    public static func displayText(_ s: Substring) -> String {
         var s = s
         if s.utf8.last == 0x0D { s = Substring(s.utf8.dropLast()) }
         guard s.utf8.contains(0x09) else { return String(s) }
@@ -357,7 +353,7 @@ extension DiffDocument {
     /// Changed span of two similar lines: everything between the common prefix
     /// and the common suffix, widened to whole characters (emoji, combining
     /// marks). Nil when the lines share nothing but whitespace.
-    static func changedRanges(_ a: String, _ b: String) -> (NSRange, NSRange)? {
+    public static func changedRanges(_ a: String, _ b: String) -> (NSRange, NSRange)? {
         let x = Array(a.utf16), y = Array(b.utf16)
         var p = 0
         while p < x.count, p < y.count, x[p] == y[p] { p += 1 }

@@ -30,25 +30,8 @@ enum HunkStaging {
 
     static func run(_ action: HunkAction, hunk: Int, in doc: DiffDocument, file: FileChange, model: RepoModel) async {
         guard let patch = doc.patch(forHunk: hunk) else { return }
-        // --whitespace=nowarn also overrides apply.whitespace=fix, which would
-        // otherwise rewrite the staged lines.
-        var args = ["apply", "--whitespace=nowarn"]
-        switch action {
-        case .stage: args += ["--cached"]
-        case .unstage: args += ["--cached", "--reverse"]
-        case .discard: args += ["--reverse"]
-        }
-        if !doc.hunks[hunk].hasContext { args.append("--unidiff-zero") }   // diff.context=0
-        args.append("-")
-        guard model.beginBusy(action.title) else { return }
-        defer { model.endBusy(action.title) }
-        do {
-            try await model.git.run(args, in: model.root, logged: true, input: patch)
-            await model.refresh()
+        if await model.applyHunk(patch, action, zeroContext: !doc.hunks[hunk].hasContext) {
             follow(file, model: model)
-        } catch {
-            await model.refresh()
-            model.alert = AlertItem(title: "\(action.title) failed", message: error.localizedDescription)
         }
     }
 

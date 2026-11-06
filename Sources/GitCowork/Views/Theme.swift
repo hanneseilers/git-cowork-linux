@@ -111,6 +111,12 @@ enum Theme {
         NSColor(srgbRed: 0.68, green: 0.53, blue: 0.40, alpha: 1),  // brown
     ]
 
+    /// Every person has one color everywhere (avatars, graph nodes, pickers).
+    static func personColor(_ email: String) -> NSColor { lane(email.lowercased().stableHash) }
+
+    /// Every label has one color everywhere (chips, filters, editors).
+    static func labelColor(_ label: String) -> NSColor { lane(label.lowercased().stableHash) }
+
     static func lane(_ i: Int) -> NSColor { lanes[((i % lanes.count) + lanes.count) % lanes.count] }
 
     enum Status {

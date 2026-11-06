@@ -257,7 +257,7 @@ private struct TaskBranchRow: View {
     }
 
     private func linked(_ branch: String) -> some View {
-        let ref = branchRef(branch, in: model)
+        let ref = model.branch(named: branch)
         let isHead = model.currentBranch == branch
         return VStack(alignment: .leading, spacing: Theme.Space.s + 2) {
             HStack(spacing: Theme.Space.s) {
@@ -300,9 +300,9 @@ private struct TaskBranchRow: View {
 
     private var unlinked: some View {
         HStack(spacing: Theme.Space.s) {
-            Button { BoardActions.start(task.id, model: model) } label: { Label("Start Task", systemImage: "play.fill") }
+            Button { model.startTask(task.id) } label: { Label("Start Task", systemImage: "play.fill") }
                 .buttonStyle(ActionButtonStyle.primary())
-                .help("Check out \(BoardLogic.branchName(for: task)) (created if needed), then link it")
+                .help("Check out \(RefName.branch(for: task)) (created if needed), then link it")
             Menu {
                 ForEach(model.localBranches) { b in
                     Button(b.name) { onLink(b.name) }

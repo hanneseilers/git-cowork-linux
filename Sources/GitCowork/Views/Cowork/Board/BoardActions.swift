@@ -55,58 +55,6 @@ enum BoardActions {
         return true
     }
 
-    /// The local or remote branch the task is linked to, if it exists.
-    static func linkedRef(_ t: CoworkTask, model: RepoModel) -> Ref? {
-        guard let b = t.branch, !b.isEmpty else { return nil }
-        return model.localBranches.first { $0.name == b }
-            ?? model.remoteBranches.first { $0.branchNameWithoutRemote == b && !$0.name.hasSuffix("/HEAD") }
-    }
-
-    /// Where new task branches start: the remote's default branch, else the
-    /// current branch.
-    static func startBase(model: RepoModel) -> String {
-        if let remote = model.defaultRemote, let d = model.defaultBranch(remote: remote),
-           model.remoteBranches.contains(where: { $0.name == "\(remote)/\(d)" }) {
-            return "\(remote)/\(d)"
-        }
-        return model.currentBranch ?? "HEAD"
-    }
-
-    /// "Start Task": checks out the task's branch (an existing local one, else
-    /// tracking the remote one, else a new one from the remote default
-    /// branch), links it, moves the task to In Progress and assigns it to me.
-    static func start(_ id: String, model: RepoModel) {
-        guard let t = model.cowork.task(id) else { return }
-        if let ref = linkedRef(t, model: model) {
-            Task { await model.checkout(ref) }
-            return
-        }
-        let name = (t.branch?.isEmpty == false ? t.branch : nil) ?? BoardLogic.branchName(for: t)
-        let remote = model.defaultRemote
-        let args: [String]
-        if model.localBranches.contains(where: { $0.name == name }) {
-            args = ["switch", name]
-        } else if let remote, model.remoteBranches.contains(where: { $0.name == "\(remote)/\(name)" }) {
-            args = ["switch", "--track", "\(remote)/\(name)"]
-        } else {
-            // --no-track: a new task branch must not push to the base branch.
-            args = ["switch", "-c", name, "--no-track", startBase(model: model)]
-        }
-        Task {
-            guard await model.perform("Start task", args) else { return }
-            let top = model.cowork.tasks.filter { $0.status == .doing }.compactMap(\.rank).min()
-            let me = model.cowork.me.email
-            await model.cowork.updateTask(id) { t in
-                t.branch = name
-                if t.status == .backlog || t.status == .todo {
-                    t.status = .doing
-                    t.rank = (top ?? 0) - 1
-                }
-                if t.assignee == nil, !me.isEmpty { t.assignee = me }
-            }
-        }
-    }
-
     static func confirmDelete(_ id: String, model: RepoModel) {
         guard let t = model.cowork.task(id) else { return }
         let comments = model.cowork.comments(on: t.commentParent).count
@@ -149,11 +97,11 @@ struct BoardCardMenu: View {
         .pickerStyle(.menu)
 
         Divider()
-        if let ref = BoardActions.linkedRef(task, model: model) {
-            Button("Checkout Branch") { BoardActions.start(task.id, model: model) }
+        if let ref = model.linkedBranch(of: task) {
+            Button("Checkout Branch") { model.startTask(task.id) }
                 .disabled(ref.kind == .localBranch && ref.isHead)
         } else {
-            Button("Start Task") { BoardActions.start(task.id, model: model) }
+            Button("Start Task") { model.startTask(task.id) }
         }
         Button("Copy ID") { External.copy(task.id) }
         Divider()

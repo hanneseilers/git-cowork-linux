@@ -1,3 +1,4 @@
+import GitCoworkCore
 import AppKit
 import SwiftUI
 

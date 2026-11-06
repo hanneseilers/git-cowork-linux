@@ -111,24 +111,12 @@ struct Avatar: View {
             .font(.system(size: size * 0.4, weight: .semibold))
             .foregroundStyle(.white)
             .frame(width: size, height: size)
-            .background(Color(nsColor: Theme.lane(abs(email.lowercased().hashValueStable))), in: Circle())
+            .background(Color(nsColor: Theme.personColor(email)), in: Circle())
     }
 
-    var initials: String {
-        let parts = name.split(whereSeparator: { $0 == " " || $0 == "." || $0 == "-" || $0 == "_" })
-        let letters = parts.prefix(2).compactMap(\.first).map { String($0).uppercased() }
-        return letters.isEmpty ? "?" : letters.joined()
-    }
+    var initials: String { name.initials }
 }
 
-extension String {
-    /// Same value on every launch (Swift's hashValue is randomized).
-    var hashValueStable: Int {
-        var h: UInt32 = 2_166_136_261
-        for b in utf8 { h = (h ^ UInt32(b)) &* 16_777_619 }
-        return Int(h % 10_000)
-    }
-}
 
 /// Header for a block inside the inspector: "Staged  3   [Unstage all]"
 struct PanelHeader<Trailing: View>: View {

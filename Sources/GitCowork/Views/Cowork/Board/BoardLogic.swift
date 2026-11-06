@@ -73,26 +73,4 @@ enum BoardLogic {
         return changes
     }
 
-    /// "Cache user sessions!" -> "cache-user-sessions", at most ~40 chars.
-    static func slug(_ title: String) -> String {
-        var out = ""
-        var dash = false
-        for ch in title.lowercased().unicodeScalars {
-            if CharacterSet.alphanumerics.contains(ch) && ch.isASCII {
-                if dash && !out.isEmpty { out.append("-") }
-                out.unicodeScalars.append(ch)
-                dash = false
-            } else {
-                dash = true
-            }
-            if out.count >= 40 { break }
-        }
-        return out
-    }
-
-    /// Branch name for "Start Task": "CW-a3f9-cache-user-sessions".
-    static func branchName(for t: CoworkTask) -> String {
-        let s = slug(t.title)
-        return s.isEmpty ? t.id : "\(t.id)-\(s)"
-    }
 }

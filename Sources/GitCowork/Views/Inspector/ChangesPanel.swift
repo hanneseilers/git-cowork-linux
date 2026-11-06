@@ -138,20 +138,11 @@ private struct BranchReviewBar: View {
     /// to the upstream's ahead count.
     private func countAhead() async {
         guard let branch = model.currentBranch, model.headSHA != nil else { ahead = nil; return }
-        let remote = model.defaultRemote
-        let name = model.defaultBranch(remote: remote)
-            ?? ["main", "master"].first { n in model.localBranches.contains { $0.name == n } }
-        if let name, branch == name { ahead = nil; return }   // nothing to review on the base itself
-        let remoteBase = remote.map { "\($0)/\(name ?? "")" }
-        let base = remoteBase.flatMap { r in model.remoteBranches.contains { $0.name == r } ? r : nil }
-            ?? name.flatMap { n in model.localBranches.contains { $0.name == n } ? n : nil }
-        if let base {
-            let out = await model.git.tryRun(["rev-list", "--count", "\(base)..HEAD"], in: model.root)
+        if let base = model.baseBranch() {
+            if branch == base.name { ahead = nil; return }   // nothing to review on the base itself
+            let n = await model.commitsAhead(of: base.ref)
             guard !Task.isCancelled else { return }
-            if let n = Int(out?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "") {
-                ahead = (n, base)
-                return
-            }
+            if let n { ahead = (n, base.ref); return }
         }
         if let up = model.status.upstream, model.status.ahead > 0 {
             ahead = (model.status.ahead, up)

@@ -1,3 +1,4 @@
+import GitCoworkCore
 import AppKit
 
 enum HunkAction: Hashable {
