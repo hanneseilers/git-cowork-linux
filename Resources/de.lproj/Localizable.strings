@@ -62,7 +62,6 @@
 "Add Worktree…" = "Worktree hinzufügen …";
 "Added" = "Hinzugefügt";
 "added" = "hinzugefügt";
-"All" = "Alle";
 "All Labels" = "Alle Labels";
 "All open" = "Alle offenen";
 "All Reviews…" = "Alle Reviews …";
@@ -211,16 +210,17 @@
 "Editor" = "Editor";
 "Email" = "E-Mail";
 "Enter this code on %@ and approve git-cowork:" = "Gib diesen Code auf %@ ein und erlaube git-cowork den Zugriff:";
+"Everyone" = "Alle";
 "Executable" = "Programm";
 "Fetch All" = "Alle abrufen (Fetch)";
 "Fetch automatically" = "Automatisch abrufen (Fetch)";
 "Fetch, push, commit and other actions show up here with git's output." = "Fetch, Push, Commit und andere Aktionen erscheinen hier mit der Ausgabe von git.";
 "File Name" = "Dateiname";
+"Filter repositories" = "Repositorys filtern";
 "Filter" = "Filter";
 "Filter by label" = "Nach Label filtern";
 "Filter Commits" = "Commits filtern";
 "Filter commits" = "Commits filtern";
-"Filter repositories" = "Repositorys filtern";
 "Filter Sidebar" = "Seitenleiste filtern";
 "Folder" = "Ordner";
 "Folder is missing; prune to clean up" = "Ordner fehlt; zum Aufräumen bereinigen";
@@ -427,6 +427,7 @@
 "Self-hosted servers" = "Eigene Server";
 "Server" = "Server";
 "Server type" = "Server-Typ";
+"Show tasks of one person" = "Aufgaben einer Person zeigen";
 "Show" = "Zeigen";
 "Show %@ on the board" = "%@ auf dem Board zeigen";
 "Show all %lld" = "Alle %lld zeigen";
@@ -435,7 +436,6 @@
 "Show Diff" = "Diff zeigen";
 "Show fewer" = "Weniger zeigen";
 "Show in History" = "Im Verlauf zeigen";
-"Show only tasks assigned to you" = "Nur Aufgaben zeigen, die dir zugewiesen sind";
 "Show or hide the sidebar (⌃⌘S)" = "Seitenleiste ein- oder ausblenden (⌃⌘S)";
 "Show parent %@" = "Eltern-Commit %@ zeigen";
 "Show the review of %@" = "Review von %@ zeigen";
