@@ -40,7 +40,7 @@ struct BoardView: View {
     private func header(_ data: BoardData) -> some View {
         PanelBar {
             Text("Tasks")
-                .font(InspectorStyle.headerFont)
+                .font(Theme.Font.headline)
             CountBadge(count: data.visibleCount)
                 .padding(.trailing, Theme.Space.s)
 
@@ -238,7 +238,8 @@ struct BoardView: View {
             .foregroundStyle(.secondary)
             .help("New task in \(status.label)")
         }
-        // Icon lines up with the card titles below.
+        // Icon lines up with the card titles below. As tall as a PanelBar, but
+        // with its own insets and no hairline: it sits inside the column.
         .padding(.leading, Theme.Space.m + Theme.Metrics.cardPadding)
         .padding(.trailing, Theme.Space.s)
         .frame(height: Theme.Metrics.panelHeaderHeight)

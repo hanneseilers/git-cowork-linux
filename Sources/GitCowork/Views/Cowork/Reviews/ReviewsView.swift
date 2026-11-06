@@ -109,7 +109,7 @@ struct ReviewsView: View {
 
     private var header: some View {
         PanelBar {
-            Text("Reviews").font(InspectorStyle.headerFont)
+            Text("Reviews").font(Theme.Font.headline)
             Spacer(minLength: Theme.Space.m)
             Picker("Filter", selection: filterSelection) {
                 ForEach(Filter.allCases) { f in
@@ -129,7 +129,7 @@ struct ReviewsView: View {
             }
             .buttonStyle(ActionButtonStyle.primary())
             .disabled(model.currentBranch == nil)
-            .help(model.currentBranch.map { "Ask teammates to review \($0)" } ?? "Check out a branch first")
+            .help(model.currentBranch.map { String(localized: "Ask teammates to review \($0)") } ?? L("Check out a branch first"))
         }
     }
 

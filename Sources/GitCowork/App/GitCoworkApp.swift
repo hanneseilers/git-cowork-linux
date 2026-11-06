@@ -32,8 +32,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #if DEBUG
         DebugSnapshot.scheduleIfRequested()
         CoworkSelfTest.runIfRequested()
+        UndoSelfTest.runIfRequested()
         #endif
         LaunchFolders.openFromCommandLine()
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        Credentials.shared.stop()   // no token stays in memory after quitting
     }
 }
 

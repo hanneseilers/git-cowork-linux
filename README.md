@@ -37,6 +37,10 @@ review work without leaving the repo.
 - **Just git.** Every action is a normal git command, visible in the command
   log (⌘J). Your SSH keys, credential helpers, hooks and commit signing work
   exactly as in the terminal.
+- **Always current.** Fetches every open repository in the background every
+  5 minutes while the app is in front, so remote branches and ahead/behind
+  are up to date before you pull. It never asks for a password; turn it off in
+  Settings (⌘,) › Git.
 - **Worktrees first.** Every worktree shows in the sidebar and the graph,
   with live uncommitted counts and ahead/behind.
 - **Tasks and reviews in the repo.** A shared board and review requests,
@@ -102,6 +106,7 @@ also drop a folder onto any window.
 | **Diff** | Hunk or split view, intra-line highlights, stage / unstage / discard single hunks. |
 | **Merge / rebase** | Banner with Continue / Skip / Abort, conflicted files, "use mine / theirs". |
 | **Hosts** | "Create pull/merge request" and "Open on …" for GitHub, GitLab, Gitea and Forgejo, including self-hosted. |
+| **Accounts** | Optional. Sign in to GitHub or GitLab in the browser, or paste an access token (also Gitea / Forgejo), and HTTPS push and pull just work. Settings > Accounts. Tokens stay in the Keychain and only git-cowork uses them. |
 | **Board** | Shared tasks in Backlog / To Do / In Progress / In Review / Done, with assignee, labels, linked branch and comments. "Start Task" creates the branch. |
 | **Reviews** | Review requests for a branch: reviewers, verdicts (approved / changes requested), comments, and the branch's changes. |
 | **Inbox** | Tasks assigned to you, review requests, verdicts, @mentions and replies — also as macOS notifications. |

@@ -187,11 +187,8 @@ private struct TaskPanelContent: View {
                     guard new != savedBody else { return }
                     scheduleBodySave()
                 }
-            if focus == .body, let q = MentionCompletion.pendingQuery(in: bodyText) {
-                let people = MentionCompletion.candidates(q, people: store.people)
-                if !people.isEmpty {
-                    MentionSuggestions(people: people) { bodyText = MentionCompletion.complete(bodyText, with: $0) }
-                }
+            if focus == .body {
+                MentionSuggestions(text: $bodyText, people: store.people)
             }
         }
     }
@@ -246,6 +243,7 @@ private struct TaskBranchRow: View {
     let model: RepoModel
     let task: CoworkTask
     let onLink: (String?) -> Void
+    @Environment(\.windowActions) private var windowActions
 
     var body: some View {
         if let branch = task.branch {
@@ -288,7 +286,12 @@ private struct TaskBranchRow: View {
                         model.centerMode = .history
                         model.reveal(ref.target)
                     }
-                    Button("Create Worktree…") { model.sheet = .addWorktree(base: ref.name) }
+                    if let wt = model.worktree(of: task), wt.path != model.root.path {
+                        Button("Open Worktree") { windowActions?.open(wt.path) }
+                    } else if model.worktree(of: task) == nil {
+                        Button("Open in New Worktree") { model.startTaskInWorktree(task.id) { windowActions?.open($0) } }
+                            .help("Check out \(branch) in its own folder and open it in a new tab")
+                    }
                     Button("Request Review…") { model.sheet = .requestReview(branch: branch) }
                 }
             }
@@ -301,7 +304,12 @@ private struct TaskBranchRow: View {
         HStack(spacing: Theme.Space.s) {
             Button { model.startTask(task.id) } label: { Label("Start Task", systemImage: "play.fill") }
                 .buttonStyle(ActionButtonStyle.primary())
-                .help("Check out \(RefName.branch(for: task)) (created if needed), then link it")
+                .help("Check out \(RefName.branch(for: task)) here (created if needed), then link it")
+            Button { model.startTaskInWorktree(task.id) { windowActions?.open($0) } } label: {
+                Label("In New Worktree", systemImage: "folder.badge.plus")
+            }
+            .buttonStyle(ActionButtonStyle.secondary())
+            .help("Create \(RefName.branch(for: task)) in its own folder and open it in a new tab, e.g. for an agent")
             Menu {
                 ForEach(model.localBranches) { b in
                     Button(b.name) { onLink(b.name) }

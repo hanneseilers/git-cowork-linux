@@ -17,7 +17,7 @@ struct InboxPopover: View {
         let unread = items.filter { !seen.contains($0.id) }.count
         VStack(spacing: 0) {
             PanelBar {
-                Text("Inbox").font(InspectorStyle.headerFont)
+                Text("Inbox").font(Theme.Font.headline)
                 if unread > 0 {
                     Text(verbatim: "\(unread) new")
                         .font(Theme.Font.small.weight(.medium))
@@ -139,7 +139,7 @@ private struct InboxRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
-        .buttonStyle(HoverRowStyle())
+        .buttonStyle(HoverFillStyle.row)
     }
 
     private var symbol: String {

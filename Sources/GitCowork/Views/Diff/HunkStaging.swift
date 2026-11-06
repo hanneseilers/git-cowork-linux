@@ -1,5 +1,27 @@
-import Foundation
+import AppKit
 import GitCoworkCore
+
+/// A button on a hunk bar.
+enum HunkAction: Hashable {
+    case stage, unstage, discard
+
+    /// Same tints as the Stage / Unstage / Discard buttons in the changes panel.
+    var tint: NSColor {
+        switch self {
+        case .stage: .systemGreen
+        case .unstage, .discard: .systemRed
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .stage: L("Stage Hunk")
+        case .unstage: L("Unstage Hunk")
+        case .discard: L("Discard Hunk")
+        }
+    }
+}
+
 
 /// Stages, unstages or discards one hunk by feeding a single-hunk patch,
 /// cut from git's raw output, to `git apply` on stdin.

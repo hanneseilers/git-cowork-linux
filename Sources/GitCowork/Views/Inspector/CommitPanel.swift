@@ -64,7 +64,7 @@ struct CommitPanel: View {
         let refs = model.refsByCommit[d.id] ?? []
         let branches = linkableBranchNames(refs)
         return VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: InspectorStyle.sectionGap) {
+            VStack(alignment: .leading, spacing: Theme.Metrics.sectionGap) {
                 MessageCard(subject: d.subject, text: message.text)
                 AuthorBlock(detail: d, reveal: model.reveal)
                 if !message.coAuthors.isEmpty {
@@ -81,7 +81,7 @@ struct CommitPanel: View {
                 }
                 CoworkLinks(model: model, branches: branches)
             }
-            .padding(InspectorStyle.padding)
+            .padding(Theme.Metrics.panelPadding)
 
             Divider()
             HStack(spacing: Theme.Space.m) {
@@ -93,7 +93,7 @@ struct CommitPanel: View {
                 Spacer(minLength: Theme.Space.s)
                 FileViewControls()
             }
-            .padding(.horizontal, InspectorStyle.padding)
+            .padding(.horizontal, Theme.Metrics.panelPadding)
             .frame(height: InspectorStyle.subheaderHeight)
             Divider()
 
@@ -114,7 +114,7 @@ struct CommitPanel: View {
                         copied = false
                     }
                 } label: {
-                    Text(copied ? "copied" : String(d.id.prefix(7)))
+                    Text(verbatim: copied ? L("copied") : String(d.id.prefix(7)))
                         .font(Theme.Font.mono)
                 }
                 .buttonStyle(.link)
@@ -157,7 +157,7 @@ struct CommitPanel: View {
             }
         }
         .listStyle(.plain)
-        .environment(\.defaultMinListRowHeight, InspectorStyle.rowHeight)
+        .environment(\.defaultMinListRowHeight, Theme.Metrics.rowHeight)
         .contextMenu(forSelectionType: String.self) { ids in
             if let id = ids.first, let f = files.first(where: { $0.id == id }) {
                 let path = model.root.appendingPathComponent(f.path).path
@@ -185,5 +185,28 @@ struct CommitPanel: View {
                 guard let id, let f = files.first(where: { $0.id == id }) else { return }
                 model.openDiff = .commit(d, f)
             })
+    }
+}
+
+/// Accent-tinted strip at the top of the commit panel: "4 file changes in working directory".
+struct WorkingCopyBanner: View {
+    let count: Int
+    let action: () -> Void
+
+    var body: some View {
+        HStack(spacing: Theme.Space.m) {
+            Image(systemName: "pencil.line")
+                .foregroundStyle(InspectorStyle.bannerTint)
+            Text(verbatim: count == 1 ? L("1 file change in working directory") : String(localized: "\(count) file changes in working directory"))
+                .font(Theme.Font.body.weight(.medium))
+                .lineLimit(1)
+            Spacer(minLength: Theme.Space.s)
+            Button("View Changes", action: action)
+                .buttonStyle(ActionButtonStyle.secondary(InspectorStyle.bannerTint))
+        }
+        .padding(.horizontal, Theme.Metrics.panelPadding)
+        .padding(.vertical, Theme.Space.m)
+        .background(InspectorStyle.bannerTint.opacity(Theme.Tint.banner))
+        .overlay(alignment: .bottom) { Divider() }
     }
 }

@@ -83,54 +83,6 @@ struct HistoryTable: NSViewRepresentable {
     }
 }
 
-enum HistoryColumn: String, CaseIterable {
-    case refs, graph, message, author, date, sha
-
-    var title: String {
-        switch self {
-        case .refs: L("Branch / tag")
-        case .graph: L("Graph")
-        case .message: L("Commit message")
-        case .author: L("Author")
-        case .date: L("Date")
-        case .sha: L("SHA")
-        }
-    }
-
-    var width: CGFloat {
-        switch self {
-        case .refs: 180
-        case .graph: 120
-        case .message: 300
-        case .author: 140
-        case .date: 92
-        case .sha: 76
-        }
-    }
-
-    var minWidth: CGFloat {
-        switch self {
-        case .refs: 60
-        case .graph: 40
-        case .message: 160
-        default: 50
-        }
-    }
-
-    /// Columns the user can show or hide from the header menu.
-    static let optional: [HistoryColumn] = [.author, .date, .sha]
-
-    private static let hiddenKey = "history.hiddenColumns"
-
-    static var hiddenColumns: Set<HistoryColumn> {
-        get {
-            guard let names = UserDefaults.standard.stringArray(forKey: hiddenKey) else { return [.author, .sha] }
-            return Set(names.compactMap(HistoryColumn.init(rawValue:)))
-        }
-        set { UserDefaults.standard.set(newValue.map(\.rawValue).sorted(), forKey: hiddenKey) }
-    }
-}
-
 /// Table subclass for Return on the "// WIP" row.
 final class HistoryTableView: NSTableView {
     weak var coordinator: HistoryTableCoordinator?
@@ -160,13 +112,13 @@ final class HistoryTableCoordinator: NSObject, NSTableViewDataSource, NSTableVie
     private(set) var graph: [GraphRow] = []
     private var ancestry: [Bool] = []
     private var commitIndex: [String: Int] = [:]
-    private var refsByCommit: [String: [Ref]] = [:]
+    var refsByCommit: [String: [Ref]] = [:]
     private(set) var headSHA: String?
     /// HEAD is part of the loaded history. When it isn't (an old branch in a
     /// big repo), nothing is dimmed rather than everything.
     private var headLoaded = false
     /// Lanes the widest row needs, including extra WIP lanes.
-    private var maxLanes = 1
+    var maxLanes = 1
 
     private var version = -1
     private var filter = ""
@@ -174,9 +126,9 @@ final class HistoryTableCoordinator: NSObject, NSTableViewDataSource, NSTableVie
     private var worktreeInfoVersion = -1
     private var revealToken = 0
     private var applyingSelection = false
-    private var fittingColumns = false
+    var fittingColumns = false
     /// The user dragged the graph column; stop auto-sizing it.
-    private var graphUserResized = false
+    var graphUserResized = false
     /// rows.count when "load more" was last requested; asks once per history size.
     private var loadMoreRequestedAt = -1
     private var badgeCache: [Int: [GraphBadge]] = [:]
@@ -185,11 +137,12 @@ final class HistoryTableCoordinator: NSObject, NSTableViewDataSource, NSTableVie
     private var wipCountsCache: [WIPCount]?
     lazy var headerMenuDelegate = HistoryHeaderMenu(coordinator: self)
 
-    // Cowork: tasks and reviews linked to branches, rebuilt when the store changes.
-    private var coworkVersion = -1
-    private var tasksByBranch: [String: [CoworkTask]] = [:]
-    private var reviewByBranch: [String: ReviewRequest] = [:]
-    private var coworkCache: [Int: HistoryCoworkInfo] = [:]
+    // Cowork: tasks and reviews linked to branches, rebuilt when the store
+    // changes (HistoryCoworkMarks.swift).
+    var coworkVersion = -1
+    var tasksByBranch: [String: [CoworkTask]] = [:]
+    var reviewByBranch: [String: ReviewRequest] = [:]
+    var coworkCache: [Int: HistoryCoworkInfo] = [:]
 
     var isFiltering: Bool { !filter.isEmpty }
 
@@ -365,7 +318,7 @@ final class HistoryTableCoordinator: NSObject, NSTableViewDataSource, NSTableVie
     /// Same color as the author's Avatar elsewhere in the app.
     func authorColor(_ email: String) -> NSColor {
         if let hit = authorColorCache[email] { return hit }
-        let c = GraphStyle.authorColor(email: email)
+        let c = Theme.personColor(email)
         authorColorCache[email] = c
         return c
     }
@@ -397,144 +350,6 @@ final class HistoryTableCoordinator: NSObject, NSTableViewDataSource, NSTableVie
         case .wip: return false
         case .otherWIP: return true
         case .commit(let i): return headLoaded && i < ancestry.count && !ancestry[i]
-        }
-    }
-
-    // MARK: Cowork
-
-    /// Re-arms itself after each change, so this costs nothing while idle.
-    private func observeCowork() {
-        withObservationTracking {
-            _ = model.cowork.version
-        } onChange: { [weak self] in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                self.refreshCoworkIfNeeded()
-                self.observeCowork()
-            }
-        }
-    }
-
-    private func refreshCoworkIfNeeded() {
-        let v = model.cowork.version
-        guard v != coworkVersion else { return }
-        coworkVersion = v
-        var tasks: [String: [CoworkTask]] = [:]
-        for t in model.cowork.tasks {
-            guard let b = t.branch, !b.isEmpty else { continue }
-            tasks[b, default: []].append(t)
-        }
-        var reviews: [String: ReviewRequest] = [:]
-        for r in model.cowork.reviews where r.status == .open && !r.branch.isEmpty {
-            if let old = reviews[r.branch], old.updated > r.updated { continue }
-            reviews[r.branch] = r
-        }
-        let changed = tasks != tasksByBranch || reviews != reviewByBranch
-        tasksByBranch = tasks
-        reviewByBranch = reviews
-        coworkCache = [:]
-        guard changed, let table else { return }
-        table.enumerateAvailableRowViews { view, _ in (view as? HistoryRowView)?.redrawCells() }
-    }
-
-    /// Tasks and the open review linked to the branches on a commit.
-    func cowork(forCommit i: Int) -> HistoryCoworkInfo {
-        if let hit = coworkCache[i] { return hit }
-        var info = HistoryCoworkInfo()
-        if !tasksByBranch.isEmpty || !reviewByBranch.isEmpty {
-            var seen = Set<String>()
-            for badge in badges(forCommit: i) where badge.kind == .branch {
-                for t in tasksByBranch[badge.name] ?? [] where seen.insert(t.id).inserted {
-                    info.tasks.append(.init(id: t.id, title: t.title, statusTitle: t.status.label, color: NSColor(t.status.color)))
-                }
-                if info.review == nil, let r = reviewByBranch[badge.name] {
-                    let v = r.overall
-                    info.review = .init(branch: r.branch, symbol: v.symbol, title: v.title, color: NSColor(v.color))
-                }
-            }
-        }
-        coworkCache[i] = info
-        return info
-    }
-
-    // MARK: Columns
-
-    private func column(_ c: HistoryColumn) -> NSTableColumn? {
-        table?.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(c.rawValue))
-    }
-
-    /// Fits the graph column to the widest row of the whole loaded history
-    /// (re-run after every reload) until the user resizes it by hand.
-    /// It never pushes the message column below its minimum (lanes past the
-    /// edge are clipped with a fade, and nodes stay pinned inside).
-    private func sizeGraphColumn() {
-        fitMessageColumn()
-    }
-
-    private func autoSizeGraphColumn() {
-        guard !graphUserResized, !graph.isEmpty, let table, let col = column(.graph), let message = column(.message),
-              let clip = table.enclosingScrollView?.contentView, clip.bounds.width > 0 else { return }
-        let lanes = isFiltering ? 1 : maxLanes
-        let wanted = CGFloat(lanes) * GraphStyle.laneWidth + GraphStyle.graphInset * 2
-        let others = table.tableColumns.filter { $0 !== message && $0 !== col && !$0.isHidden }.reduce(0) { $0 + $1.width }
-        let room = clip.bounds.width - others - message.minWidth
-        let target = max(GraphStyle.minGraphWidth, min(wanted, GraphStyle.maxGraphWidth, room))
-        if abs(col.width - target) > 0.5 { col.width = target }
-    }
-
-    /// The message column takes whatever width the other columns leave.
-    @objc func fitMessageColumn() {
-        guard !fittingColumns, let table, let clip = table.enclosingScrollView?.contentView, let message = column(.message) else { return }
-        fittingColumns = true
-        defer { fittingColumns = false }
-        autoSizeGraphColumn()
-        let others = table.tableColumns.filter { $0 !== message && !$0.isHidden }.reduce(0) { $0 + $1.width }
-        let width = max(message.minWidth, clip.bounds.width - others)
-        if abs(message.width - width) > 0.5 { message.width = width }
-    }
-
-    func tableViewColumnDidResize(_ notification: Notification) {
-        guard let table, let column = notification.userInfo?["NSTableColumn"] as? NSTableColumn else { return }
-        // A drag in the header (not our own sizing).
-        let byUser = table.headerView?.resizedColumn == table.column(withIdentifier: column.identifier)
-            && table.headerView?.resizedColumn != -1
-        if !fittingColumns {
-            if column.identifier.rawValue == HistoryColumn.graph.rawValue, byUser {
-                graphUserResized = true
-            }
-            if column.identifier.rawValue == HistoryColumn.message.rawValue {
-                // Dragging the message divider moves width to/from the next visible
-                // column, so nothing ends up past the right edge.
-                if byUser, let old = notification.userInfo?["NSOldWidth"] as? CGFloat,
-                   let next = table.tableColumns.drop(while: { $0 !== column }).dropFirst().first(where: { !$0.isHidden }) {
-                    fittingColumns = true
-                    next.width = max(next.minWidth, next.width - (column.width - old))
-                    fittingColumns = false
-                }
-                DispatchQueue.main.async { self.fitMessageColumn() }
-            } else {
-                fitMessageColumn()
-            }
-        }
-        // Bands start at the node, which moves with the graph column.
-        refreshBands()
-    }
-
-    func setColumn(_ c: HistoryColumn, visible: Bool) {
-        guard let col = column(c) else { return }
-        col.isHidden = !visible
-        var hidden = HistoryColumn.hiddenColumns
-        if visible { hidden.remove(c) } else { hidden.insert(c) }
-        HistoryColumn.hiddenColumns = hidden
-        fitMessageColumn()
-        refreshBands()
-    }
-
-    func isColumnVisible(_ c: HistoryColumn) -> Bool { column(c).map { !$0.isHidden } ?? false }
-
-    private func refreshBands() {
-        table?.enumerateAvailableRowViews { view, row in
-            (view as? HistoryRowView)?.band = self.band(forRow: row)
         }
     }
 
@@ -655,134 +470,4 @@ final class HistoryTableCoordinator: NSObject, NSTableViewDataSource, NSTableVie
         }
         return cell
     }
-
-    // MARK: Context menu
-
-    func menuNeedsUpdate(_ menu: NSMenu) {
-        menu.removeAllItems()
-        guard let table, table.clickedRow >= 0, table.clickedRow < rows.count else { return }
-        let model = self.model
-        let i: Int
-        switch rows[table.clickedRow] {
-        case .wip:
-            let row = table.clickedRow
-            menu.addItem(ActionItem("Write Commit Message") { [weak self] in _ = self?.focusSummaryIfWIP(row: row) })
-            menu.addItem(ActionItem("Stash Changes…") { model.sheet = .stash })
-            return
-        case .otherWIP(let path):
-            menu.addItem(ActionItem("Open in Terminal") { External.openTerminal(path) })
-            menu.addItem(ActionItem("Open in Editor") { External.openEditor(path) })
-            menu.addItem(ActionItem("Reveal in Finder") { External.reveal(path) })
-            menu.addItem(.separator())
-            menu.addItem(ActionItem("Copy Path") { External.copy(path) })
-            return
-        case .commit(let index):
-            guard index < commits.count else { return }
-            i = index
-        }
-        let commit = commits[i]
-        let sha = commit.id
-        let short = commit.shortID
-        let current = model.currentBranch ?? "HEAD"
-        let refs = refsByCommit[sha] ?? []
-
-        // One group per branch badge: a local branch and its remote share items.
-        for badge in badges(forCommit: i) where badge.kind == .branch {
-            let local = refs.first { $0.kind == .localBranch && badge.refNames.contains($0.name) }
-            let remote = refs.first { $0.kind == .remoteBranch && badge.refNames.contains($0.name) }
-            if let local {
-                if !local.isHead {
-                    menu.addItem(ActionItem("Checkout \(local.name)") { Task { await model.checkout(local) } })
-                }
-            } else if let remote {
-                // Remote-only here. If a local branch of that name exists elsewhere,
-                // checking out switches to it, so say where it is.
-                if let other = model.localBranches.first(where: { $0.name == badge.name }) {
-                    if !other.isHead {
-                        let at = String(other.target.prefix(7))
-                        menu.addItem(ActionItem("Checkout \(other.name) (local, at \(at))") { Task { await model.checkout(other) } })
-                    }
-                } else {
-                    menu.addItem(ActionItem("Checkout \(remote.name)") { Task { await model.checkout(remote) } })
-                }
-            }
-            if !(local?.isHead ?? false) {
-                let target = local?.name ?? remote?.name ?? badge.name
-                menu.addItem(ActionItem("Merge \(target) into \(current)") { Task { await model.merge(target) } })
-                menu.addItem(ActionItem("Rebase \(current) onto \(target)") { Task { await model.rebase(onto: target) } })
-            }
-            let branch = badge.name
-            menu.addItem(ActionItem("Request Review of \(branch)…") { model.sheet = .requestReview(branch: branch) })
-            for task in tasksByBranch[branch] ?? [] {
-                let id = task.id
-                menu.addItem(ActionItem("Open Task \(id)") {
-                    model.centerMode = .board
-                    model.coworkSelection = .task(id)
-                })
-            }
-            menu.addItem(.separator())
-        }
-
-        menu.addItem(ActionItem("Checkout \(short) (detached)") { Task { await model.checkoutCommit(sha) } })
-        menu.addItem(ActionItem("Create Branch Here…") { model.sheet = .newBranch(from: sha, label: short) })
-        menu.addItem(ActionItem("Create Tag Here…") { model.sheet = .newTag(sha: sha) })
-        menu.addItem(ActionItem("Create Worktree Here…") { model.sheet = .addWorktree(base: sha) })
-        menu.addItem(.separator())
-        menu.addItem(ActionItem("Cherry-pick into \(current)") { Task { await model.cherryPick(sha) } })
-        menu.addItem(ActionItem("Revert Commit") { Task { await model.revert(sha) } })
-
-        let reset = NSMenuItem(title: String(localized: "Reset \(current) to \(short)"), action: nil, keyEquivalent: "")
-        let sub = NSMenu()
-        sub.addItem(ActionItem("Soft – keep changes staged") { model.reset(to: sha, mode: .soft) })
-        sub.addItem(ActionItem("Mixed – keep changes unstaged") { model.reset(to: sha, mode: .mixed) })
-        sub.addItem(ActionItem("Hard – discard changes…") { model.reset(to: sha, mode: .hard) })
-        reset.submenu = sub
-        menu.addItem(reset)
-
-        menu.addItem(.separator())
-        menu.addItem(ActionItem("Copy SHA") { External.copy(sha) })
-        menu.addItem(ActionItem("Copy Message") { External.copy(commit.subject) })
-        if let links = model.links(for: nil), let url = links.commitURL(sha) {
-            menu.addItem(ActionItem("Open Commit on \(links.host)") { External.browse(url) })
-        }
-    }
-}
-
-/// Header menu: toggles the optional columns.
-@MainActor
-final class HistoryHeaderMenu: NSObject, NSMenuDelegate {
-    private unowned let coordinator: HistoryTableCoordinator
-
-    init(coordinator: HistoryTableCoordinator) {
-        self.coordinator = coordinator
-    }
-
-    func menuNeedsUpdate(_ menu: NSMenu) {
-        menu.removeAllItems()
-        let title = NSMenuItem(title: L("Columns"), action: nil, keyEquivalent: "")
-        title.isEnabled = false
-        menu.addItem(title)
-        for c in HistoryColumn.optional {
-            let visible = coordinator.isColumnVisible(c)
-            let item = ActionItem("\(c.title)") { [coordinator] in coordinator.setColumn(c, visible: !visible) }
-            item.state = visible ? .on : .off
-            menu.addItem(item)
-        }
-    }
-}
-
-/// NSMenuItem that runs a closure.
-final class ActionItem: NSMenuItem {
-    private let handler: () -> Void
-
-    init(_ title: String.LocalizationValue, handler: @escaping () -> Void) {
-        self.handler = handler
-        super.init(title: String(localized: title), action: #selector(fire), keyEquivalent: "")
-        target = self
-    }
-
-    @available(*, unavailable)
-    required init(coder: NSCoder) { fatalError() }
-
-    @objc private func fire() { handler() }
 }

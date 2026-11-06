@@ -3,6 +3,11 @@
 git-cowork runs `git` with your SSH keys and credential helpers, so security
 problems matter. Thanks for reporting them responsibly.
 
+If you sign in under Settings > Accounts, the token is stored in your login
+Keychain. While git-cowork runs, it's handed to git through git's own
+`credential-cache` daemon on a socket in a folder only you can read, and only
+for the hosts you signed in to. Quitting the app stops the daemon.
+
 ## Supported versions
 
 Fixes go into the newest release and `main`. Please update with

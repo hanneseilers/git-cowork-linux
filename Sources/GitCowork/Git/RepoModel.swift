@@ -143,6 +143,9 @@ final class RepoModel {
     var sheet: SheetKind?
     var openDiff: DiffTarget?
     var showCommandLog = false
+    /// The last git action Edit > Undo can take back (one level). Set by the
+    /// actions in RepoActions, cleared by most other commands (see RepoUndo).
+    var lastUndo: UndoRecord?
     /// History graph, task board or review list in the middle.
     var centerMode: CenterMode = .history
     /// Task or review shown in the right panel while on Board / Reviews.
@@ -178,7 +181,6 @@ final class RepoModel {
     var localBranches: [Ref] { refs.filter { $0.kind == .localBranch } }
     var remoteBranches: [Ref] { refs.filter { $0.kind == .remoteBranch } }
     var tags: [Ref] { refs.filter { $0.kind == .tag } }
-    var currentRef: Ref? { refs.first { $0.kind == .localBranch && $0.isHead } }
 
     // MARK: Loading
 
@@ -209,6 +211,7 @@ final class RepoModel {
         await cowork.load()
         guard !isStopped else { return }
         startCoworkSync()
+        startAutoFetch()
     }
 
     /// Called when the window closes: stops file watching, timers and observers.
@@ -219,6 +222,8 @@ final class RepoModel {
         watcher = nil
         coworkTimer?.cancel()
         coworkTimer = nil
+        fetchTimer?.cancel()
+        fetchTimer = nil
         debounce?.cancel()
         debounce = nil
         if let activationObserver { NotificationCenter.default.removeObserver(activationObserver) }
@@ -273,6 +278,92 @@ final class RepoModel {
             ?? (names.contains("origin") ? "origin" : names[0])
         UserDefaults.standard.set(pick, forKey: key)
         return pick
+    }
+
+    // MARK: Background fetch
+
+    /// Set while the background fetch runs. User actions wait for it briefly
+    /// so two fetches don't fight over the same ref locks.
+    private(set) var autoFetching = false
+    /// Why background fetching stopped (a sign-in problem), with git's message.
+    /// Cleared by the next fetch, pull or push that works.
+    private(set) var autoFetchPaused: String?
+    /// Signed-in accounts when the pause started. Signing in under Settings ›
+    /// Accounts changes them and ends the pause.
+    private var accountsAtPause: [HostAccount] = []
+    private var fetchTimer: Task<Void, Never>?
+    private let openedAt = Date()
+
+    /// Last fetch per repository (keyed by the shared .git folder), so two
+    /// windows on worktrees of the same repo don't both fetch.
+    private static var lastFetchByRepo: [String: Date] = [:]
+    private var fetchKey: String { commonDir?.path ?? root.path }
+
+    /// Last fetch from anywhere: this app, or the terminal (FETCH_HEAD's date).
+    private var lastFetch: Date? {
+        let fetchHead = gitDir.flatMap {
+            try? FileManager.default.attributesOfItem(atPath: $0.appendingPathComponent("FETCH_HEAD").path)[.modificationDate] as? Date
+        }
+        return [Self.lastFetchByRepo[fetchKey], fetchHead].compactMap { $0 }.max()
+    }
+
+    /// Records a fetch (or pull/push) the user ran, so the timer starts over
+    /// and a sign-in pause ends once it worked.
+    func noteRemoteAction(fetched: Bool, succeeded: Bool) {
+        if fetched { Self.lastFetchByRepo[fetchKey] = Date() }
+        if succeeded { autoFetchPaused = nil }
+    }
+
+    /// `git fetch --all --prune` shortly after the window opens, then every
+    /// 5 minutes while the app is in front. Wakes on the same 30 s tick as the
+    /// task sync and does nothing in the background.
+    private func startAutoFetch() {
+        fetchTimer?.cancel()
+        fetchTimer = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(AutoFetch.firstDelay))
+            while !Task.isCancelled {
+                guard let self else { return }
+                if self.autoFetchPaused != nil, AccountStore.shared.accounts != self.accountsAtPause {
+                    self.autoFetchPaused = nil
+                }
+                let conditions = AutoFetch.Conditions(
+                    enabled: Prefs.autoFetch, appActive: NSApp.isActive, hasRemotes: !self.remotes.isEmpty,
+                    actionRunning: self.busy != nil || self.autoFetching, pausedForSignIn: self.autoFetchPaused != nil,
+                    openedAt: self.openedAt, lastFetch: self.lastFetch)
+                if AutoFetch.isDue(conditions, now: Date()) { await self.autoFetch() }
+                try? await Task.sleep(for: .seconds(AutoFetch.tick))
+            }
+        }
+    }
+
+    private func autoFetch() async {
+        autoFetching = true
+        defer { autoFetching = false }
+        Self.lastFetchByRepo[fetchKey] = Date()
+        // Never ask for credentials: no terminal prompt (GitRunner sets it for
+        // every command, repeated here because it matters most), no Git
+        // Credential Manager window, no ssh-askpass dialog.
+        let quiet = ["GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never", "SSH_ASKPASS_REQUIRE": "never"]
+        do {
+            try await git.run(["fetch", "--all", "--prune"], in: root, logged: true, env: quiet)
+            guard !isStopped else { return }
+            await refresh()
+        } catch let error as GitError {
+            if AutoFetch.classify(error.result.stderr) == .signIn {
+                autoFetchPaused = error.localizedDescription
+                accountsAtPause = AccountStore.shared.accounts
+            }
+            // Offline and other errors stay in the command log; the next tick retries.
+        } catch {}
+    }
+
+    /// Waits up to 15 s for a running background fetch, then goes ahead anyway.
+    func waitForAutoFetch() async {
+        var waited = 0
+        while autoFetching && waited < 150 {
+            try? await Task.sleep(for: .milliseconds(100))
+            waited += 1
+        }
     }
 
     func syncCowork() async {

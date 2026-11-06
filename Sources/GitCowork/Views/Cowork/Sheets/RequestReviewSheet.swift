@@ -36,7 +36,7 @@ struct RequestReviewSheet: View {
         return names.filter { $0 != branch }.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
     }
 
-    private var candidates: [TeamMember] { store.people.filter { $0.id != store.me.id } }
+    private var candidates: [TeamMember] { store.others }
 
     private var openTasks: [CoworkTask] {
         store.tasks.filter { $0.status != .done || $0.id == taskID }
@@ -48,9 +48,10 @@ struct RequestReviewSheet: View {
         let local = model.localBranches.first { $0.name == branch }
         let onRemote = local?.upstream != nil
             || model.remoteBranches.contains { $0.branchNameWithoutRemote == branch }
-        if !onRemote { return "\(branch) isn't on the remote yet. Push it so reviewers can fetch it." }
+        if !onRemote { return String(localized: "\(branch) isn't on the remote yet. Push it so reviewers can fetch it.") }
         if let local, local.ahead > 0 {
-            return "\(local.ahead) commit\(local.ahead == 1 ? "" : "s") on \(branch) not pushed yet."
+            return local.ahead == 1 ? String(localized: "1 commit on \(branch) not pushed yet.")
+                                    : String(localized: "\(local.ahead) commits on \(branch) not pushed yet.")
         }
         return nil
     }

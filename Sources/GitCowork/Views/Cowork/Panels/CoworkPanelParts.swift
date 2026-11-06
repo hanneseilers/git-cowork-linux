@@ -92,8 +92,6 @@ extension TeamMember {
     var mentionHandle: String {
         handle.isEmpty ? String(email.split(separator: "@").first ?? "") : handle
     }
-
-    var displayName: String { name.isEmpty ? email : name }
 }
 
 /// Short display name for an email: team name, else commit author name, else local part.

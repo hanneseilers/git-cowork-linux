@@ -19,6 +19,8 @@ KEEP = {"git-cowork", "OK", "Git", "SHA", "Commit", "Cowork", "repo", "detached"
         "Filter (⌥⌘F)", "Commit (⌘↩)", "Review: %@", "99+",
         "Terminal, iTerm, Ghostty, Warp…", "Visual Studio Code, Cursor, Zed…"}
 # Commit messages on refs/cowork/main stay English for everyone.
+COMMIT_MESSAGES = {"Update team", "Merge cowork changes"}
+# Files whose literals are cowork commit messages.
 SKIP_FILES = ("/Debug/", "CoworkStore.swift")
 
 
@@ -45,7 +47,7 @@ def code_keys():
         found = [m.group(1) for m in re.finditer(r'\bL\("((?:[^"\\]|\\.)*)"\)', src)]
         found += [m.group(1) for m in re.finditer(r'\bSectionHeader\("((?:[^"\\]|\\.)*)"', src)]
         found += [m.group(2) for m in re.finditer(
-            r'\b(title|label|caption|text|help|message|subtitle|confirmTitle|placeholder)(?::|\s*=)\s*"((?:[^"\\]|\\.)*)"', src)]
+            r'\b(title|label|caption|text|help|message|subtitle|confirmTitle|placeholder|discard|stage)(?::|\s*=)\s*"((?:[^"\\]|\\.)*)"', src)]
         for k in found:
             if "\\(" not in k:
                 keys.setdefault(unescape(k), os.path.basename(path))
@@ -70,10 +72,11 @@ def placeholders(s):
 
 keys = code_keys()
 tr = translations(LANG)
-# Status names come from GitCoworkCore and are looked up with L(title).
-extra = {"Backlog", "To Do", "In Progress", "In Review", "Done"}
+# Task status names and undo titles come from GitCoworkCore and are looked up with L(title).
+extra = {"Backlog", "To Do", "In Progress", "In Review", "Done",
+         "Undo Commit", "Undo Amend", "Undo Reset", "Undo Checkout", "Undo Delete Branch"}
 missing = sorted(k for k in set(keys) | extra
-                 if k not in tr and k not in KEEP and not SAME.match(k))
+                 if k not in tr and k not in KEEP and k not in COMMIT_MESSAGES and not SAME.match(k))
 bad = sorted(k for k, v in tr.items() if placeholders(k) != placeholders(v))
 unused = sorted(set(tr) - set(keys) - extra)
 

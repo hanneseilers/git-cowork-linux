@@ -80,7 +80,7 @@ struct ChangesPanel: View {
             return Text("No changes")
         }
         let n = st.changeCount
-        let count = Text(verbatim: "\(n) file change\(n == 1 ? "" : "s") on ")
+        let count = Text(verbatim: n == 1 ? L("1 file change on ") : String(localized: "\(n) file changes on "))
         if let branch = st.branch { return count + Text(branch).foregroundColor(.accentColor) }
         return count + Text("detached HEAD").foregroundColor(.secondary)
     }
@@ -103,12 +103,13 @@ private struct BranchReviewBar: View {
                               help: String(localized: "Show the review of \(review.branch)")) {
                     VerdictChip(verdict: review.overall)
                 } action: { model.showReview(review.id) }
-                .padding(.horizontal, InspectorStyle.padding)
+                .padding(.horizontal, Theme.Metrics.panelPadding)
                 .padding(.vertical, Theme.Space.s)
             } else if let branch, let ahead, ahead.count > 0 {
                 Divider()
                 HStack(spacing: Theme.Space.m) {
-                    Text(verbatim: "\(ahead.count) commit\(ahead.count == 1 ? "" : "s") ahead of \(ahead.base)")
+                    Text(verbatim: ahead.count == 1 ? String(localized: "1 commit ahead of \(ahead.base)")
+                                              : String(localized: "\(ahead.count) commits ahead of \(ahead.base)"))
                         .font(Theme.Font.small)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -120,7 +121,7 @@ private struct BranchReviewBar: View {
                         .fixedSize()
                         .help("Ask teammates to review \(branch)")
                 }
-                .padding(.horizontal, InspectorStyle.padding)
+                .padding(.horizontal, Theme.Metrics.panelPadding)
                 .frame(height: Theme.Metrics.rowHeight + Theme.Space.m)
             }
         }
@@ -195,7 +196,7 @@ private struct FileLists: View {
             }
         }
         .listStyle(.plain)
-        .environment(\.defaultMinListRowHeight, InspectorStyle.rowHeight)
+        .environment(\.defaultMinListRowHeight, Theme.Metrics.rowHeight)
         .contextMenu(forSelectionType: String.self) { ids in
             menu(for: changes(ids))
         } primaryAction: { ids in
@@ -224,12 +225,12 @@ private struct FileLists: View {
         HStack(spacing: Theme.Space.s) {
             Button {
                 model.discard(unstaged)
-            } label: { Label(discard, systemImage: "trash") }
+            } label: { Label(LocalizedStringKey(discard), systemImage: "trash") }
             .buttonStyle(ActionButtonStyle.secondary(Theme.Status.deleted))
             .help("Discard all unstaged changes and delete untracked files")
             Button {
                 Task { await model.stageAll() }
-            } label: { Label(stage, systemImage: "plus") }
+            } label: { Label(LocalizedStringKey(stage), systemImage: "plus") }
             .buttonStyle(ActionButtonStyle.secondary(Theme.Status.added))
             .help("Stage all changes")
         }
@@ -364,7 +365,7 @@ private struct OperationBanner: View {
         }
         .padding(Theme.Metrics.cardPadding)
         .background(Theme.Status.warning.opacity(Theme.Tint.banner), in: RoundedRectangle(cornerRadius: Theme.Radius.card))
-        .padding(.horizontal, InspectorStyle.padding)
-        .padding(.top, InspectorStyle.padding)
+        .padding(.horizontal, Theme.Metrics.panelPadding)
+        .padding(.top, Theme.Metrics.panelPadding)
     }
 }

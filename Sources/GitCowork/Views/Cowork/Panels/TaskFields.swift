@@ -11,10 +11,8 @@ struct StatusMenu: View {
     var body: some View {
         Menu {
             ForEach(TaskStatus.allCases, id: \.self) { s in
-                Button { onChange(s) } label: {
-                    Label { Text(s.label) } icon: { menuSymbol(s.symbol, s.color) }
-                }
-                .disabled(s == status)
+                Button { onChange(s) } label: { s.menuLabel }
+                    .disabled(s == status)
             }
         } label: {
             HStack(spacing: Theme.Space.xs) {
@@ -41,25 +39,9 @@ struct AssigneeMenu: View {
 
     var body: some View {
         Menu {
-            Button { onChange(nil) } label: {
-                Label("Unassigned", systemImage: "person.crop.circle.badge.questionmark")
-            }
-            .disabled(assignee == nil)
-            if !store.me.email.isEmpty {
-                Button { onChange(store.me.email) } label: {
-                    Label { Text("Me (\(store.me.displayName))") } icon: { menuPersonIcon(store.me) }
-                }
-                .disabled(assignee?.lowercased() == store.me.id)
-            }
-            let others = store.people.filter { $0.id != store.me.id }
-            if !others.isEmpty {
-                Divider()
-                ForEach(others) { p in
-                    Button { onChange(p.email) } label: {
-                        Label { Text(p.displayName) } icon: { menuPersonIcon(p) }
-                    }
-                    .disabled(assignee?.lowercased() == p.id)
-                }
+            AssigneeOptions(store: store) { email, title, icon in
+                Button { onChange(email) } label: { Label { Text(title) } icon: { icon } }
+                    .disabled(assignee?.lowercased() == email?.lowercased())
             }
         } label: {
             HStack(spacing: Theme.Space.s + 2) {
@@ -177,14 +159,5 @@ struct LabelEditor: View {
             added.append(known.first { $0.lowercased() == n.lowercased() } ?? n)
         }
         if !added.isEmpty { onAdd(added) }
-    }
-}
-
-extension CoworkStore {
-    /// Every label used on any task, most used first.
-    var allLabels: [String] {
-        var counts: [String: Int] = [:]
-        for t in tasks { for l in t.labels { counts[l, default: 0] += 1 } }
-        return counts.keys.sorted { (counts[$0]!, $1) > (counts[$1]!, $0) }
     }
 }

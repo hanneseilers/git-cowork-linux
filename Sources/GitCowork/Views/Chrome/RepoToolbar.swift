@@ -22,13 +22,13 @@ struct RepoToolbar: ToolbarContent {
                         .frame(height: ChromeStyle.iconHeight)
                         .padding(.vertical, Theme.Space.xs)
                 }
-                .buttonStyle(ChromeButtonStyle())
+                .buttonStyle(HoverFillStyle.chrome())
                 .help("Show or hide the sidebar (⌃⌘S)")
                 .keyboardShortcut("s", modifiers: [.command, .control])
                 .padding(.trailing, Theme.Space.m)
                 RepositoryPicker(model: model, openHere: openHere, openInNewTab: openInNewTab)
                 Image(systemName: "chevron.right")
-                    .font(ChromeStyle.pickerChevron)
+                    .font(Theme.Glyph.dropdown)
                     .foregroundStyle(.tertiary)
                 BranchPicker(model: model, openHere: openHere)
                 CenterModeSwitch(model: model)
@@ -68,7 +68,7 @@ private struct InboxButton: View {
                 }
                 .padding(.vertical, Theme.Space.xs)
         }
-        .buttonStyle(ChromeButtonStyle())
+        .buttonStyle(HoverFillStyle.chrome())
         .help(unread > 0 ? "Inbox: \(unread) new" : "Inbox")
         .popover(isPresented: $shown, arrowEdge: .bottom) {
             InboxPopover(model: model)
@@ -132,13 +132,21 @@ private struct ActionButtons: View {
     private var busy: Bool { model.busy != nil }
 
     private var pullHelp: String {
-        guard let up = model.status.upstream else { return "Pull (no upstream set)" }
-        return model.status.behind > 0 ? "Pull \(model.status.behind) commit(s) from \(up)" : "Pull from \(up)"
+        guard let up = model.status.upstream else { return L("Pull (no upstream set)") }
+        switch model.status.behind {
+        case 0: return String(localized: "Pull from \(up)")
+        case 1: return String(localized: "Pull 1 commit from \(up)")
+        case let n: return String(localized: "Pull \(n) commits from \(up)")
+        }
     }
 
     private var pushHelp: String {
-        guard let up = model.status.upstream else { return "Push and set upstream" }
-        return model.status.ahead > 0 ? "Push \(model.status.ahead) commit(s) to \(up)" : "Push to \(up)"
+        guard let up = model.status.upstream else { return L("Push and set upstream") }
+        switch model.status.ahead {
+        case 0: return String(localized: "Push to \(up)")
+        case 1: return String(localized: "Push 1 commit to \(up)")
+        case let n: return String(localized: "Push \(n) commits to \(up)")
+        }
     }
 }
 

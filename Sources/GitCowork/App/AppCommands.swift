@@ -11,6 +11,11 @@ struct AppCommands: Commands {
     /// can't overlap it (same rule as the toolbar buttons).
     private var idle: Bool { model != nil && model?.busy == nil }
 
+    private var textFocus: TextFocus { TextFocus.shared }
+
+    /// "Undo Commit" etc. when the focused repo's last git action can be taken back.
+    private var gitUndoTitle: String? { idle ? model?.undoTitle : nil }
+
     var body: some Commands {
         CommandGroup(after: .newItem) {
             Button("New Tab") { WindowChrome.newTab() }
@@ -30,6 +35,23 @@ struct AppCommands: Commands {
                 }
             }
             .keyboardShortcut("o", modifiers: [.command, .shift])
+        }
+
+        // While text is being edited, Undo / Redo act on the text as usual;
+        // otherwise Undo takes back the last git action.
+        CommandGroup(replacing: .undoRedo) {
+            Button(textFocus.isEditing ? L("Undo") : gitUndoTitle ?? L("Undo")) {
+                if TextFocus.editingTextView() != nil {
+                    TextFocus.undoText()
+                } else if gitUndoTitle != nil {
+                    run { await $0.undoLastAction() }
+                }
+            }
+            .keyboardShortcut("z")
+            .disabled(!textFocus.isEditing && gitUndoTitle == nil)
+            Button("Redo") { TextFocus.redoText() }
+                .keyboardShortcut("z", modifiers: [.command, .shift])
+                .disabled(!textFocus.isEditing)
         }
 
         // Ahead of Edit > Find so ⌘F filters commits in a repo window.
@@ -89,7 +111,7 @@ struct AppCommands: Commands {
             }
             .keyboardShortcut("t", modifiers: [.command, .shift])
             .disabled(model == nil)
-            Button(model?.currentBranch.map { "Request Review of \($0)…" } ?? "Request Review…") {
+            Button(model?.currentBranch.map { String(localized: "Request Review of \($0)…") } ?? L("Request Review…")) {
                 guard let m = model, let branch = m.currentBranch else { return }
                 m.sheet = .requestReview(branch: branch)
             }

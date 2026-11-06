@@ -1,12 +1,12 @@
 import GitCoworkCore
 import SwiftUI
 
-// Rows of the sidebar list. Each is a single line of SidebarStyle.rowHeight.
+// Rows of the sidebar list. Each is a single line of Theme.Metrics.rowHeight.
 
 /// Indentation, disclosure chevron slot and icon shared by every row.
 struct SidebarRowLayout<Leading: View, Content: View>: View {
     var depth = 0
-    var height = SidebarStyle.rowHeight
+    var height = Theme.Metrics.rowHeight
     @ViewBuilder var leading: Leading
     @ViewBuilder var content: Content
 
@@ -16,7 +16,7 @@ struct SidebarRowLayout<Leading: View, Content: View>: View {
             ZStack { leading }.frame(width: SidebarStyle.chevronWidth, height: height)
             content
         }
-        .font(SidebarStyle.rowFont)
+        .font(Theme.Font.body)
         .lineLimit(1)
         .frame(maxWidth: .infinity, minHeight: height, maxHeight: height, alignment: .leading)
         .contentShape(Rectangle())
@@ -24,7 +24,7 @@ struct SidebarRowLayout<Leading: View, Content: View>: View {
 }
 
 extension SidebarRowLayout where Leading == EmptyView {
-    init(depth: Int = 0, height: CGFloat = SidebarStyle.rowHeight, @ViewBuilder content: () -> Content) {
+    init(depth: Int = 0, height: CGFloat = Theme.Metrics.rowHeight, @ViewBuilder content: () -> Content) {
         self.init(depth: depth, height: height, leading: { EmptyView() }, content: content)
     }
 }
@@ -37,7 +37,7 @@ struct SidebarIcon: View {
         Image(systemName: symbol)
             .font(.system(size: SidebarStyle.iconSize))
             .foregroundStyle(color)
-            .frame(width: SidebarStyle.iconWidth)
+            .frame(width: Theme.Metrics.iconWidth)
     }
 }
 
@@ -82,12 +82,12 @@ struct SidebarSectionHeader<Trailing: View>: View {
     @ViewBuilder var trailing: Trailing
 
     var body: some View {
-        SidebarRowLayout(height: SidebarStyle.headerHeight) {
+        SidebarRowLayout(height: Theme.Metrics.rowHeight) {
             if let expanded { DisclosureChevron(expanded: expanded) }
         } content: {
             SidebarIcon(symbol: section.symbol)
             Text(section.title)
-                .font(SidebarStyle.headerFont)
+                .font(Theme.Font.caption)
                 .foregroundStyle(.secondary)
             Spacer(minLength: Theme.Space.s)
             SidebarTrailing {
@@ -119,7 +119,7 @@ struct SidebarHeaderButton: View {
         Button(action: action) {
             Image(systemName: "plus")
                 .font(.system(size: SidebarStyle.iconSize, weight: .medium))
-                .frame(width: SidebarStyle.iconWidth, height: SidebarStyle.iconWidth)
+                .frame(width: Theme.Metrics.iconWidth, height: Theme.Metrics.iconWidth)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.borderless)
@@ -244,7 +244,7 @@ struct SidebarWorktreeRow: View {
             Image(systemName: "folder").font(.system(size: SidebarStyle.iconSize - 1))
             Text(folder)
         }
-        .font(SidebarStyle.detailFont)
+        .font(Theme.Font.small)
         .foregroundStyle(.secondary)
     }
 
@@ -343,20 +343,20 @@ struct SidebarPersonRow: View {
 
     var body: some View {
         SidebarRowLayout {
-            Avatar(name: person.name.isEmpty ? person.email : person.name, email: person.email,
+            Avatar(name: person.displayName, email: person.email,
                    size: SidebarStyle.avatarSize)
-                .frame(width: SidebarStyle.iconWidth)
-            Text(person.name.isEmpty ? person.email : person.name)
+                .frame(width: Theme.Metrics.iconWidth)
+            Text(person.displayName)
             if !person.handle.isEmpty {
                 Text(verbatim: "@" + person.handle)
-                    .font(SidebarStyle.detailFont)
+                    .font(Theme.Font.small)
                     .foregroundStyle(.secondary)
                     .truncationMode(.tail)
             }
             Spacer(minLength: Theme.Space.s)
             if isMe {
                 Text("you")
-                    .font(SidebarStyle.detailFont)
+                    .font(Theme.Font.small)
                     .foregroundStyle(.tertiary)
                     .fixedSize()
             }
@@ -386,9 +386,9 @@ struct SidebarNoteRow: View {
 
     var body: some View {
         SidebarRowLayout {
-            Color.clear.frame(width: SidebarStyle.iconWidth)
+            Color.clear.frame(width: Theme.Metrics.iconWidth)
             Text(ui: text)
-                .font(SidebarStyle.detailFont)
+                .font(Theme.Font.small)
                 .foregroundStyle(.tertiary)
             Spacer(minLength: 0)
         }
@@ -412,7 +412,7 @@ struct SidebarFilterField: View {
                 .focused(focus)
                 .onExitCommand { text = "" }
             Text(text.isEmpty ? "Viewing \(count)" : count == 1 ? "1 match" : "\(count) matches")
-                .font(SidebarStyle.detailFont.monospacedDigit())
+                .font(Theme.Font.small.monospacedDigit())
                 .foregroundStyle(.tertiary)
                 .fixedSize()
             if !text.isEmpty {
