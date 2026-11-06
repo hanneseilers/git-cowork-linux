@@ -71,7 +71,7 @@ enum DebugSnapshot {
                 // Same as choosing File > Clone Repository… (⇧⌘O).
                 for item in NSApp.mainMenu?.items ?? [] {
                     guard let menu = item.submenu,
-                          let i = menu.items.firstIndex(where: { $0.title.hasPrefix("Clone Repository") }) else { continue }
+                          let i = menu.items.firstIndex(where: { $0.title == L("Clone Repository…") }) else { continue }
                     menu.performActionForItem(at: i)
                     return
                 }
