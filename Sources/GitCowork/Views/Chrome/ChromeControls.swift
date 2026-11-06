@@ -8,6 +8,8 @@ enum ChromeStyle {
     static let icon = Font.system(size: 15)
     static let label = Font.system(size: 10)
     static let badge = Font.system(size: 9, weight: .semibold).monospacedDigit()
+    /// Badge position on a toolbar icon: over its top-right corner, never above the icon.
+    static let badgeOffset = CGSize(width: 8, height: -2)
     static let menuChevron = Theme.Glyph.dropdown
 
     static let iconHeight: CGFloat = 18
@@ -77,7 +79,7 @@ struct ChromeButtonLabel: View {
                 .font(ChromeStyle.icon)
                 .frame(height: ChromeStyle.iconHeight)
                 .overlay(alignment: .topTrailing) {
-                    if badge > 0 { CountPill(count: badge).offset(x: 10, y: -4) }
+                    if badge > 0 { CountPill(count: badge).offset(x: ChromeStyle.badgeOffset.width, y: ChromeStyle.badgeOffset.height) }
                 }
             Text(title)
                 .font(ChromeStyle.label)

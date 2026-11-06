@@ -196,7 +196,9 @@ final class RepoModel {
         await refresh()
         isLoaded = true
         selection = status.isClean ? commits.first.map { .commit($0.id) } : .workingCopy
-        NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+        // The window may have closed while loading; don't start anything then.
+        guard !isStopped else { return }
+        activationObserver = NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor in
                 await self?.refresh()
                 if let self, Prefs.coworkAutoSync, (self.cowork.lastSync.map { Date().timeIntervalSince($0) > 30 } ?? true) { await self.syncCowork() }
@@ -205,30 +207,47 @@ final class RepoModel {
         cowork.remote = await resolveCoworkRemote()
         updateKnownAuthors()
         await cowork.load()
+        guard !isStopped else { return }
         startCoworkSync()
     }
 
+    /// Called when the window closes: stops file watching, timers and observers.
+    /// A cowork push already scheduled still finishes, so no edit stays local.
     func stopWatching() {
+        isStopped = true
         watcher?.stop()
         watcher = nil
         coworkTimer?.cancel()
         coworkTimer = nil
+        debounce?.cancel()
+        debounce = nil
+        if let activationObserver { NotificationCenter.default.removeObserver(activationObserver) }
+        activationObserver = nil
     }
+
+    private var isStopped = false
+    private var activationObserver: NSObjectProtocol?
 
     // MARK: Cowork
 
     private var coworkTimer: Task<Void, Never>?
 
-    /// Syncs tasks/reviews now, then every minute while the app is in front.
-    /// One tiny fetch of a single ref; nothing runs while the app is in the background.
+    /// Syncs tasks/reviews now, then every minute while the app is in front and
+    /// every 3 minutes in the background, so teammates' mentions and review
+    /// requests still arrive as notifications. Each sync is one small fetch of a
+    /// single ref.
     private func startCoworkSync() {
         coworkTimer?.cancel()
         coworkTimer = Task { [weak self] in
             await self?.syncCowork()
+            var lastSync = Date()
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(60))
+                try? await Task.sleep(for: .seconds(30))
                 guard let self, !Task.isCancelled else { return }
-                if NSApp.isActive, Prefs.coworkAutoSync { await self.syncCowork() }
+                let interval: TimeInterval = NSApp.isActive ? 60 : 180
+                guard Prefs.coworkAutoSync, Date().timeIntervalSince(lastSync) >= interval else { continue }
+                lastSync = Date()
+                await self.syncCowork()
             }
         }
     }

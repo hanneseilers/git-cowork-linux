@@ -64,7 +64,7 @@ private struct InboxButton: View {
                 .font(ChromeStyle.icon)
                 .frame(width: ChromeStyle.iconHeight + Theme.Space.s, height: ChromeStyle.iconHeight)
                 .overlay(alignment: .topTrailing) {
-                    if unread > 0 { CountPill(count: unread).offset(x: 8, y: -5) }
+                    if unread > 0 { CountPill(count: unread).offset(x: ChromeStyle.badgeOffset.width, y: ChromeStyle.badgeOffset.height) }
                 }
                 .padding(.vertical, Theme.Space.xs)
         }

@@ -43,6 +43,9 @@ Bump PATCH for fixes, MINOR for new features, MAJOR for breaking changes
 
 ## Debug aids
 
+These exist in debug builds only (`swift build`, `make run`); release builds
+from `make app` / `make install` don't contain them.
+
 Render the window to a PNG without screen-recording permission:
 
 ```bash
@@ -59,6 +62,9 @@ End-to-end cowork sync test against a local bare remote with two clones:
 ```bash
 GITCOWORK_SELFTEST=/tmp/empty-dir .build/debug/GitCowork
 ```
+
+The folder must be empty or one a previous self-test created; anything else
+is refused, never deleted. Add `GITCOWORK_SELFTEST_SEED=1` for extra demo tasks.
 
 You can pass several folders to `.build/debug/GitCowork a b c` to get one
 tab each.

@@ -6,7 +6,13 @@ cd "$(dirname "$0")/.."
 
 APP="dist/git-cowork.app"
 echo "→ Building release binary"
-swift build -c release --arch arm64 2>&1 | grep -vE '^\[[0-9]+/[0-9]+\]' || true
+# Fail on a failed build; only the progress lines are hidden.
+if ! LOG="$(swift build -c release --arch arm64 2>&1)"; then
+  echo "$LOG"
+  echo "Build failed"
+  exit 1
+fi
+echo "$LOG" | grep -vE '^\[[0-9]+/[0-9]+\]' || true
 BIN="$(swift build -c release --arch arm64 --show-bin-path)/GitCowork"
 [ -x "$BIN" ] || { echo "Build failed"; exit 1; }
 

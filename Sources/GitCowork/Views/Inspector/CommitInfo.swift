@@ -188,7 +188,7 @@ struct CoAuthorList: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.s) {
-            Text("CO-AUTHORS")
+            Text("Co-authors")
                 .font(Theme.Font.caption)
                 .foregroundStyle(.secondary)
             FlowRow(spacing: Theme.Space.m) {

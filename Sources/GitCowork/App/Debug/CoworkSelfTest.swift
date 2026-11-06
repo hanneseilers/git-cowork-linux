@@ -2,6 +2,9 @@ import AppKit
 import Foundation
 import GitCoworkCore
 
+// Debug builds only (see DebugSnapshot.swift).
+#if DEBUG
+
 /// End-to-end check of cowork sync with real git, no UI:
 ///     GITCOWORK_SELFTEST=/tmp/some-empty-dir .build/debug/GitCowork
 /// Creates a bare remote and two clones ("anna" and "ben"), makes
@@ -32,8 +35,18 @@ enum CoworkSelfTest {
 
     static func run(in dir: URL) async -> Bool {
         let fm = FileManager.default
-        try? fm.removeItem(at: dir)
+        // Only ever delete a folder this test created itself (it holds a marker file).
+        let marker = dir.appendingPathComponent(".git-cowork-selftest")
+        let contents = (try? fm.contentsOfDirectory(atPath: dir.path)) ?? []
+        if !contents.isEmpty {
+            guard fm.fileExists(atPath: marker.path) else {
+                print("Refusing to use \(dir.path): it isn't empty and wasn't created by the self-test.")
+                return false
+            }
+            try? fm.removeItem(at: dir)
+        }
         try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
+        fm.createFile(atPath: marker.path, contents: nil)
         let remote = dir.appendingPathComponent("remote.git")
         let a = dir.appendingPathComponent("anna"), b = dir.appendingPathComponent("ben")
 
@@ -154,3 +167,5 @@ enum CoworkSelfTest {
         await s.sync()
     }
 }
+
+#endif

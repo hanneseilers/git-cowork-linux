@@ -13,6 +13,8 @@ enum WindowChrome {
         window.tabbingIdentifier = tabbingIdentifier
         // The repository picker shows the name; keep the title for tabs only.
         window.titleVisibility = .hidden
+        // Full-height toolbar, so the icon-over-label buttons and their badges have room.
+        window.toolbarStyle = .unified
     }
 
     static func showTabBar(_ window: NSWindow) {

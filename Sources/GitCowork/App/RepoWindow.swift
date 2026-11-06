@@ -144,7 +144,9 @@ private struct RepoContainer: View {
         .task {
             await model.load()
             if model.loadError == nil { Prefs.addRecent(model.mainWorktreePath ?? model.root.path) }
+            #if DEBUG
             await DebugSnapshot.applySelection(model)
+            #endif
         }
         .onAppear { OpenRepos.add(path) }
         .onDisappear {

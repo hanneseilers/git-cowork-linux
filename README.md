@@ -24,7 +24,7 @@
 ## Why
 
 Most git GUIs are either heavy Electron apps or thin wrappers that hide what
-git is doing. git-cowork is a native SwiftUI + AppKit app (about 3 MB) that
+git is doing. git-cowork is a native SwiftUI + AppKit app (about 8 MB) that
 runs plain `git` underneath and shows you every command it runs.
 
 It's built for how many teams work now: lots of branches and worktrees,
@@ -115,8 +115,10 @@ and fetched with plain git like any other ref — no extra service, token or
 account.
 
 - **Teammates get it by opening the repo in git-cowork.** Nothing to set up.
-- **Sync** runs about once a minute while the app is in front, and when you
+- **Sync** runs about once a minute while the app is in front, every 3
+  minutes in the background (so notifications still arrive), and when you
   switch back to it. Click "Tasks synced …" in the status bar to sync now.
+  Notifications need the app to be running; there is no push server.
 - **Your identity** is `git config user.email`. Repository › Edit Team… gives
   people names and @handles for mentions.
 - **It never touches your work.** The ref is written with git plumbing into a
