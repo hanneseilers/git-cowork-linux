@@ -93,6 +93,11 @@ final class Credentials: @unchecked Sendable {
         }
     }
 
+    /// The account's token for API calls, renewed first if it's about to expire.
+    func tokens(for account: HostAccount) async -> TokenSet? {
+        await refresher.validTokens(for: account)
+    }
+
     /// Drops a host's token from the running daemon.
     func forget(_ account: HostAccount) {
         let input = Data("protocol=https\nhost=\(account.host)\n\n".utf8)

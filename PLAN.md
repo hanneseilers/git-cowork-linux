@@ -252,8 +252,11 @@ Status: sign-in and "making git use the token" are built (Settings >
 Accounts; code in `Sources/GitCowork/Accounts` and
 `Sources/GitCoworkCore/Accounts`). Browser sign-in on github.com and
 gitlab.com needs our OAuth apps registered and their client IDs filled into
-`OAuthApps.swift`; until then it asks for a client ID, and tokens work. Not
-built yet: the SSH key and the API features below.
+`OAuthApps.swift`; until then it asks for a client ID, and tokens work.
+"Clone from your repos" (item 1 below) is built: the Clone sheet lists the
+signed-in accounts' repos (`HostAPI` repo listing in core,
+`Accounts/RepoList.swift` and `Views/CloneRepoList.swift` in the app). Not
+built yet: the SSH key and items 2 and 3 below.
 
 How git gets the token: `git credential-cache` on a private socket, plus
 `-c credential.https://<host>.helper=` (clears the person's helpers for that
@@ -303,7 +306,7 @@ credential helper just fails. That's the gap this fills first.
 ### What signing in unlocks
 
 In this order:
-1. Clone from a list of your repos (and your orgs' repos).
+1. Clone from a list of your repos (and your orgs' repos). Built.
 2. PRs/MRs: list open ones, show them on branches in the graph, create one
    from the app instead of only opening the web page.
 3. CI status on branches and commits.

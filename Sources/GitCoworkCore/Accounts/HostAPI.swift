@@ -1,7 +1,7 @@
 import Foundation
 
-/// The few host API calls sign-in needs. Builds requests and reads responses;
-/// the app does the actual networking.
+/// Host API calls for sign-in and the repo list (HostRepos.swift). Builds
+/// requests and reads responses; the app does the actual networking.
 public enum HostAPI {
     /// API base for a host: api.github.com for github.com, /api/v3 on GitHub
     /// Enterprise, /api/v4 on GitLab, /api/v1 on Gitea and Forgejo.
@@ -16,11 +16,7 @@ public enum HostAPI {
     /// GET the signed-in user, to check a token and learn the account name.
     public static func currentUserRequest(kind: HostKind, host: String, token: String) -> URLRequest? {
         guard let url = URL(string: apiBase(kind: kind, host: host) + "/user") else { return nil }
-        var r = URLRequest(url: url)
-        r.setValue(kind == .gitea ? "token \(token)" : "Bearer \(token)", forHTTPHeaderField: "Authorization")
-        r.setValue(kind == .github ? "application/vnd.github+json" : "application/json", forHTTPHeaderField: "Accept")
-        r.timeoutInterval = 20
-        return r
+        return authorized(url, kind: kind, token: token)
     }
 
     /// Account name from a /user response: `login` on GitHub and Gitea, `username` on GitLab.
@@ -49,5 +45,14 @@ public enum HostAPI {
         case .gitlab: "read_user, read_api and write_repository"
         case .gitea: "read:user and write:repository"
         }
+    }
+
+    /// Adds the token and Accept header each host wants.
+    static func authorized(_ url: URL, kind: HostKind, token: String) -> URLRequest {
+        var r = URLRequest(url: url)
+        r.setValue(kind == .gitea ? "token \(token)" : "Bearer \(token)", forHTTPHeaderField: "Authorization")
+        r.setValue(kind == .github ? "application/vnd.github+json" : "application/json", forHTTPHeaderField: "Accept")
+        r.timeoutInterval = 20
+        return r
     }
 }

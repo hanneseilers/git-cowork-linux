@@ -25,6 +25,10 @@ First public release.
   access token (also for Gitea and Forgejo), and HTTPS push and pull work
   without setting up git. Tokens are kept in the Keychain and used only by
   git-cowork; git in the terminal and SSH remotes are unchanged.
+- Clone from your repos: with an account signed in, the Clone sheet lists
+  your repositories and your organizations' or groups' (newest activity
+  first), with a filter. Pick one to fill in its HTTPS URL, or double-click
+  to clone it right away.
 - Command log (⌘J) showing every git command the app runs.
 - Undo (⌘Z) for the last commit, amend, reset, checkout or branch delete,
   run as plain git commands; not offered once you've pushed.
