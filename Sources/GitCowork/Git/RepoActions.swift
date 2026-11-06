@@ -35,6 +35,7 @@ extension RepoModel {
     /// Errors are shown as an alert with git's own message.
     @discardableResult
     func perform(_ label: String, _ args: [String], okCodes: Set<Int32> = [0]) async -> Bool {
+        await waitForAutoFetch()
         guard beginBusy(label) else { return false }
         defer { endBusy(label) }
         do {
@@ -69,12 +70,14 @@ extension RepoModel {
     // MARK: Remote
 
     func fetch() async {
-        await perform("Fetch", ["fetch", "--all", "--prune"])
+        let ok = await perform("Fetch", ["fetch", "--all", "--prune"])
+        noteRemoteAction(fetched: true, succeeded: ok)
         await syncCowork()
     }
 
     func pull(_ mode: PullMode = .default) async {
-        await perform("Pull", mode.args)
+        let ok = await perform("Pull", mode.args)
+        noteRemoteAction(fetched: true, succeeded: ok)
     }
 
     func push(force: Bool = false) async {
@@ -87,7 +90,9 @@ extension RepoModel {
             }
             args += ["-u", remote, "HEAD"]
         }
-        await perform(force ? "Force push" : "Push", args)
+        if await perform(force ? "Force push" : "Push", args) {
+            noteRemoteAction(fetched: false, succeeded: true)
+        }
     }
 
     func confirmForcePush() {

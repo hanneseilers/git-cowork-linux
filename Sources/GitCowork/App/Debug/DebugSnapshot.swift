@@ -10,9 +10,12 @@ import SwiftUI
 enum DebugSnapshot {
     /// GITCOWORK_DEBUG_SELECT = "commit:<n>" (nth commit) | "diff" (first changed file) | "commitdiff:<n>"
     /// GITCOWORK_DEBUG_MODE = "board" | "reviews", optionally ":<n>" to select the nth task / review.
+    /// GITCOWORK_DEBUG_LOG = "1" opens the command log.
     @MainActor
     static func applySelection(_ model: RepoModel) async {
         applyMode(model)
+        // GITCOWORK_DEBUG_LOG = "1": open the command log.
+        if ProcessInfo.processInfo.environment["GITCOWORK_DEBUG_LOG"] != nil { model.showCommandLog = true }
         guard let sel = ProcessInfo.processInfo.environment["GITCOWORK_DEBUG_SELECT"] else { return }
         let parts = sel.split(separator: ":")
         let n = parts.count > 1 ? Int(parts[1]) ?? 0 : 0

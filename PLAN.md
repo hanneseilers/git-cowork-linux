@@ -194,7 +194,8 @@ Sync without conflicts:
 
 Measured on an M1/M2 MacBook with a repo of ~50k commits:
 - Cold start to usable window: < 300 ms.
-- Idle CPU: 0% (FSEvents, no polling timers except the cowork sync).
+- Idle CPU: 0% (FSEvents, no polling timers except the cowork sync and the
+  5-minute background fetch, which only runs while the app is in front).
 - Memory: < 100 MB with 10k commits loaded.
 - Graph scroll: no dropped frames at 120 Hz.
 - First 2,000 commits on screen: < 150 ms; more load on scroll.

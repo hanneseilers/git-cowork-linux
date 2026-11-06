@@ -37,6 +37,10 @@ review work without leaving the repo.
 - **Just git.** Every action is a normal git command, visible in the command
   log (⌘J). Your SSH keys, credential helpers, hooks and commit signing work
   exactly as in the terminal.
+- **Always current.** Fetches every open repository in the background every
+  5 minutes while the app is in front, so remote branches and ahead/behind
+  are up to date before you pull. It never asks for a password; turn it off in
+  Settings (⌘,) › Git.
 - **Worktrees first.** Every worktree shows in the sidebar and the graph,
   with live uncommitted counts and ahead/behind.
 - **Tasks and reviews in the repo.** A shared board and review requests,
