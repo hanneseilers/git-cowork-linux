@@ -117,8 +117,15 @@ enum CoworkSelfTest {
         let repoModel = RepoModel(root: a)
         await repoModel.load()
         if let wtTask = await anna.createTask(title: "Agent: tidy logging", status: .todo) {
-            await repoModel.cowork.reload()
+            // Saves are queued: wait until the commit has landed and this window sees it.
+            for _ in 0..<50 where repoModel.cowork.task(wtTask.id) == nil {
+                try? await Task.sleep(for: .milliseconds(100))
+                await repoModel.cowork.reload()
+            }
             let path = await repoModel.startTaskInWorktree(wtTask.id)
+            if path == nil {
+                print("  (task visible: \(repoModel.cowork.task(wtTask.id) != nil), busy: \(repoModel.busy ?? "-"), alert: \(repoModel.alert?.message ?? "-"))")
+            }
             await repoModel.refresh()
             let branch = RefName.branch(for: wtTask)
             check(path.map { fm.fileExists(atPath: $0) } == true, "worktree folder created")
