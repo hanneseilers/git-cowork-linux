@@ -66,9 +66,9 @@ struct BoardView: View {
     private var assigneeMenu: some View {
         let people = model.cowork.others
         let title: String = switch assignee {
-        case "": "Everyone"
-        case "me": "Mine"
-        case "unassigned": "Unassigned"
+        case "": L("Everyone")
+        case "me": L("Mine")
+        case "unassigned": L("Unassigned")
         default: model.cowork.person(assignee)?.displayName ?? assignee
         }
         return Menu {
