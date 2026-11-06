@@ -7,8 +7,8 @@ warnings.
 ## Requirements
 
 - A Mac with Apple Silicon (M1 or newer)
-- macOS 14 Sonoma or newer
-- Xcode Command Line Tools (for `git`, `swift` and `make`)
+- macOS 14 Sonoma or newer, recent enough to get Swift 6 (see below)
+- Xcode Command Line Tools with **Swift 6 or newer** (for `git`, `swift` and `make`)
 
 Check whether you have the tools:
 
@@ -16,13 +16,19 @@ Check whether you have the tools:
 swift --version
 ```
 
-If that prints "command not found" or opens an install dialog, install them:
+It should say `Apple Swift version 6` or higher. If it prints "command not
+found" or opens an install dialog, install them:
 
 ```bash
 xcode-select --install
 ```
 
-The full Xcode app works too, but isn't needed.
+If it shows Swift 5.x, your tools are too old: update them in System
+Settings › General › Software Update. If no Swift 6 update is offered, update
+macOS first; the Swift 6 tools need a recent macOS 14 or newer.
+
+The download is a few GB if you don't have the tools yet. The full Xcode app
+(16 or newer) works too, but isn't needed.
 
 ## Install
 
@@ -118,6 +124,10 @@ Tasks and reviews live in your repositories (on `refs/cowork/main`), not in
 the app, so uninstalling doesn't touch them.
 
 ## Troubleshooting
+
+**`package '…' is using Swift tools version 6.0.0 but the installed version
+is 5.x`** — your Command Line Tools are too old. See
+[Requirements](#requirements) for how to update them.
 
 **`make: command not found` or `xcrun: error: invalid active developer path`**
 — the Command Line Tools are missing or were removed by a macOS update. Run

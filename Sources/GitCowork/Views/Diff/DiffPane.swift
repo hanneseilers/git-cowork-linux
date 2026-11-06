@@ -60,7 +60,6 @@ struct DiffPane: View {
                 .keyboardShortcut(.cancelAction)
                 .help("Back to history (Esc)")
             }
-            Divider()
             if loaded && document.isEmpty {
                 EmptyState(symbol: "doc.text", title: "No text changes",
                            message: "The file may be binary, empty, or only its mode changed.")
@@ -188,8 +187,8 @@ private struct DiffHeader<Trailing: View>: View {
     @ViewBuilder var trailing: Trailing
 
     var body: some View {
-        HStack(spacing: Theme.Space.m) {
-            StatusGlyph(status: file.status)
+        PanelBar {
+            FileStatusIcon(status: file.status)
             VStack(alignment: .leading, spacing: 0) {
                 breadcrumb
                     .lineLimit(1)
@@ -215,8 +214,6 @@ private struct DiffHeader<Trailing: View>: View {
             Spacer(minLength: Theme.Space.m)
             trailing
         }
-        .padding(.horizontal, Theme.Metrics.panelPadding)
-        .frame(height: Theme.Metrics.panelHeaderHeight)
         .background(.bar)
     }
 

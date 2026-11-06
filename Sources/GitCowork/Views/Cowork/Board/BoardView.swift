@@ -26,7 +26,6 @@ struct BoardView: View {
         let data = BoardData(store: model.cowork, mineOnly: mineOnly, label: labelFilter, query: query)
         VStack(spacing: 0) {
             header(data)
-            Divider()
             if model.cowork.loaded && model.cowork.tasks.isEmpty {
                 emptyState
             } else {
@@ -39,7 +38,7 @@ struct BoardView: View {
     // MARK: Header
 
     private func header(_ data: BoardData) -> some View {
-        HStack(spacing: Theme.Space.m) {
+        PanelBar {
             Text("Tasks")
                 .font(InspectorStyle.headerFont)
             CountBadge(count: data.visibleCount)
@@ -68,8 +67,6 @@ struct BoardView: View {
             .buttonStyle(ActionButtonStyle.primary())
             .help("New task in To Do (N)")
         }
-        .padding(.horizontal, Theme.Metrics.panelPadding)
-        .frame(height: Theme.Metrics.panelHeaderHeight)
     }
 
     private func labelMenu(_ labels: [String]) -> some View {

@@ -1,5 +1,6 @@
 import AppKit
 import GitCoworkCore
+import SwiftUI
 
 enum HistoryRow: Equatable {
     case wip                    // this worktree's uncommitted changes
@@ -64,25 +65,17 @@ struct WIPCount {
     let count: Int
 
     static func make(_ st: WorkingStatus) -> [WIPCount] {
-        var deleted = Set<String>(), added = Set<String>(), tracked = Set<String>()
-        for f in st.staged {
-            tracked.insert(f.path)
-            if f.status == .deleted { deleted.insert(f.path) }
-            if f.status == .added { added.insert(f.path) }
+        ChangeCounts(st.conflicted + st.staged + st.unstaged + st.untracked).groups.map {
+            WIPCount(symbol: $0.status.symbol, color: NSColor($0.status.color), count: $0.count)
         }
-        for f in st.unstaged {
-            tracked.insert(f.path)
-            if f.status == .deleted { deleted.insert(f.path) }
-        }
-        for f in st.untracked { added.insert(f.path) }
-        let modified = tracked.subtracting(deleted).subtracting(added)
-        var out: [WIPCount] = []
-        if !st.conflicted.isEmpty { out.append(WIPCount(symbol: "exclamationmark.triangle.fill", color: .systemPink, count: st.conflicted.count)) }
-        if !modified.isEmpty { out.append(WIPCount(symbol: "pencil", color: .systemOrange, count: modified.count)) }
-        if !added.isEmpty { out.append(WIPCount(symbol: "plus", color: .systemGreen, count: added.count)) }
-        if !deleted.isEmpty { out.append(WIPCount(symbol: "minus", color: .systemRed, count: deleted.count)) }
-        return out
     }
+
+    /// Another worktree's WIP row: only its total is known, shown as modified.
+    static func modified(_ count: Int) -> WIPCount {
+        WIPCount(symbol: FileStatus.modified.symbol, color: modifiedColor, count: count)
+    }
+
+    private static let modifiedColor = NSColor(FileStatus.modified.color)
 }
 
 /// One badge in the Branch / Tag column. A local branch and its remote

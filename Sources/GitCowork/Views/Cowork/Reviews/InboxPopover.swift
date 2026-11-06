@@ -16,7 +16,7 @@ struct InboxPopover: View {
         let items = store.inbox
         let unread = items.filter { !seen.contains($0.id) }.count
         VStack(spacing: 0) {
-            CoworkPanelBar {
+            PanelBar {
                 Text("Inbox").font(InspectorStyle.headerFont)
                 if unread > 0 {
                     Text(verbatim: "\(unread) new")

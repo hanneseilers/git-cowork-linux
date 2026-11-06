@@ -48,12 +48,11 @@ private struct SidebarContent: View, Equatable {
         let builder = SidebarBuilder(model: model, collapsed: collapsed, openSections: openSections)
         let items = filter.isEmpty ? builder.tree() : builder.filtered(filter)
         VStack(alignment: .leading, spacing: 0) {
-            SidebarFilterField(text: $filter, focus: $filterFocused,
-                               count: filter.isEmpty ? builder.totalCount : items.matchCount)
-                .padding(.horizontal, Theme.Metrics.panelPadding)
-                .frame(height: Theme.Metrics.panelHeaderHeight)
-                .background { focusShortcut }
-            Divider()
+            PanelBar {
+                SidebarFilterField(text: $filter, focus: $filterFocused,
+                                   count: filter.isEmpty ? builder.totalCount : items.matchCount)
+            }
+            .background { focusShortcut }
 
             List(selection: $selection) {
                 ForEach(items) { item in

@@ -4,47 +4,6 @@ import SwiftUI
 
 // Building blocks shared by the task panel, review panel, review list, inbox and sheets.
 
-/// Top bar of a cowork panel: `panelHeaderHeight` tall, content inset by
-/// `panelPadding`, one hairline divider underneath. Lines up with the other
-/// panels' top bars.
-struct CoworkPanelBar<Content: View>: View {
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: Theme.Space.m) { content }
-                .padding(.horizontal, Theme.Metrics.panelPadding)
-                .frame(height: Theme.Metrics.panelHeaderHeight)
-            Divider()
-        }
-    }
-}
-
-/// Small caption above a group: "Description", "Comments 3".
-struct CoworkSectionTitle<Trailing: View>: View {
-    let title: String
-    var count: Int?
-    @ViewBuilder var trailing: Trailing
-
-    var body: some View {
-        HStack(spacing: Theme.Space.m) {
-            Text(title)
-                .font(Theme.Font.caption)
-                .foregroundStyle(.secondary)
-            if let count { CountBadge(count: count) }
-            Spacer(minLength: 0)
-            trailing
-        }
-        .frame(minHeight: Theme.Metrics.chipHeight)
-    }
-}
-
-extension CoworkSectionTitle where Trailing == EmptyView {
-    init(_ title: String, count: Int? = nil) {
-        self.init(title: title, count: count) { EmptyView() }
-    }
-}
-
 /// "Status   [In Progress]" row of the property grid. The label column has a
 /// fixed width so values line up; rows are at least `rowHeight` tall.
 struct PropertyRow<Content: View>: View {
@@ -63,35 +22,6 @@ struct PropertyRow<Content: View>: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(minHeight: Theme.Metrics.rowHeight)
-    }
-}
-
-/// Wrapping row of chips.
-struct ChipFlow: Layout {
-    var spacing: CGFloat = Theme.Space.s
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let width = proposal.width ?? .infinity
-        var x: CGFloat = 0, y: CGFloat = 0, line: CGFloat = 0, maxX: CGFloat = 0
-        for v in subviews {
-            let s = v.sizeThatFits(.unspecified)
-            if x > 0 && x + s.width > width { x = 0; y += line + spacing; line = 0 }
-            x += s.width + spacing
-            maxX = max(maxX, x - spacing)
-            line = max(line, s.height)
-        }
-        return CGSize(width: min(maxX, width), height: y + line)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        var x = bounds.minX, y = bounds.minY, line: CGFloat = 0
-        for v in subviews {
-            let s = v.sizeThatFits(.unspecified)
-            if x > bounds.minX && x + s.width > bounds.maxX { x = bounds.minX; y += line + spacing; line = 0 }
-            v.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(s))
-            x += s.width + spacing
-            line = max(line, s.height)
-        }
     }
 }
 

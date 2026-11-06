@@ -310,7 +310,7 @@ final class HistoryCell: NSTableCellView {
         let pad = GraphStyle.Text.padding
         var x = pad
         x = drawInline("// WIP", font: GraphStyle.Text.wip, color: primaryText, x: x) + GraphStyle.WIP.countSpacing
-        x = drawCount(WIPCount(symbol: "pencil", color: .systemOrange, count: w.changes), x: x) + GraphStyle.WIP.countSpacing
+        x = drawCount(WIPCount.modified(w.changes), x: x) + GraphStyle.WIP.countSpacing
         if let branch = w.branch {
             let s = NSMutableAttributedString(string: "on ", attributes: [.font: GraphStyle.Text.small, .foregroundColor: secondaryText])
             s.append(NSAttributedString(string: branch, attributes: [.font: GraphStyle.Text.small, .foregroundColor: primaryText]))

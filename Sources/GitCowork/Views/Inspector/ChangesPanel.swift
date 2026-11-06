@@ -9,7 +9,7 @@ struct ChangesPanel: View {
         let st = model.status
         let task = st.branch.flatMap { model.inspectorTasks(branches: [$0]).first }
         VStack(spacing: 0) {
-            HStack(spacing: Theme.Space.m) {
+            PanelBar {
                 // Shorter wording (and an icon-only task chip) when the panel is narrow.
                 ViewThatFits(in: .horizontal) {
                     headerTitle(st, task: task, short: false, compactChip: false)
@@ -26,9 +26,6 @@ struct ChangesPanel: View {
                 Spacer(minLength: Theme.Space.s)
                 if !st.isClean { FileViewControls() }
             }
-            .padding(.horizontal, InspectorStyle.padding)
-            .frame(height: InspectorStyle.headerHeight)
-            Divider()
 
             if let op = model.operation {
                 OperationBanner(model: model, operation: op)
@@ -190,9 +187,10 @@ private struct FileLists: View {
             }
             section("staged", title: "Staged files", files: st.staged) {
                 if !st.staged.isEmpty {
-                    TintedButton(title: "Unstage All", symbol: "minus", tint: Theme.Status.deleted) {
+                    Button {
                         Task { await model.unstageAll() }
-                    }
+                    } label: { Label("Unstage All", systemImage: "minus") }
+                    .buttonStyle(ActionButtonStyle.secondary(Theme.Status.deleted))
                 }
             }
         }
@@ -224,13 +222,15 @@ private struct FileLists: View {
 
     private func unstagedButtons(discard: String, stage: String) -> some View {
         HStack(spacing: Theme.Space.s) {
-            TintedButton(title: discard, symbol: "trash", tint: Theme.Status.deleted) {
+            Button {
                 model.discard(unstaged)
-            }
+            } label: { Label(discard, systemImage: "trash") }
+            .buttonStyle(ActionButtonStyle.secondary(Theme.Status.deleted))
             .help("Discard all unstaged changes and delete untracked files")
-            TintedButton(title: stage, symbol: "plus", tint: Theme.Status.added) {
+            Button {
                 Task { await model.stageAll() }
-            }
+            } label: { Label(stage, systemImage: "plus") }
+            .buttonStyle(ActionButtonStyle.secondary(Theme.Status.added))
             .help("Stage all changes")
         }
         .fixedSize()
@@ -247,6 +247,7 @@ private struct FileLists: View {
             }
         } header: {
             SectionHeader(title: title, count: files.count, collapsed: isCollapsed, trailing: trailing)
+                .padding(.vertical, Theme.Space.s)
         }
     }
 
@@ -261,7 +262,7 @@ private struct FileLists: View {
                     .contextMenu { menu(for: f.files, folder: f.path) }
                     .listRowSeparator(.hidden)
             case .file(let c, let depth):
-                ChangedFileRow(change: c, depth: depth, showDirectory: mode == .path, action: action(for: [c]))
+                FileRow(change: c, depth: depth, showDirectory: mode == .path, action: action(for: [c]))
                     .tag(c.id)
                     .listRowSeparator(.hidden)
             }

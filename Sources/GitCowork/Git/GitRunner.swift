@@ -1,4 +1,5 @@
 import Foundation
+import GitCoworkCore
 
 struct GitResult {
     let stdout: String
@@ -118,7 +119,7 @@ final class GitRunner: @unchecked Sendable {
             DispatchQueue.global(qos: .userInitiated).async {
                 let p = Process()
                 p.executableURL = URL(fileURLWithPath: gitPath)
-                p.arguments = ["-c", "core.quotepath=false", "-c", "color.ui=false"] + args
+                p.arguments = GitDefaults.configArgs + args
                 p.currentDirectoryURL = dir
                 p.environment = env
                 let out = Pipe(), err = Pipe()

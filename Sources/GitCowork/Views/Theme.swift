@@ -72,6 +72,8 @@ enum Theme {
         static let chipHeight: CGFloat = 20
         /// Height of every small action button (`ActionButtonStyle`).
         static let buttonHeight: CGFloat = 22
+        /// Column for a row's leading icon (file status, sidebar icons), so text lines up.
+        static let iconWidth: CGFloat = 16
         /// Borders: use Divider() / separatorColor at 1pt; never stack two.
         static let hairline: CGFloat = 1
     }
@@ -176,6 +178,54 @@ enum Formatters {
     static func full(_ date: Date) -> String { dateTime.string(from: date) }
 }
 
+
+extension FileStatus {
+    /// SF Symbol, GitKraken style: pencil, plus, minus, arrow.
+    var symbol: String {
+        switch self {
+        case .modified, .typeChanged, .unknown: "pencil"
+        case .added, .copied, .untracked: "plus"
+        case .deleted: "minus"
+        case .renamed: "arrow.right"
+        case .conflicted: "exclamationmark.triangle"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .added, .copied: Theme.Status.added
+        case .modified, .typeChanged: Theme.Status.modified
+        case .deleted: Theme.Status.deleted
+        case .renamed: Theme.Status.renamed
+        case .conflicted: Theme.Status.conflicted
+        case .untracked: Theme.Status.untracked
+        case .unknown: .secondary
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .added: "Added"
+        case .copied: "Copied"
+        case .modified: "Modified"
+        case .typeChanged: "Type changed"
+        case .deleted: "Deleted"
+        case .renamed: "Renamed"
+        case .conflicted: "Conflicted"
+        case .untracked: "New file"
+        case .unknown: "Changed"
+        }
+    }
+}
+
+extension ChangeCounts {
+    /// Non-empty groups in display order, each with the status whose icon it uses.
+    var groups: [(status: FileStatus, label: String, count: Int)] {
+        [(FileStatus.conflicted, "conflicted", conflicted), (.modified, "modified", modified),
+         (.added, "added", added), (.deleted, "deleted", deleted), (.renamed, "renamed", renamed)]
+            .filter { $0.2 > 0 }
+    }
+}
 
 extension TaskStatus {
     var color: Color {

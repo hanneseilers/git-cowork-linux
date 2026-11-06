@@ -132,7 +132,7 @@ struct LabelEditor: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.s + 2) {
-            ChipFlow(spacing: Theme.Space.s) {
+            FlowRow {
                 ForEach(labels, id: \.self) { l in
                     RemovableLabelChip(label: l) { onRemove(l) }
                 }
@@ -146,7 +146,7 @@ struct LabelEditor: View {
                     .onSubmit { add(draft) }
             }
             if focused, !suggestions.isEmpty {
-                ChipFlow(spacing: Theme.Space.s) {
+                FlowRow {
                     ForEach(suggestions, id: \.self) { s in
                         Button { add(s) } label: {
                             HStack(spacing: Theme.Space.xs) {

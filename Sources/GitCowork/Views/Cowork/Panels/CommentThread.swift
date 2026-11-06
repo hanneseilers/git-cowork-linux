@@ -155,7 +155,7 @@ struct CommentList: View {
         let comments = model.cowork.comments(on: parent)
         let handles = model.cowork.mentionHandles
         VStack(alignment: .leading, spacing: Theme.Metrics.panelPadding) {
-            CoworkSectionTitle("Comments", count: comments.count)
+            SectionHeader("Comments", count: comments.count)
             if comments.isEmpty {
                 Text("No comments yet")
                     .font(Theme.Font.small)

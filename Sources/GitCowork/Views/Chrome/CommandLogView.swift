@@ -12,16 +12,18 @@ struct CommandLogView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            PanelHeader(title: "Command log", count: entries.count) {
-                Toggle("This worktree only", isOn: $onlyThisRepo)
-                    .toggleStyle(.checkbox)
-                    .font(Theme.Font.small)
-                Button("Clear") { log.clear() }
-                    .buttonStyle(.link)
-                    .font(Theme.Font.small)
+            PanelBar {
+                SectionHeader(title: "Command log", count: entries.count) {
+                    HStack(spacing: Theme.Space.m) {
+                        Toggle("This worktree only", isOn: $onlyThisRepo)
+                            .toggleStyle(.checkbox)
+                            .font(Theme.Font.small)
+                        Button("Clear") { log.clear() }
+                            .buttonStyle(.link)
+                            .font(Theme.Font.small)
+                    }
+                }
             }
-            .frame(height: Theme.Metrics.panelHeaderHeight)
-            Divider()
             if entries.isEmpty {
                 EmptyState(symbol: "terminal", title: "No commands yet",
                            message: "Fetch, push, commit and other actions show up here with git's output.")

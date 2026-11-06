@@ -4,7 +4,7 @@ Thanks for your interest! Bug reports, ideas and pull requests are welcome.
 
 ## Getting started
 
-Requirements: Apple Silicon Mac, macOS 14+, Xcode Command Line Tools.
+Requirements: Apple Silicon Mac, macOS 14+, Xcode Command Line Tools with Swift 6.
 
 ```bash
 make run        # debug build, run from the terminal

@@ -77,7 +77,7 @@ struct BoardCard: View, Equatable {
 
     /// Up to three labels, then "+2". Wraps in narrow columns.
     private var labels: some View {
-        ChipFlow(spacing: Theme.Space.s) {
+        FlowRow {
             ForEach(task.labels.prefix(3), id: \.self) { LabelChip(label: $0) }
             if task.labels.count > 3 {
                 Text(verbatim: "+\(task.labels.count - 3)")

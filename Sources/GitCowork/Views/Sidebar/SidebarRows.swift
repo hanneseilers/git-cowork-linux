@@ -29,17 +29,6 @@ extension SidebarRowLayout where Leading == EmptyView {
     }
 }
 
-struct DisclosureChevron: View {
-    let expanded: Bool
-
-    var body: some View {
-        Image(systemName: "chevron.right")
-            .font(Theme.Glyph.chevron)
-            .foregroundStyle(.secondary)
-            .rotationEffect(.degrees(expanded ? 90 : 0))
-    }
-}
-
 struct SidebarIcon: View {
     let symbol: String
     var color: Color = .secondary
@@ -103,7 +92,7 @@ struct SidebarSectionHeader<Trailing: View>: View {
             Spacer(minLength: Theme.Space.s)
             SidebarTrailing {
                 trailing
-                SidebarCount(count: count, highlight: highlight)
+                CountBadge(count: count, style: highlight ? .accent : .plain, column: SidebarStyle.countWidth)
             }
         }
         .overlay(alignment: .top) {
@@ -118,24 +107,6 @@ extension SidebarSectionHeader where Trailing == EmptyView {
          showsDivider: Bool = true, toggle: @escaping () -> Void = {}) {
         self.init(section: section, count: count, expanded: expanded, highlight: highlight,
                   showsDivider: showsDivider, toggle: toggle) { EmptyView() }
-    }
-}
-
-/// Section count, right-aligned in a fixed column so counts line up across headers.
-/// Highlighted counts get an accent capsule.
-struct SidebarCount: View {
-    let count: Int
-    var highlight = false
-
-    var body: some View {
-        Text(verbatim: "\(count)")
-            .font(Theme.Font.caption.monospacedDigit())
-            .foregroundStyle(highlight ? Color.white : Color.secondary)
-            .padding(.horizontal, highlight ? Theme.Space.s : 0)
-            .frame(minWidth: SidebarStyle.countWidth, minHeight: 16, alignment: highlight ? .center : .trailing)
-            .background {
-                if highlight { Capsule().fill(Color.accentColor) }
-            }
     }
 }
 
@@ -290,24 +261,11 @@ struct WorktreeInfoBadges: View {
 
     var body: some View {
         if let info = model.worktreeInfo[path] {
-            if info.changes > 0 { ChangeCountPill(count: info.changes) }
+            if info.changes > 0 {
+                CountBadge(count: info.changes, style: .warning).help("\(info.changes) uncommitted changes")
+            }
             if info.ahead > 0 || info.behind > 0 { AheadBehind(ahead: info.ahead, behind: info.behind) }
         }
-    }
-}
-
-/// Uncommitted change count in a small orange capsule.
-struct ChangeCountPill: View {
-    let count: Int
-
-    var body: some View {
-        Text(verbatim: "\(count)")
-            .font(Theme.Font.caption.monospacedDigit())
-            .padding(.horizontal, Theme.Space.s)
-            .padding(.vertical, 1)
-            .background(Theme.Status.warning.opacity(Theme.Tint.chip), in: Capsule())
-            .foregroundStyle(Theme.Status.warning)
-            .help("\(count) uncommitted changes")
     }
 }
 

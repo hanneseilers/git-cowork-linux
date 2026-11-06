@@ -15,7 +15,7 @@ struct TaskPanel: View {
                 .id(taskID)
         } else {
             VStack(spacing: 0) {
-                CoworkPanelBar { TaskIDText(id: taskID); Spacer() }
+                PanelBar { TaskIDText(id: taskID); Spacer() }
                 EmptyState(symbol: "checklist", title: "Task not found",
                            message: model.cowork.loaded ? "It may have been deleted by a teammate." : nil)
             }
@@ -83,7 +83,7 @@ private struct TaskPanelContent: View {
     // MARK: Header
 
     private var header: some View {
-        CoworkPanelBar {
+        PanelBar {
             TaskIDText(id: task.id)
             Spacer()
             if copied {
@@ -175,7 +175,7 @@ private struct TaskPanelContent: View {
 
     private var description: some View {
         VStack(alignment: .leading, spacing: Theme.Space.m) {
-            CoworkSectionTitle(title: "Description") {
+            SectionHeader(title: "Description") {
                 if bodySave != nil {
                     Text("Saving…").font(Theme.Font.small).foregroundStyle(.tertiary)
                 }
@@ -278,7 +278,7 @@ private struct TaskBranchRow: View {
                     .foregroundStyle(.secondary)
                     .help("Unlink branch")
             }
-            ChipFlow(spacing: Theme.Space.s) {
+            FlowRow {
                 if let ref, !isHead {
                     Button("Checkout") { Task { await model.checkout(ref) } }
                 }

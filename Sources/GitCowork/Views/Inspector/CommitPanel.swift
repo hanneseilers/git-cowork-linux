@@ -17,7 +17,6 @@ struct CommitPanel: View {
     var body: some View {
         VStack(spacing: 0) {
             header(detail)
-            Divider()
             if !model.status.isClean {
                 WorkingCopyBanner(count: model.status.changeCount) {
                     model.selection = .workingCopy
@@ -72,7 +71,7 @@ struct CommitPanel: View {
                     CoAuthorList(authors: message.coAuthors)
                 }
                 if !refs.isEmpty {
-                    FlowRow(spacing: Theme.Space.s) {
+                    FlowRow {
                         ForEach(refs) { ref in
                             RefBadge(ref: ref, color: laneColor(d.id))
                                 .truncationMode(.middle)
@@ -104,7 +103,7 @@ struct CommitPanel: View {
 
     /// Top bar: "commit 858f93a" (click copies the full sha) and "Open on github.com".
     private func header(_ d: CommitDetail?) -> some View {
-        HStack(spacing: Theme.Space.s) {
+        PanelBar(spacing: Theme.Space.s) {
             Text("Commit").font(Theme.Font.title)
             if let d {
                 Button {
@@ -134,8 +133,6 @@ struct CommitPanel: View {
                 .help(url.absoluteString)
             }
         }
-        .padding(.horizontal, InspectorStyle.padding)
-        .frame(height: InspectorStyle.headerHeight)
     }
 
     private func fileList(_ d: CommitDetail) -> some View {
@@ -153,7 +150,7 @@ struct CommitPanel: View {
                         }
                         .listRowSeparator(.hidden)
                 case .file(let c, let depth):
-                    ChangedFileRow(change: c, depth: depth, showDirectory: mode == .path)
+                    FileRow(change: c, depth: depth, showDirectory: mode == .path)
                         .tag(c.id)
                         .listRowSeparator(.hidden)
                 }
@@ -188,42 +185,5 @@ struct CommitPanel: View {
                 guard let id, let f = files.first(where: { $0.id == id }) else { return }
                 model.openDiff = .commit(d, f)
             })
-    }
-}
-
-/// Lays out children left to right, wrapping onto new lines. A child wider
-/// than the row is narrowed to the row width (its text truncates).
-struct FlowRow: Layout {
-    var spacing: CGFloat = 4
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let width = proposal.width ?? .infinity
-        var x: CGFloat = 0, y: CGFloat = 0, lineHeight: CGFloat = 0, maxX: CGFloat = 0
-        for v in subviews {
-            let s = size(of: v, maxWidth: width)
-            if x > 0 && x + s.width > width { x = 0; y += lineHeight + spacing; lineHeight = 0 }
-            maxX = max(maxX, x + s.width)
-            x += s.width + spacing
-            lineHeight = max(lineHeight, s.height)
-        }
-        return CGSize(width: min(maxX, width), height: y + lineHeight)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        var x = bounds.minX, y = bounds.minY, lineHeight: CGFloat = 0
-        for v in subviews {
-            let s = size(of: v, maxWidth: bounds.width)
-            if x > bounds.minX && x + s.width > bounds.maxX { x = bounds.minX; y += lineHeight + spacing; lineHeight = 0 }
-            v.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(s))
-            x += s.width + spacing
-            lineHeight = max(lineHeight, s.height)
-        }
-    }
-
-    private func size(of v: LayoutSubview, maxWidth: CGFloat) -> CGSize {
-        let ideal = v.sizeThatFits(.unspecified)
-        guard ideal.width > maxWidth, maxWidth.isFinite else { return ideal }
-        let s = v.sizeThatFits(ProposedViewSize(width: maxWidth, height: nil))
-        return CGSize(width: min(s.width, maxWidth), height: s.height)
     }
 }

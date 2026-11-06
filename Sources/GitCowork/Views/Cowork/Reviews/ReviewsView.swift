@@ -108,7 +108,7 @@ struct ReviewsView: View {
     }
 
     private var header: some View {
-        CoworkPanelBar {
+        PanelBar {
             Text("Reviews").font(InspectorStyle.headerFont)
             Spacer(minLength: Theme.Space.m)
             Picker("Filter", selection: filterSelection) {

@@ -49,7 +49,8 @@ review work without leaving the repo.
 
 ## Install
 
-Requirements: Apple Silicon Mac, macOS 14 or newer, Xcode Command Line Tools.
+Requirements: Apple Silicon Mac, macOS 14 or newer, Xcode Command Line Tools with Swift 6
+(details in [INSTALL.md](INSTALL.md#requirements)).
 
 ```bash
 xcode-select --install          # skip if you already have git and swift

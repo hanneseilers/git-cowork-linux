@@ -13,7 +13,7 @@ struct ReviewPanel: View {
                 .id(reviewID)
         } else {
             VStack(spacing: 0) {
-                CoworkPanelBar { TaskIDText(id: reviewID); Spacer() }
+                PanelBar { TaskIDText(id: reviewID); Spacer() }
                 EmptyState(symbol: "checkmark.bubble", title: "Review not found",
                            message: model.cowork.loaded ? "It may have been removed by a teammate." : nil)
             }
@@ -77,7 +77,7 @@ private struct ReviewPanelContent: View {
     // MARK: Header
 
     private var header: some View {
-        CoworkPanelBar {
+        PanelBar {
             Image(systemName: "arrow.triangle.branch")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
@@ -145,7 +145,7 @@ private struct ReviewPanelContent: View {
 
     private var people: some View {
         VStack(alignment: .leading, spacing: Theme.Space.xs) {
-            CoworkSectionTitle(title: "Reviewers", count: review.reviewers.count) {
+            SectionHeader(title: "Reviewers", count: review.reviewers.count) {
                 if isRequester && review.status == .open { addReviewerMenu }
             }
             if review.reviewers.isEmpty {
@@ -237,7 +237,7 @@ private struct ReviewPanelContent: View {
 
     private var myReview: some View {
         VStack(alignment: .leading, spacing: Theme.Space.m) {
-            CoworkSectionTitle(title: "Your review") {
+            SectionHeader(title: "Your review") {
                 if let v = myVerdict, v != .requested {
                     Text("You: \(v.title.lowercased())").font(Theme.Font.small).foregroundStyle(.secondary)
                 }
@@ -290,7 +290,7 @@ private struct ReviewPanelContent: View {
         let web = model.links(for: nil)
         let pr = web?.newPullRequestURL(branch: review.branch, base: review.base)
         if branch != nil || pr != nil {
-            ChipFlow(spacing: Theme.Space.s) {
+            FlowRow {
                 if let branch {
                     Button("Show in History") {
                         model.openDiff = nil
@@ -329,7 +329,7 @@ private struct ReviewPanelContent: View {
 
     private var changesList: some View {
         VStack(alignment: .leading, spacing: Theme.Space.s) {
-            CoworkSectionTitle(title: "Changes", count: changes.loaded ? changes.files.count : nil) {
+            SectionHeader(title: "Changes", count: changes.loaded ? changes.files.count : nil) {
                 if changes.loaded, changes.error == nil {
                     Text("since \(review.base)").font(Theme.Font.small).foregroundStyle(.secondary)
                 }

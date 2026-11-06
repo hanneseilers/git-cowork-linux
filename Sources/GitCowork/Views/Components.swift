@@ -34,14 +34,50 @@ extension Ref {
     }
 }
 
-/// Small grey number, used in section headers and rows.
+/// A count. Styles:
+/// - `.plain`: small grey number (section headers, folders).
+/// - `.accent`: white on an accent capsule (reviews waiting for me).
+/// - `.warning`: tinted capsule (uncommitted changes of a worktree).
+/// - `.toolbar`: tiny filled badge on a toolbar icon (commits to push, unread).
 struct CountBadge: View {
+    enum Style { case plain, accent, warning, toolbar }
     let count: Int
+    var style: Style = .plain
+    /// Fixed column width, so counts line up across rows (sidebar headers).
+    var column: CGFloat?
+    @Environment(\.isEnabled) private var enabled
 
     var body: some View {
-        Text(verbatim: "\(count)")
-            .font(Theme.Font.caption.monospacedDigit())
-            .foregroundStyle(.secondary)
+        switch style {
+        case .plain:
+            number
+                .foregroundStyle(.secondary)
+                .frame(minWidth: column, minHeight: column == nil ? nil : 16, alignment: .trailing)
+        case .accent:
+            number
+                .foregroundStyle(.white)
+                .padding(.horizontal, Theme.Space.s)
+                .frame(minWidth: column, minHeight: 16)
+                .background(Capsule().fill(Color.accentColor))
+        case .warning:
+            number
+                .padding(.horizontal, Theme.Space.s)
+                .padding(.vertical, 1)
+                .background(Theme.Status.warning.opacity(Theme.Tint.chip), in: Capsule())
+                .foregroundStyle(Theme.Status.warning)
+        case .toolbar:
+            Text(count > 99 ? "99+" : "\(count)")
+                .font(.system(size: 9, weight: .semibold).monospacedDigit())
+                .foregroundStyle(.white)
+                .padding(.horizontal, 3)
+                .frame(minWidth: 13, minHeight: 13)
+                .background(Capsule().fill(Color.accentColor))
+                .opacity(enabled ? 1 : 0.4)
+        }
+    }
+
+    private var number: some View {
+        Text(verbatim: "\(count)").font(Theme.Font.caption.monospacedDigit())
     }
 }
 
@@ -57,46 +93,6 @@ struct AheadBehind: View {
         }
         .font(Theme.Font.small.monospacedDigit())
         .foregroundStyle(.secondary)
-    }
-}
-
-/// One-letter file status in a colored square: M, A, D, R, U, ?
-struct StatusGlyph: View {
-    let status: FileStatus
-
-    var body: some View {
-        Text(String(status == .untracked ? "+" : status.rawValue))
-            .font(.system(size: 10, weight: .semibold, design: .monospaced))
-            .foregroundStyle(color)
-            .frame(width: 16, height: 16)
-            .background(color.opacity(Theme.Tint.chip), in: RoundedRectangle(cornerRadius: Theme.Radius.badge))
-            .help(label)
-    }
-
-    var color: Color {
-        switch status {
-        case .added, .copied: Theme.Status.added
-        case .modified, .typeChanged: Theme.Status.modified
-        case .deleted: Theme.Status.deleted
-        case .renamed: Theme.Status.renamed
-        case .conflicted: Theme.Status.conflicted
-        case .untracked: Theme.Status.untracked
-        case .unknown: .secondary
-        }
-    }
-
-    var label: String {
-        switch status {
-        case .added: "Added"
-        case .copied: "Copied"
-        case .modified: "Modified"
-        case .typeChanged: "Type changed"
-        case .deleted: "Deleted"
-        case .renamed: "Renamed"
-        case .conflicted: "Conflicted"
-        case .untracked: "New file"
-        case .unknown: "Changed"
-        }
     }
 }
 
@@ -118,29 +114,117 @@ struct Avatar: View {
 }
 
 
-/// Header for a block inside the inspector: "Staged  3   [Unstage all]"
-struct PanelHeader<Trailing: View>: View {
-    let title: String
-    var count: Int?
-    @ViewBuilder var trailing: Trailing
+/// Top bar of a panel: `panelHeaderHeight` tall, content inset by
+/// `panelPadding`, one hairline underneath. Every panel uses it, so the
+/// bars' bottom borders form one line across the window.
+struct PanelBar<Content: View>: View {
+    var spacing = Theme.Space.m
+    @ViewBuilder var content: Content
 
     var body: some View {
-        HStack(spacing: Theme.Space.m) {
-            Text(title)
-                .font(Theme.Font.caption)
-                .foregroundStyle(.secondary)
-            if let count { CountBadge(count: count) }
-            Spacer()
-            trailing
+        VStack(spacing: 0) {
+            HStack(spacing: spacing) { content }
+                .padding(.horizontal, Theme.Metrics.panelPadding)
+                .frame(height: Theme.Metrics.panelHeaderHeight)
+            Divider()
         }
-        .padding(.horizontal, Theme.Space.l)
-        .padding(.vertical, Theme.Space.s)
     }
 }
 
-extension PanelHeader where Trailing == EmptyView {
-    init(title: String, count: Int? = nil) {
+/// Caption above a group: "Description", "Comments 3", "Unstaged files 3".
+/// With `collapsed` it gets a chevron and clicking the title toggles it.
+struct SectionHeader<Trailing: View>: View {
+    let title: String
+    var count: Int?
+    var collapsed: Binding<Bool>?
+    @ViewBuilder var trailing: Trailing
+
+    var body: some View {
+        HStack(spacing: Theme.Space.s) {
+            if let collapsed {
+                Button {
+                    collapsed.wrappedValue.toggle()
+                } label: {
+                    HStack(spacing: Theme.Space.s) {
+                        DisclosureChevron(expanded: !collapsed.wrappedValue).frame(width: 10)
+                        label
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .layoutPriority(1)
+            } else {
+                label.layoutPriority(1)
+            }
+            Spacer(minLength: Theme.Space.s)
+            trailing
+        }
+        .frame(minHeight: Theme.Metrics.chipHeight)
+    }
+
+    private var label: some View {
+        HStack(spacing: Theme.Space.s) {
+            Text(title)
+                .font(Theme.Font.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            if let count { CountBadge(count: count) }
+        }
+    }
+}
+
+extension SectionHeader where Trailing == EmptyView {
+    init(_ title: String, count: Int? = nil) {
         self.init(title: title, count: count) { EmptyView() }
+    }
+}
+
+/// Disclosure chevron of collapsible sections, folders and tree rows.
+struct DisclosureChevron: View {
+    let expanded: Bool
+
+    var body: some View {
+        Image(systemName: "chevron.right")
+            .font(Theme.Glyph.chevron)
+            .foregroundStyle(.secondary)
+            .rotationEffect(.degrees(expanded ? 90 : 0))
+    }
+}
+
+/// Lays out children left to right, wrapping onto new lines. A child wider
+/// than the row is narrowed to the row width (its text truncates).
+struct FlowRow: Layout {
+    var spacing: CGFloat = Theme.Space.s
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? .infinity
+        var x: CGFloat = 0, y: CGFloat = 0, lineHeight: CGFloat = 0, maxX: CGFloat = 0
+        for v in subviews {
+            let s = size(of: v, maxWidth: width)
+            if x > 0 && x + s.width > width { x = 0; y += lineHeight + spacing; lineHeight = 0 }
+            maxX = max(maxX, x + s.width)
+            x += s.width + spacing
+            lineHeight = max(lineHeight, s.height)
+        }
+        return CGSize(width: min(maxX, width), height: y + lineHeight)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x = bounds.minX, y = bounds.minY, lineHeight: CGFloat = 0
+        for v in subviews {
+            let s = size(of: v, maxWidth: bounds.width)
+            if x > bounds.minX && x + s.width > bounds.maxX { x = bounds.minX; y += lineHeight + spacing; lineHeight = 0 }
+            v.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(s))
+            x += s.width + spacing
+            lineHeight = max(lineHeight, s.height)
+        }
+    }
+
+    private func size(of v: LayoutSubview, maxWidth: CGFloat) -> CGSize {
+        let ideal = v.sizeThatFits(.unspecified)
+        guard ideal.width > maxWidth, maxWidth.isFinite else { return ideal }
+        let s = v.sizeThatFits(ProposedViewSize(width: maxWidth, height: nil))
+        return CGSize(width: min(s.width, maxWidth), height: s.height)
     }
 }
 
@@ -165,26 +249,6 @@ struct EmptyState: View {
         }
         .padding(Theme.Space.xxl)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
-
-/// Row for a changed file: status glyph, file name, dimmed folder.
-struct FileRow: View {
-    let change: FileChange
-
-    var body: some View {
-        HStack(spacing: Theme.Space.m) {
-            StatusGlyph(status: change.status)
-            Text(change.fileName)
-                .lineLimit(1)
-                .layoutPriority(1)
-            Text(change.oldPath.map { "← \($0)" } ?? change.directory)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .truncationMode(.head)
-            Spacer(minLength: 0)
-        }
-        .font(Theme.Font.body)
     }
 }
 
