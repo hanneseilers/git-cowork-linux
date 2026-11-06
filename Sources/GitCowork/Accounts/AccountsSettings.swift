@@ -34,7 +34,7 @@ struct AccountsSection: View {
                     }
                 } label: {
                     Text(account.username)
-                    Text("\(account.kind.title) · \(account.host)" + (account.sshKey != nil ? " · SSH key" : ""))
+                    Text("\(account.kind.title) · \(account.host)" + (account.sshKey != nil ? L(" · SSH key") : ""))
                 }
             }
             HStack {
@@ -331,7 +331,7 @@ struct SSHHostEntrySheet: View {
                 .background(Theme.cardFill, in: RoundedRectangle(cornerRadius: Theme.Radius.card))
                 .overlay(RoundedRectangle(cornerRadius: Theme.Radius.card).stroke(Theme.cardBorder))
         } buttons: {
-            Button(copied ? "Copied" : "Copy") {
+            Button(copied ? L("Copied") : L("Copy")) {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(entry, forType: .string)
                 copied = true

@@ -15,11 +15,7 @@ public enum HostAPI {
 
     /// GET the signed-in user, to check a token and learn the account name.
     public static func currentUserRequest(kind: HostKind, host: String, token: String) -> URLRequest? {
-        request(kind: kind, host: host, path: "/user", token: token)
-    }
-
-    private static func request(kind: HostKind, host: String, path: String, token: String) -> URLRequest? {
-        guard let url = URL(string: apiBase(kind: kind, host: host) + path) else { return nil }
+        guard let url = URL(string: apiBase(kind: kind, host: host) + "/user") else { return nil }
         return authorized(url, kind: kind, token: token)
     }
 
@@ -36,7 +32,8 @@ public enum HostAPI {
     /// `write:public_key` scope, GitLab `api`. GitLab keys are marked for
     /// sign-in only (`usage_type`), since the app doesn't sign commits with them.
     public static func addSSHKeyRequest(kind: HostKind, host: String, token: String, title: String, publicKey: String) -> URLRequest? {
-        guard kind != .gitea, var r = request(kind: kind, host: host, path: "/user/keys", token: token) else { return nil }
+        guard kind != .gitea, let url = URL(string: apiBase(kind: kind, host: host) + "/user/keys") else { return nil }
+        var r = authorized(url, kind: kind, token: token)
         var body = ["title": title, "key": publicKey.trimmingCharacters(in: .whitespacesAndNewlines)]
         if kind == .gitlab { body["usage_type"] = "auth" }
         r.httpMethod = "POST"
