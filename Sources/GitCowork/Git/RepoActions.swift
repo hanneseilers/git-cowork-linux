@@ -7,10 +7,10 @@ enum PullMode: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .default: "Pull"
-        case .ffOnly: "Pull (fast-forward only)"
-        case .rebase: "Pull (rebase)"
-        case .merge: "Pull (merge)"
+        case .default: L("Pull")
+        case .ffOnly: L("Pull (fast-forward only)")
+        case .rebase: L("Pull (rebase)")
+        case .merge: L("Pull (merge)")
         }
     }
 
@@ -24,10 +24,6 @@ enum PullMode: String, CaseIterable {
     }
 }
 
-enum ResetMode: String, CaseIterable {
-    case soft, mixed, hard
-}
-
 /// Everything the user can do to a repo. Each action is one or two plain git
 /// commands; they all show up in the command log.
 extension RepoModel {
@@ -38,13 +34,14 @@ extension RepoModel {
         await waitForAutoFetch()
         guard beginBusy(label) else { return false }
         defer { endBusy(label) }
+        if !UndoRecord.survives(args) { lastUndo = nil }
         do {
             try await git.run(args, in: root, logged: true, okCodes: okCodes)
             await refresh()
             return true
         } catch {
             await refresh()
-            alert = AlertItem(title: "\(label) failed", message: error.localizedDescription)
+            alert = AlertItem(title: String(localized: "\(label) failed"), message: error.localizedDescription)
             return false
         }
     }
@@ -54,7 +51,7 @@ extension RepoModel {
     func beginBusy(_ label: String) -> Bool {
         if let running = busy {
             if alert == nil {
-                alert = AlertItem(title: "\(label) not started", message: "Wait for \(running) to finish, then try again.")
+                alert = AlertItem(title: String(localized: "\(label) not started"), message: String(localized: "Wait for \(running) to finish, then try again."))
             }
             return false
         }
@@ -97,7 +94,7 @@ extension RepoModel {
 
     func confirmForcePush() {
         confirmation = Confirmation(
-            title: "Force push \(currentBranch ?? "HEAD")?",
+            title: String(localized: "Force push \(currentBranch ?? "HEAD")?"),
             message: "Uses --force-with-lease: it overwrites the remote branch, but only if nobody else pushed to it since your last fetch.",
             confirmTitle: "Force Push"
         ) { [weak self] in await self?.push(force: true) }
@@ -113,27 +110,28 @@ extension RepoModel {
     func checkout(_ ref: Ref) async {
         let local = ref.kind == .remoteBranch ? ref.branchNameWithoutRemote : ref.name
         if ref.kind != .tag, let wt = worktree(holding: local) {
-            alert = AlertItem(title: "\(local) is checked out in another worktree",
-                              message: "Git allows a branch in one worktree at a time. It's open in \(wt.path). Open that worktree instead, or create a new branch.")
+            alert = AlertItem(title: String(localized: "\(local) is checked out in another worktree"),
+                              message: String(localized: "Git allows a branch in one worktree at a time. It's open in \(wt.path). Open that worktree instead, or create a new branch."))
             return
         }
+        let args: [String]
         switch ref.kind {
         case .localBranch:
-            await perform("Checkout", ["switch", ref.name])
+            args = ["switch", ref.name]
         case .remoteBranch:
-            let local = ref.branchNameWithoutRemote
             if localBranches.contains(where: { $0.name == local }) {
-                await perform("Checkout", ["switch", local])
+                args = ["switch", local]
             } else {
-                await perform("Checkout", ["switch", "--track", ref.name])
+                args = ["switch", "--track", ref.name]
             }
         case .tag:
-            await perform("Checkout", ["switch", "--detach", ref.name])
+            args = ["switch", "--detach", ref.name]
         }
+        await performUndoable(.checkout, "Checkout", args)
     }
 
     func checkoutCommit(_ sha: String) async {
-        await perform("Checkout", ["switch", "--detach", sha])
+        await performUndoable(.checkout, "Checkout", ["switch", "--detach", sha])
     }
 
     /// `--no-track`: a new branch made from e.g. origin/main shouldn't use main as its upstream.
@@ -163,7 +161,7 @@ extension RepoModel {
     func deleteBranch(_ ref: Ref) {
         if ref.kind == .remoteBranch, let remote = ref.remoteName {
             confirmation = Confirmation(
-                title: "Delete \(ref.name) on \(remote)?",
+                title: String(localized: "Delete \(ref.name) on \(remote)?"),
                 message: "This deletes the branch on the server for everyone.",
                 confirmTitle: "Delete Remote Branch"
             ) { [weak self] in
@@ -177,13 +175,18 @@ extension RepoModel {
             endBusy("Delete branch")
             if r.exitCode == 0 {
                 CommandLog.shared.add(.init(args: ["branch", "-d", ref.name], directory: root, start: .now, duration: 0, result: r))
+                lastUndo = nil
                 await refresh()
+                recordDeletedBranch(ref)
             } else if r.stderr.contains("not fully merged") {
                 confirmation = Confirmation(
-                    title: "\(ref.name) is not fully merged",
-                    message: "Its commits aren't in your current branch or its upstream. Delete it anyway? The commits can only be recovered via reflog.",
+                    title: String(localized: "\(ref.name) is not fully merged"),
+                    message: "Its commits aren't in your current branch or its upstream. Delete it anyway? Edit > Undo brings it back until you run another git command.",
                     confirmTitle: "Delete Anyway"
-                ) { [weak self] in await self?.perform("Delete branch", ["branch", "-D", ref.name]) }
+                ) { [weak self] in
+                    guard let self, await perform("Delete branch", ["branch", "-D", ref.name]) else { return }
+                    recordDeletedBranch(ref)
+                }
             } else {
                 alert = AlertItem(title: "Delete branch failed", message: GitError(command: "", result: r).localizedDescription)
             }
@@ -219,12 +222,12 @@ extension RepoModel {
         let short = String(sha.prefix(7))
         if mode == .hard {
             confirmation = Confirmation(
-                title: "Hard reset \(branch) to \(short)?",
-                message: "All uncommitted changes are lost, and commits after \(short) leave the branch.",
+                title: String(localized: "Hard reset \(branch) to \(short)?"),
+                message: String(localized: "All uncommitted changes are lost, and commits after \(short) leave the branch. Edit > Undo can move the branch back, but not restore uncommitted changes."),
                 confirmTitle: "Reset"
-            ) { [weak self] in await self?.perform("Reset", ["reset", "--hard", sha]) }
+            ) { [weak self] in await self?.performUndoable(.reset(.hard), "Reset", ["reset", "--hard", sha]) }
         } else {
-            Task { await perform("Reset", ["reset", "--\(mode.rawValue)", sha]) }
+            Task { await performUndoable(.reset(mode), "Reset", ["reset", "--\(mode.rawValue)", sha]) }
         }
     }
 
@@ -237,7 +240,7 @@ extension RepoModel {
     }
 
     func deleteTag(_ name: String) {
-        confirmation = Confirmation(title: "Delete tag \(name)?", message: "Only deletes the local tag.",
+        confirmation = Confirmation(title: String(localized: "Delete tag \(name)?"), message: "Only deletes the local tag.",
                                     confirmTitle: "Delete") { [weak self] in
             await self?.perform("Delete tag", ["tag", "-d", name])
         }
@@ -285,7 +288,7 @@ extension RepoModel {
         guard !changes.isEmpty else { return }
         let names = changes.count == 1 ? changes[0].path : "\(changes.count) files"
         confirmation = Confirmation(
-            title: "Discard changes to \(names)?",
+            title: String(localized: "Discard changes to \(names)?"),
             message: "This can't be undone.",
             confirmTitle: "Discard"
         ) { [weak self] in
@@ -301,11 +304,14 @@ extension RepoModel {
         var args = ["commit"]
         if amend { args.append("--amend") }
         if message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            if amend { args.append("--no-edit") } else { args.append("--no-edit") }
+            args.append("--no-edit")
         } else {
             args += ["-m", message]
         }
-        return await perform(amend ? "Amend" : "Commit", args)
+        // A commit that concludes a merge or cherry-pick isn't offered for undo:
+        // a soft reset would silently drop the operation's state.
+        if operation != nil { return await perform(amend ? "Amend" : "Commit", args) }
+        return await performUndoable(amend ? .amend : .commit, amend ? "Amend" : "Commit", args)
     }
 
     /// Resolves a conflict with one whole side. `mine` is the user's own
@@ -338,7 +344,7 @@ extension RepoModel {
             return true
         } catch {
             await refresh()
-            alert = AlertItem(title: "\(action.title) failed", message: error.localizedDescription)
+            alert = AlertItem(title: String(localized: "\(action.title) failed"), message: error.localizedDescription)
             return false
         }
     }
@@ -392,7 +398,7 @@ extension RepoModel {
     }
 
     func dropStash(_ stash: Stash) {
-        confirmation = Confirmation(title: "Delete \(stash.selector)?", message: stash.message,
+        confirmation = Confirmation(title: String(localized: "Delete \(stash.selector)?"), message: stash.message,
                                     confirmTitle: "Delete") { [weak self] in
             await self?.perform("Drop stash", ["stash", "drop", stash.selector])
         }
@@ -415,10 +421,10 @@ extension RepoModel {
     func removeWorktree(_ wt: Worktree) {
         let dirty = (worktreeInfo[wt.path]?.changes ?? 0) > 0
         confirmation = Confirmation(
-            title: "Remove worktree \(wt.displayName)?",
+            title: String(localized: "Remove worktree \(wt.displayName)?"),
             message: dirty
-                ? "It has uncommitted changes. They will be lost. The branch \(wt.branch ?? "") stays."
-                : "Deletes the folder \(wt.path). The branch \(wt.branch ?? "") stays.",
+                ? String(localized: "It has uncommitted changes. They will be lost. The branch \(wt.branch ?? "") stays.")
+                : String(localized: "Deletes the folder \(wt.path). The branch \(wt.branch ?? "") stays."),
             confirmTitle: "Remove"
         ) { [weak self] in
             await self?.perform("Remove worktree", ["worktree", "remove"] + (dirty ? ["--force"] : []) + [wt.path])

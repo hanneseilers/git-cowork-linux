@@ -23,17 +23,17 @@ enum SSHKeys {
     /// Returns the private key's path once the host has the public key.
     static func create(for account: HostAccount) async throws -> String {
         guard let token = await Credentials.shared.accessToken(for: account) else {
-            throw SSHKeyError(message: "No token for \(account.host) in the Keychain. Sign in again.", needsSignIn: true)
+            throw SSHKeyError(message: String(localized: "No token for \(account.host) in the Keychain. Sign in again."), needsSignIn: true)
         }
         guard ProcessInfo.processInfo.environment["SSH_AUTH_SOCK"] != nil else {
-            throw SSHKeyError(message: "macOS's ssh-agent isn't available, so the key's passphrase can't be put in the Keychain.")
+            throw SSHKeyError(message: L("macOS's ssh-agent isn't available, so the key's passphrase can't be put in the Keychain."))
         }
         let fm = FileManager.default
         if !fm.fileExists(atPath: sshDir) {
             try? fm.createDirectory(atPath: sshDir, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         }
         guard let path = plannedPath(for: account) else {
-            throw SSHKeyError(message: "Couldn't find a free file name for the key in ~/.ssh.")
+            throw SSHKeyError(message: L("Couldn't find a free file name for the key in ~/.ssh."))
         }
 
         // 1. Make the key. ssh-keygen won't replace a file that appeared meanwhile.
@@ -43,7 +43,7 @@ enum SSHKeys {
                                input: SSHKey.passphraseInput(passphrase, times: 2))
         guard keygen.status == 0, let publicKey = try? String(contentsOfFile: path + ".pub", encoding: .utf8) else {
             if keygen.status == 0 { removeFiles(path) }   // never delete a file ssh-keygen refused to replace
-            throw SSHKeyError(message: "ssh-keygen failed: \(keygen.stderr.isEmpty ? "exit \(keygen.status)" : keygen.stderr)")
+            throw SSHKeyError(message: String(localized: "ssh-keygen failed: \(keygen.stderr.isEmpty ? "exit \(keygen.status)" : keygen.stderr)"))
         }
 
         do {
@@ -53,7 +53,7 @@ enum SSHKeys {
             let add = await run("/usr/bin/ssh-add", ["--apple-use-keychain", path],
                                 input: SSHKey.passphraseInput(passphrase, times: 1))
             guard add.status == 0 else {
-                throw SSHKeyError(message: "Couldn't put the key's passphrase in the Keychain: \(add.stderr)")
+                throw SSHKeyError(message: String(localized: "Couldn't put the key's passphrase in the Keychain: \(add.stderr)"))
             }
             _ = await run("/usr/bin/ssh-add", ["-d", path], input: Data())
 
@@ -70,12 +70,12 @@ enum SSHKeys {
     private static func upload(_ publicKey: String, for account: HostAccount, token: String) async throws {
         guard let request = HostAPI.addSSHKeyRequest(kind: account.kind, host: account.host, token: token,
                                                      title: SSHKey.title(machine: machineName), publicKey: publicKey)
-        else { throw SSHKeyError(message: "\(account.kind.title) servers can't take an SSH key from git-cowork.") }
+        else { throw SSHKeyError(message: String(localized: "\(account.kind.title) servers can't take an SSH key from git-cowork.")) }
         let data: Data, response: URLResponse
         do {
             (data, response) = try await URLSession.shared.data(for: request)
         } catch {
-            throw SSHKeyError(message: "Couldn't reach \(account.host): \(error.localizedDescription)")
+            throw SSHKeyError(message: String(localized: "Couldn't reach \(account.host): \(error.localizedDescription)"))
         }
         let http = response as? HTTPURLResponse
         let result = HostAPI.parseAddSSHKey(status: http?.statusCode ?? 0, data: data, kind: account.kind,
@@ -86,14 +86,14 @@ enum SSHKeys {
         case .missingScope:
             let scope = account.kind == .github ? "write:public_key" : "api"
             let fix = account.method == .oauth
-                ? "Sign in again to allow it."
-                : "Make a new token with the scopes \(HostAPI.tokenScopesHint(kind: account.kind)) and add it with Add Token."
-            throw SSHKeyError(message: "Your sign-in on \(account.host) isn't allowed to add SSH keys (needs the \(scope) scope). \(fix)",
+                ? L("Sign in again to allow it.")
+                : String(localized: "Make a new token with the scopes \(HostAPI.tokenScopesHint(kind: account.kind)) and add it with Add Token.")
+            throw SSHKeyError(message: String(localized: "Your sign-in on \(account.host) isn't allowed to add SSH keys (needs the \(scope) scope).") + " " + fix,
                               needsSignIn: true)
         case .signedOut:
-            throw SSHKeyError(message: "\(account.host) no longer accepts your sign-in. Sign in again.", needsSignIn: true)
+            throw SSHKeyError(message: String(localized: "\(account.host) no longer accepts your sign-in. Sign in again."), needsSignIn: true)
         case .failed(let reason):
-            throw SSHKeyError(message: "\(account.host) didn't add the key: \(reason)")
+            throw SSHKeyError(message: String(localized: "\(account.host) didn't add the key: \(reason)"))
         }
     }
 

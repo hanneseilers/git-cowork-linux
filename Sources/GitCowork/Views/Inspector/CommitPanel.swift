@@ -114,7 +114,7 @@ struct CommitPanel: View {
                         copied = false
                     }
                 } label: {
-                    Text(copied ? "copied" : String(d.id.prefix(7)))
+                    Text(verbatim: copied ? L("copied") : String(d.id.prefix(7)))
                         .font(Theme.Font.mono)
                 }
                 .buttonStyle(.link)
@@ -197,7 +197,7 @@ struct WorkingCopyBanner: View {
         HStack(spacing: Theme.Space.m) {
             Image(systemName: "pencil.line")
                 .foregroundStyle(InspectorStyle.bannerTint)
-            Text(verbatim: "\(count) file change\(count == 1 ? "" : "s") in working directory")
+            Text(verbatim: count == 1 ? L("1 file change in working directory") : String(localized: "\(count) file changes in working directory"))
                 .font(Theme.Font.body.weight(.medium))
                 .lineLimit(1)
             Spacer(minLength: Theme.Space.s)

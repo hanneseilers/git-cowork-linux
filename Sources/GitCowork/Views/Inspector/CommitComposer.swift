@@ -104,11 +104,13 @@ struct CommitComposer: View {
 
     private var buttonTitle: String {
         let n = model.status.staged.count
-        let files = "\(n) file\(n == 1 ? "" : "s")"
-        if model.operation == .merge { return "Commit Merge" }
-        if amend { return n == 0 ? "Amend Previous Commit" : "Amend Previous Commit with \(files)" }
-        if n == 0 { return "Stage Changes to Commit" }
-        return "Commit Changes to \(files)"
+        if model.operation == .merge { return L("Commit Merge") }
+        if amend {
+            if n == 0 { return L("Amend Previous Commit") }
+            return n == 1 ? L("Amend Previous Commit with 1 file") : String(localized: "Amend Previous Commit with \(n) files")
+        }
+        if n == 0 { return L("Stage Changes to Commit") }
+        return n == 1 ? L("Commit Changes to 1 file") : String(localized: "Commit Changes to \(n) files")
     }
 
     private func commit() {

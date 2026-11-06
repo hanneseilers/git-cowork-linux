@@ -29,13 +29,13 @@ struct TeamSheet: View {
 
     private var problem: String? {
         let filled = rows.filter { !$0.email.trimmingCharacters(in: .whitespaces).isEmpty }
-        if let bad = filled.first(where: { !emailOK($0.email) }) { return "“\(bad.email)” isn't an email address." }
+        if let bad = filled.first(where: { !emailOK($0.email) }) { return String(localized: "“\(bad.email)” isn't an email address.") }
         let emails = filled.map { $0.email.trimmingCharacters(in: .whitespaces).lowercased() }
-        if Set(emails).count != emails.count { return "Each email can only be listed once." }
+        if Set(emails).count != emails.count { return L("Each email can only be listed once.") }
         let handles = filled.map { handle(for: $0).lowercased() }
-        if Set(handles).count != handles.count { return "Handles must be unique." }
+        if Set(handles).count != handles.count { return L("Handles must be unique.") }
         if filled.contains(where: { handle(for: $0).contains(where: { !($0.isLetter || $0.isNumber || $0 == "." || $0 == "_" || $0 == "-") }) }) {
-            return "Handles may only use letters, digits, . _ and -."
+            return L("Handles may only use letters, digits, . _ and -.")
         }
         return nil
     }

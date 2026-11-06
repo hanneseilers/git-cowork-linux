@@ -58,10 +58,10 @@ enum BoardActions {
     static func confirmDelete(_ id: String, model: RepoModel) {
         guard let t = model.cowork.task(id) else { return }
         let comments = model.cowork.comments(on: t.commentParent).count
-        let extra = comments > 0 ? " and its \(comments) comment\(comments == 1 ? "" : "s")" : ""
+        let extra = comments == 0 ? "" : comments == 1 ? L(" and its comment") : String(localized: " and its \(comments) comments")
         model.confirmation = Confirmation(
-            title: "Delete \(t.id)?",
-            message: "“\(t.title)”\(extra) will be removed for everyone on the next sync.",
+            title: String(localized: "Delete \(t.id)?"),
+            message: String(localized: "“\(t.title)”\(extra) will be removed for everyone on the next sync."),
             confirmTitle: "Delete"
         ) {
             if model.coworkSelection == .task(t.id) { model.coworkSelection = nil }

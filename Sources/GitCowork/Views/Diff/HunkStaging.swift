@@ -15,9 +15,9 @@ enum HunkAction: Hashable {
 
     var title: String {
         switch self {
-        case .stage: "Stage Hunk"
-        case .unstage: "Unstage Hunk"
-        case .discard: "Discard Hunk"
+        case .stage: L("Stage Hunk")
+        case .unstage: L("Unstage Hunk")
+        case .discard: L("Discard Hunk")
         }
     }
 }
@@ -43,7 +43,7 @@ enum HunkStaging {
         let lines = doc.newRange(ofHunk: hunk).map { " (lines \($0.lowerBound)–\($0.upperBound))" } ?? ""
         model.confirmation = Confirmation(
             title: "Discard this hunk?",
-            message: "Removes the change in \(file.fileName)\(lines) from the working copy. This can't be undone.",
+            message: String(localized: "Removes the change in \(file.fileName)\(lines) from the working copy. This can't be undone."),
             confirmTitle: "Discard Hunk"
         ) {
             await run(.discard, hunk: hunk, in: doc, file: file, model: model)

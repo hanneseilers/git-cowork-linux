@@ -6,7 +6,8 @@ import SwiftUI
 struct BoardView: View {
     let model: RepoModel
 
-    @AppStorage("board.mineOnly") private var mineOnly = false
+    /// "" = everyone, "me", "unassigned", or an email.
+    @AppStorage("board.assignee") private var assignee = ""
     @State private var labelFilter: String?
     @State private var query = ""
     @State private var showAllDone = false
@@ -23,7 +24,7 @@ struct BoardView: View {
     }
 
     var body: some View {
-        let data = BoardData(store: model.cowork, mineOnly: mineOnly, label: labelFilter, query: query)
+        let data = BoardData(store: model.cowork, assignee: assignee, label: labelFilter, query: query)
         VStack(spacing: 0) {
             header(data)
             if model.cowork.loaded && model.cowork.tasks.isEmpty {
@@ -44,15 +45,7 @@ struct BoardView: View {
             CountBadge(count: data.visibleCount)
                 .padding(.trailing, Theme.Space.s)
 
-            Picker("Show", selection: $mineOnly) {
-                Text("Mine").tag(true)
-                Text("All").tag(false)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .controlSize(.small)
-            .fixedSize()
-            .help("Show only tasks assigned to you")
+            assigneeMenu
 
             labelMenu(data.allLabels)
 
@@ -67,6 +60,40 @@ struct BoardView: View {
             .buttonStyle(ActionButtonStyle.primary())
             .help("New task in To Do (N)")
         }
+    }
+
+    /// Whose tasks to show: everyone, me, nobody, or one person.
+    private var assigneeMenu: some View {
+        let people = model.cowork.others
+        let title: String = switch assignee {
+        case "": L("Everyone")
+        case "me": L("Mine")
+        case "unassigned": L("Unassigned")
+        default: model.cowork.person(assignee)?.displayName ?? assignee
+        }
+        return Menu {
+            Picker("Show", selection: $assignee) {
+                Text("Everyone").tag("")
+                Text("Mine").tag("me")
+                Text("Unassigned").tag("unassigned")
+                if !people.isEmpty {
+                    Divider()
+                    ForEach(people) { p in Text(p.displayName).tag(p.email.lowercased()) }
+                }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            HStack(spacing: Theme.Space.s) {
+                Image(systemName: assignee.isEmpty ? "person.2" : "person")
+                Text(title).lineLimit(1)
+                Image(systemName: "chevron.down").font(Theme.Glyph.dropdown)
+            }
+            .actionButtonLabel(tint: assignee.isEmpty ? nil : .accentColor)
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help("Show tasks of one person")
     }
 
     private func labelMenu(_ labels: [String]) -> some View {
@@ -150,8 +177,13 @@ struct BoardView: View {
         }
         .onKeyPress(.upArrow) { moveSelection(data, dx: 0, dy: -1) }
         .onKeyPress(.downArrow) { moveSelection(data, dx: 0, dy: 1) }
-        .onKeyPress(.leftArrow) { moveSelection(data, dx: -1, dy: 0) }
-        .onKeyPress(.rightArrow) { moveSelection(data, dx: 1, dy: 0) }
+        // ⌘← / ⌘→ move the selected task to the previous / next column.
+        .onKeyPress(.leftArrow, phases: .down) { press in
+            press.modifiers.contains(.command) ? moveTask(by: -1) : moveSelection(data, dx: -1, dy: 0)
+        }
+        .onKeyPress(.rightArrow, phases: .down) { press in
+            press.modifiers.contains(.command) ? moveTask(by: 1) : moveSelection(data, dx: 1, dy: 0)
+        }
         .onKeyPress(.escape) {
             guard model.coworkSelection != nil else { return .ignored }
             model.coworkSelection = nil
@@ -221,7 +253,7 @@ struct BoardView: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(status.color)
                 .frame(width: 14)
-            Text(status.title)
+            Text(status.label)
                 .font(Theme.Font.body.weight(.semibold))
                 .lineLimit(1)
             CountBadge(count: count)
@@ -236,7 +268,7 @@ struct BoardView: View {
             }
             .buttonStyle(.borderless)
             .foregroundStyle(.secondary)
-            .help("New task in \(status.title)")
+            .help("New task in \(status.label)")
         }
         // Icon lines up with the card titles below. As tall as a PanelBar, but
         // with its own insets and no hairline: it sits inside the column.
@@ -301,6 +333,14 @@ struct BoardView: View {
     }
 
     // MARK: Keyboard
+
+    private func moveTask(by step: Int) -> KeyPress.Result {
+        guard case .task(let id) = model.coworkSelection, let t = model.cowork.task(id) else { return .ignored }
+        let all = TaskStatus.allCases
+        guard let i = all.firstIndex(of: t.status), all.indices.contains(i + step) else { return .handled }
+        BoardActions.move(id, to: all[i + step], model: model)
+        return .handled
+    }
 
     private func moveSelection(_ data: BoardData, dx: Int, dy: Int) -> KeyPress.Result {
         let statuses = TaskStatus.allCases
@@ -375,7 +415,7 @@ struct BoardData {
     private var verdictByBranch: [String: ReviewVerdict] = [:]
     private var comments: [String: [CoworkComment]] = [:]
 
-    init(store: CoworkStore, mineOnly: Bool, label: String?, query: String) {
+    init(store: CoworkStore, assignee: String, label: String?, query: String) {
         let snapshot = store.snapshot
         let me = store.me.id
         let q = query.trimmingCharacters(in: .whitespaces)
@@ -383,7 +423,13 @@ struct BoardData {
         var grouped: [TaskStatus: [CoworkTask]] = [:]
         for t in snapshot.tasks {
             labels.formUnion(t.labels)
-            if mineOnly && t.assignee?.lowercased() != me { continue }
+            let who = t.assignee?.lowercased()
+            switch assignee {
+            case "": break
+            case "me": if who != me { continue }
+            case "unassigned": if who != nil { continue }
+            default: if who != assignee { continue }
+            }
             if let label, !t.labels.contains(label) { continue }
             if !BoardLogic.matches(t, query: q) { continue }
             grouped[t.status, default: []].append(t)

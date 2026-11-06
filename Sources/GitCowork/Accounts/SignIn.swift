@@ -10,21 +10,21 @@ struct SignInError: LocalizedError {
 enum SignIn {
     static func requestCode(kind: HostKind, host: String, clientID: String) async throws -> DeviceFlow.Code {
         guard let request = DeviceFlow.codeRequest(kind: kind, host: host, clientID: clientID) else {
-            throw SignInError(message: "\(host) isn't a valid server name.")
+            throw SignInError(message: L("\(host) isn't a valid server name."))
         }
         let (data, response) = try await send(request, host: host)
         if let code = DeviceFlow.parseCode(data) { return code }
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
         if case .failed(let reason) = DeviceFlow.parsePoll(data), status != 404 {
-            throw SignInError(message: "\(host) refused the sign-in: \(reason)")
+            throw SignInError(message: L("\(host) refused the sign-in: \(reason)"))
         }
-        throw SignInError(message: "\(host) doesn't offer browser sign-in for this app. Check the client ID, or add an access token instead.")
+        throw SignInError(message: L("\(host) doesn't offer browser sign-in for this app. Check the client ID, or add an access token instead."))
     }
 
     /// Polls until the user approves in the browser. Cancel the task to stop.
     static func waitForToken(kind: HostKind, host: String, clientID: String, code: DeviceFlow.Code) async throws -> TokenSet {
         guard let request = DeviceFlow.tokenRequest(kind: kind, host: host, clientID: clientID, deviceCode: code.deviceCode) else {
-            throw SignInError(message: "\(host) isn't a valid server name.")
+            throw SignInError(message: L("\(host) isn't a valid server name."))
         }
         var interval = code.interval
         let deadline = Date().addingTimeInterval(code.expiresIn)
@@ -35,26 +35,26 @@ enum SignIn {
             case .token(let tokens): return tokens
             case .pending: continue
             case .slowDown: interval += 5
-            case .denied: throw SignInError(message: "Sign-in was declined in the browser.")
-            case .expired: throw SignInError(message: "The code expired. Start again.")
-            case .failed(let reason): throw SignInError(message: "Sign-in failed: \(reason)")
+            case .denied: throw SignInError(message: L("Sign-in was declined in the browser."))
+            case .expired: throw SignInError(message: L("The code expired. Start again."))
+            case .failed(let reason): throw SignInError(message: L("Sign-in failed: \(reason)"))
             }
         }
-        throw SignInError(message: "The code expired. Start again.")
+        throw SignInError(message: L("The code expired. Start again."))
     }
 
     /// Checks a token and returns the account name it belongs to.
     static func username(kind: HostKind, host: String, token: String) async throws -> String {
         guard let request = HostAPI.currentUserRequest(kind: kind, host: host, token: token) else {
-            throw SignInError(message: "\(host) isn't a valid server name.")
+            throw SignInError(message: L("\(host) isn't a valid server name."))
         }
         let (data, response) = try await send(request, host: host)
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
         if status == 401 || status == 403 {
-            throw SignInError(message: "\(host) didn't accept the token. Check that it's current and has the scopes \(HostAPI.tokenScopesHint(kind: kind)).")
+            throw SignInError(message: L("\(host) didn't accept the token. Check that it's current and has the scopes \(HostAPI.tokenScopesHint(kind: kind))."))
         }
         guard (200..<300).contains(status), let name = HostAPI.parseUsername(data, kind: kind) else {
-            throw SignInError(message: "\(host) didn't answer like a \(kind.title) server (HTTP \(status)). Check the server type.")
+            throw SignInError(message: L("\(host) didn't answer like a \(kind.title) server (HTTP \(status)). Check the server type."))
         }
         return name
     }
@@ -69,13 +69,13 @@ enum SignIn {
         return tokens
     }
 
-    private static func send(_ request: URLRequest, host: String) async throws -> (Data, URLResponse) {
+    static func send(_ request: URLRequest, host: String) async throws -> (Data, URLResponse) {
         do {
             return try await URLSession.shared.data(for: request)
         } catch let error as URLError where error.code == .cancelled {
             throw CancellationError()
         } catch {
-            throw SignInError(message: "Couldn't reach \(host): \(error.localizedDescription)")
+            throw SignInError(message: L("Couldn't reach \(host): \(error.localizedDescription)"))
         }
     }
 }

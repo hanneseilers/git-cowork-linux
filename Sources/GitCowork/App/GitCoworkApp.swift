@@ -28,9 +28,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
         NSWindow.allowsAutomaticWindowTabbing = true
         _ = GitRunner.shared   // start resolving the login shell PATH early
+        DeveloperToolsCheck.runAtLaunch()
         #if DEBUG
         DebugSnapshot.scheduleIfRequested()
         CoworkSelfTest.runIfRequested()
+        UndoSelfTest.runIfRequested()
         #endif
         LaunchFolders.openFromCommandLine()
     }

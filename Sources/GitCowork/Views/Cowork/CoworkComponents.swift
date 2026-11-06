@@ -46,7 +46,7 @@ struct Chip: View {
 
 struct StatusChip: View {
     let status: TaskStatus
-    var body: some View { Chip(text: status.title, symbol: status.symbol, color: status.color) }
+    var body: some View { Chip(text: status.label, symbol: status.symbol, color: status.color) }
 }
 
 struct VerdictChip: View {
@@ -102,7 +102,7 @@ struct AssigneePicker: View {
     @Binding var selection: String
 
     var body: some View {
-        Picker(title, selection: $selection) {
+        Picker(LocalizedStringKey(title), selection: $selection) {
             AssigneeOptions(store: store) { email, title, icon in
                 Label { Text(title) } icon: { icon }.tag(email ?? "")
             }
@@ -116,7 +116,7 @@ struct StatusPicker: View {
     @Binding var selection: TaskStatus
 
     var body: some View {
-        Picker(title, selection: $selection) {
+        Picker(LocalizedStringKey(title), selection: $selection) {
             ForEach(TaskStatus.allCases, id: \.self) { $0.menuLabel.tag($0) }
         }
     }
@@ -125,6 +125,6 @@ struct StatusPicker: View {
 extension TaskStatus {
     /// Title with the colored status icon, for menus and pickers.
     var menuLabel: some View {
-        Label { Text(title) } icon: { menuSymbol(symbol, color) }
+        Label { Text(label) } icon: { menuSymbol(symbol, color) }
     }
 }

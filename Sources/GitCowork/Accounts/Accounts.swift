@@ -19,7 +19,7 @@ final class AccountStore {
             account.sshKey = old.sshKey
         }
         guard let data = try? JSONEncoder().encode(tokens), Keychain.save(data, host: account.host) else {
-            throw SignInError(message: "Couldn't save the token in the Keychain.")
+            throw SignInError(message: L("Couldn't save the token in the Keychain."))
         }
         accounts.removeAll { $0.host == account.host }
         accounts.append(account)
@@ -145,6 +145,11 @@ final class Credentials: @unchecked Sendable {
             else { continue }
             cache(["store"], input: input, gitPath: gitPath, env: env)
         }
+    }
+
+    /// The account's token for API calls, renewed first if it's about to expire.
+    func tokens(for account: HostAccount) async -> TokenSet? {
+        await refresher.validTokens(for: account)
     }
 
     /// Drops a host's token from the running daemon.

@@ -96,8 +96,8 @@ private struct WelcomeTile: View {
                     .foregroundStyle(Color.accentColor)
                     .frame(width: 24)
                 VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                    Text(title).font(Theme.Font.body.weight(.medium))
-                    Text(subtitle).font(Theme.Font.small).foregroundStyle(.secondary)
+                    Text(ui: title).font(Theme.Font.body.weight(.medium))
+                    Text(ui: subtitle).font(Theme.Font.small).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 0)
                 Text(shortcut).font(Theme.Font.small).foregroundStyle(.tertiary)
@@ -147,7 +147,7 @@ enum RepoPicker {
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
-        panel.message = "Choose a git repository or worktree folder"
+        panel.message = L("Choose a git repository or worktree folder")
         return panel.runModal() == .OK ? panel.url?.path : nil
     }
 }

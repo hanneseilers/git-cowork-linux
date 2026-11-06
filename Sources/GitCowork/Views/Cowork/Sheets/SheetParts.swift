@@ -9,7 +9,7 @@ struct SheetRow<Content: View>: View {
 
     var body: some View {
         GridRow(alignment: top ? .top : .firstTextBaseline) {
-            Text(label)
+            Text(ui: label)
                 .foregroundStyle(.secondary)
                 .padding(.top, top ? 5 : 0)
                 .gridColumnAlignment(.trailing)
@@ -40,7 +40,7 @@ struct SheetNotice<Trailing: View>: View {
     var body: some View {
         HStack(alignment: .center, spacing: Theme.Space.m) {
             Image(systemName: symbol).foregroundStyle(color)
-            Text(text)
+            Text(ui: text)
                 .font(Theme.Font.small)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)

@@ -72,7 +72,7 @@ struct RenameBranchSheet: View {
     }
 
     var body: some View {
-        SheetScaffold(title: "Rename \(old)", confirmTitle: "Rename", confirmDisabled: !RefName.isValid(name) || name == old || model.busy != nil) {
+        SheetScaffold(title: String(localized: "Rename \(old)"), confirmTitle: "Rename", confirmDisabled: !RefName.isValid(name) || name == old || model.busy != nil) {
             Task { await model.renameBranch(old, to: name) }
         } content: {
             TextField("New name", text: $name).textFieldStyle(.roundedBorder)
@@ -201,6 +201,7 @@ struct CloneSheet: View {
     let onCloned: (String) -> Void
     @State private var url = ""
     @State private var parent = CloneSheet.defaultParent
+    @State private var accounts = AccountStore.shared.accounts
     @State private var running = false
     @State private var error: String?
     @Environment(\.dismiss) private var dismiss
@@ -210,7 +211,9 @@ struct CloneSheet: View {
         return FileManager.default.fileExists(atPath: gh) ? gh : NSHomeDirectory()
     }
 
-    private var folderName: String {
+    private var folderName: String { Self.folderName(for: url) }
+
+    private static func folderName(for url: String) -> String {
         var s = url.trimmingCharacters(in: .whitespaces)
         while s.hasSuffix("/") { s.removeLast() }
         if s.hasSuffix(".git") { s = String(s.dropLast(4)) }
@@ -220,6 +223,14 @@ struct CloneSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.l) {
             Text("Clone Repository").font(Theme.Font.title)
+            if !accounts.isEmpty {
+                CloneRepoList(accounts: accounts, url: $url) { picked in
+                    guard !running else { return }
+                    url = picked
+                    clone(picked)
+                }
+                Text("Or Enter a URL").font(Theme.Font.caption).foregroundStyle(.secondary)
+            }
             TextField("git@github.com:org/repo.git or https://…", text: $url)
                 .textFieldStyle(.roundedBorder)
             HStack {
@@ -244,22 +255,24 @@ struct CloneSheet: View {
                 if running { ProgressView().controlSize(.small); Text("Cloning…").font(Theme.Font.small) }
                 Spacer()
                 Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
-                Button("Clone") { clone() }
+                Button("Clone") { clone(url) }
                     .keyboardShortcut(.defaultAction)
                     .disabled(folderName.isEmpty || running)
             }
         }
         .padding(Theme.Space.xl)
-        .frame(width: 480)
+        .frame(width: accounts.isEmpty ? 480 : 540)
     }
 
-    private func clone() {
+    private func clone(_ source: String) {
+        let name = Self.folderName(for: source)
+        guard !name.isEmpty else { return }
         running = true
         error = nil
-        let dest = parent + "/" + folderName
+        let dest = parent + "/" + name
         Task {
             do {
-                try await RepoModel.clone(url.trimmingCharacters(in: .whitespaces), into: dest)
+                try await RepoModel.clone(source.trimmingCharacters(in: .whitespaces), into: dest)
                 running = false
                 dismiss()
                 onCloned(dest)

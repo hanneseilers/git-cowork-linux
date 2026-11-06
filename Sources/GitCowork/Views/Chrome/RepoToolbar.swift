@@ -120,10 +120,10 @@ private struct ActionButtons: View {
 
             ChromeDivider()
 
-            ChromeButton(title: "Terminal", symbol: "terminal", help: "Open in \(Prefs.terminalApp)") {
+            ChromeButton(title: "Terminal", symbol: "terminal", help: String(localized: "Open in \(Prefs.terminalApp)")) {
                 External.openTerminal(model.root.path)
             }
-            ChromeButton(title: "Editor", symbol: "chevron.left.forwardslash.chevron.right", help: "Open in \(Prefs.editorApp)") {
+            ChromeButton(title: "Editor", symbol: "chevron.left.forwardslash.chevron.right", help: String(localized: "Open in \(Prefs.editorApp)")) {
                 External.openEditor(model.root.path)
             }
         }
@@ -132,13 +132,21 @@ private struct ActionButtons: View {
     private var busy: Bool { model.busy != nil }
 
     private var pullHelp: String {
-        guard let up = model.status.upstream else { return "Pull (no upstream set)" }
-        return model.status.behind > 0 ? "Pull \(model.status.behind) commit(s) from \(up)" : "Pull from \(up)"
+        guard let up = model.status.upstream else { return L("Pull (no upstream set)") }
+        switch model.status.behind {
+        case 0: return String(localized: "Pull from \(up)")
+        case 1: return String(localized: "Pull 1 commit from \(up)")
+        case let n: return String(localized: "Pull \(n) commits from \(up)")
+        }
     }
 
     private var pushHelp: String {
-        guard let up = model.status.upstream else { return "Push and set upstream" }
-        return model.status.ahead > 0 ? "Push \(model.status.ahead) commit(s) to \(up)" : "Push to \(up)"
+        guard let up = model.status.upstream else { return L("Push and set upstream") }
+        switch model.status.ahead {
+        case 0: return String(localized: "Push to \(up)")
+        case 1: return String(localized: "Push 1 commit to \(up)")
+        case let n: return String(localized: "Push \(n) commits to \(up)")
+        }
     }
 }
 
@@ -184,7 +192,7 @@ private struct RepositoryPicker: View {
     }
 
     private func worktreeLabel(_ wt: Worktree) -> String {
-        let branch = wt.branch ?? "detached"
+        let branch = wt.branch ?? L("detached")
         return wt.displayName == branch ? branch : "\(branch) — \(wt.displayName)"
     }
 
@@ -221,8 +229,8 @@ private struct BranchPicker: View {
 
     private var title: String {
         if let b = model.currentBranch { return b }
-        if let sha = model.headSHA { return "detached at \(sha.prefix(7))" }
-        return "no commits"
+        if let sha = model.headSHA { return String(format: L("detached at %@"), String(sha.prefix(7))) }
+        return L("no commits")
     }
 
     /// A branch checked out in another worktree can't be switched to here;

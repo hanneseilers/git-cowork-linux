@@ -7,14 +7,14 @@ enum SidebarSection: String, CaseIterable {
 
     var title: String {
         switch self {
-        case .local: "Local"
-        case .remote: "Remote"
-        case .worktrees: "Worktrees"
-        case .tasks: "Tasks"
-        case .reviews: "Reviews"
-        case .stashes: "Stashes"
-        case .tags: "Tags"
-        case .team: "Team"
+        case .local: L("Local")
+        case .remote: L("Remote")
+        case .worktrees: L("Worktrees")
+        case .tasks: L("Tasks")
+        case .reviews: L("Reviews")
+        case .stashes: L("Stashes")
+        case .tags: L("Tags")
+        case .team: L("Team")
         }
     }
 
@@ -46,9 +46,9 @@ enum SidebarLink: String {
 
     var title: String {
         switch self {
-        case .board: "All Tasks…"
-        case .reviews: "All Reviews…"
-        case .team: "Edit Team…"
+        case .board: L("All Tasks…")
+        case .reviews: L("All Reviews…")
+        case .team: L("Edit Team…")
         }
     }
 

@@ -6,7 +6,7 @@ import SwiftUI
 #if DEBUG
 
 /// For checking the UI without screen-recording permission:
-/// GITCOWORK_SNAPSHOT=/tmp/shot.png renders the front window to a PNG after a few seconds.
+/// GITCOWORK_SNAPSHOT=/tmp/shot.png renders the front window (or its open sheet) to a PNG after a few seconds.
 enum DebugSnapshot {
     /// GITCOWORK_DEBUG_SELECT = "commit:<n>" (nth commit) | "diff" (first changed file) | "commitdiff:<n>"
     /// GITCOWORK_DEBUG_MODE = "board" | "reviews", optionally ":<n>" to select the nth task / review.
@@ -48,6 +48,7 @@ enum DebugSnapshot {
         }
     }
 
+    @MainActor
     static func scheduleIfRequested() {
         // GITCOWORK_DEBUG_APPEARANCE = "light" | "dark": render in that appearance.
         switch ProcessInfo.processInfo.environment["GITCOWORK_DEBUG_APPEARANCE"] {
@@ -64,6 +65,18 @@ enum DebugSnapshot {
                 menu.performActionForItem(at: i)
             }
         }
+        // GITCOWORK_DEBUG_CLONE=1: open the Clone sheet in the first window (to snapshot it).
+        if ProcessInfo.processInfo.environment["GITCOWORK_DEBUG_CLONE"] != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                // Same as choosing File > Clone Repository… (⇧⌘O).
+                for item in NSApp.mainMenu?.items ?? [] {
+                    guard let menu = item.submenu,
+                          let i = menu.items.firstIndex(where: { $0.title.hasPrefix("Clone Repository") }) else { continue }
+                    menu.performActionForItem(at: i)
+                    return
+                }
+            }
+        }
         guard let path = ProcessInfo.processInfo.environment["GITCOWORK_SNAPSHOT"] else { return }
         let delay = Double(ProcessInfo.processInfo.environment["GITCOWORK_SNAPSHOT_DELAY"] ?? "") ?? 4
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
@@ -74,7 +87,8 @@ enum DebugSnapshot {
             let candidate = settings ?? NSApp.keyWindow ?? NSApp.mainWindow
                 ?? NSApp.orderedWindows.first(where: { $0.isVisible && $0.contentView != nil })
                 ?? NSApp.windows.first(where: { $0.isVisible && $0.contentView != nil })
-            guard let window = candidate?.tabGroup?.selectedWindow ?? candidate,
+            let front = candidate?.tabGroup?.selectedWindow ?? candidate
+            guard let window = front?.attachedSheet ?? front,
                   let view = window.contentView?.superview ?? window.contentView,
                   let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else {
                 debugLog("snapshot: no visible window (\(NSApp.windows.count) windows)")
