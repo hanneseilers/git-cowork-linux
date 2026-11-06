@@ -7,6 +7,8 @@
 " and its comment" = " und der Kommentar dazu";
 "%@ asked you to review %@\n%@" = "%1$@ bittet dich um ein Review von %2$@\n%3$@";
 "%@ commits" = "%@ Commits";
+"%@ didn't accept the token. Sign in again in Settings › Accounts." = "%@ hat das Token nicht akzeptiert. Melde dich unter Einstellungen › Accounts neu an.";
+"%@ didn't return a repository list (HTTP %lld)." = "%@ hat keine Repository-Liste geliefert (HTTP %lld).";
 "%@ failed" = "%@ fehlgeschlagen";
 "%@ in progress" = "%@ läuft";
 "%@ into %@" = "%1$@ in %2$@";
@@ -15,6 +17,7 @@
 "%@ isn't on the remote yet. Push it so reviewers can fetch it." = "%@ ist noch nicht auf dem Remote. Pushe den Branch, damit die Reviewer ihn abrufen können.";
 "%@ isn't possible anymore" = "%@ ist nicht mehr möglich";
 "%@ not started" = "%@ nicht gestartet";
+"%@ on %@" = "%@ auf %@";
 "%@ — in %@" = "%1$@ – in %2$@";
 "%@ → %@\n\nAll changes on the branch since its merge base %@." = "%1$@ → %2$@\n\nAlle Änderungen auf dem Branch seit seiner Merge-Basis %3$@.";
 "%@+ commits" = "%@+ Commits";
@@ -43,6 +46,7 @@
 "1 match" = "1 Treffer";
 "A repository or worktree folder" = "Ein Repository- oder Worktree-Ordner";
 "Abort" = "Abbrechen";
+"Account" = "Account";
 "Accounts" = "Accounts";
 "Add" = "Hinzufügen";
 "Add a description" = "Beschreibung hinzufügen";
@@ -216,6 +220,7 @@
 "Filter by label" = "Nach Label filtern";
 "Filter Commits" = "Commits filtern";
 "Filter commits" = "Commits filtern";
+"Filter repositories" = "Repositorys filtern";
 "Filter Sidebar" = "Seitenleiste filtern";
 "Folder" = "Ordner";
 "Folder is missing; prune to clean up" = "Ordner fehlt; zum Aufräumen bereinigen";
@@ -251,6 +256,7 @@
 "Labels" = "Labels";
 "Link an existing local branch" = "Einen vorhandenen lokalen Branch verknüpfen";
 "Link Branch" = "Branch verknüpfen";
+"Loading repositories…" = "Repositorys werden geladen …";
 "Local" = "Lokal";
 "Locked" = "Gesperrt";
 "Mark All as Read" = "Alle als gelesen markieren";
@@ -293,14 +299,17 @@
 "No conflicts left." = "Keine Konflikte mehr.";
 "No file changes" = "Keine Dateiänderungen";
 "No local or remote branch with this name. Fetch, or link another branch." = "Kein lokaler oder Remote-Branch mit diesem Namen. Rufe neue Daten ab (Fetch) oder verknüpfe einen anderen Branch.";
+"No matches" = "Keine Treffer";
 "No open requests from you" = "Keine offenen Anfragen von dir";
 "No open reviews" = "Keine offenen Reviews";
 "No remote: tasks stay on this Mac" = "Kein Remote: Aufgaben bleiben auf diesem Mac";
+"No repositories on %@" = "Keine Repositorys auf %@";
 "No review selected" = "Kein Review ausgewählt";
 "No task selected" = "Keine Aufgabe ausgewählt";
 "No tasks yet" = "Noch keine Aufgaben";
 "No teammates known yet. Add them under Team, or they appear once they commit." = "Noch keine Teammitglieder bekannt. Füge sie unter „Team“ hinzu, oder sie erscheinen nach ihrem ersten Commit.";
 "No text changes" = "Keine Textänderungen";
+"No token for %@ in the Keychain. Sign in again in Settings › Accounts." = "Kein Token für %@ im Schlüsselbund. Melde dich unter Einstellungen › Accounts neu an.";
 "No upstream" = "Kein Upstream";
 "Nobody asked yet" = "Noch niemand angefragt";
 "None" = "Keine";
@@ -338,6 +347,7 @@
 "Open Worktree" = "Worktree öffnen";
 "Open Worktree for %@" = "Worktree für %@ öffnen";
 "Open Worktree in New Tab" = "Worktree in neuem Tab öffnen";
+"Or Enter a URL" = "Oder eine URL eingeben";
 "parent:" = "Eltern-Commit:";
 "parents:" = "Eltern-Commits:";
 "Path" = "Pfad";
@@ -347,7 +357,9 @@
 "Pop latest stash" = "Neuesten Stash anwenden";
 "Pop Stash" = "Stash anwenden (Pop)";
 "Previous file" = "Vorherige Datei";
+"Private" = "Privat";
 "Prune Stale Worktrees" = "Verwaiste Worktrees bereinigen";
+"Public" = "Öffentlich";
 "Pull" = "Pull";
 "Pull %lld commits from %@" = "%1$lld Commits von %2$@ holen (Pull)";
 "Pull (fast-forward only)" = "Pull (nur Fast-Forward)";
@@ -497,6 +509,7 @@
 "To Do" = "Offen";
 "Token" = "Token";
 "Tree" = "Baum";
+"Try Again" = "Noch mal versuchen";
 "Type changed" = "Typ geändert";
 "Unassigned" = "Nicht zugewiesen";
 "Undo" = "Widerrufen";
@@ -537,6 +550,7 @@
 "you" = "du";
 "You approve git-cowork in your browser. No password is typed here." = "Du gibst git-cowork im Browser frei. Hier wird kein Passwort eingegeben.";
 "You: %@" = "Du: %@";
+"Your Repositories" = "Deine Repositorys";
 "Your review" = "Dein Review";
 "“%@” and its comments are removed for everyone on the next sync. Linked branches are kept." = "„%@“ und die Kommentare dazu werden beim nächsten Sync für alle entfernt. Verknüpfte Branches bleiben erhalten.";
 "“%@” isn't an email address." = "„%@“ ist keine E-Mail-Adresse.";
