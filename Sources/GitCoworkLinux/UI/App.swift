@@ -168,7 +168,7 @@ final class App {
 
     private func addAction(_ name: String, _ fn: @escaping Action) {
         let action = g_simple_action_new(name, nil)!
-        Signal.on(RP(action), "activate", fn)
+        Signal.onPtr(RP(action), "activate") { _ in fn() }   // (action, parameter, data)
         g_action_map_add_action(OP(gapp), OP(action))
     }
 
