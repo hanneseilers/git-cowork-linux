@@ -84,6 +84,11 @@ static inline void gc_cairo_rgba(cairo_t *cr, double r, double g, double b, doub
     cairo_set_source_rgba(cr, r, g, b, a);
 }
 
+/// gtk_text_buffer_create_tag without properties (they're set afterwards).
+static inline GtkTextTag *gc_text_tag(GtkTextBuffer *buffer, const char *name) {
+    return gtk_text_buffer_create_tag(buffer, name, NULL);
+}
+
 static inline GType gc_string_object_type(void) { return GTK_TYPE_STRING_OBJECT; }
 static inline GType gc_file_list_type(void) { return GDK_TYPE_FILE_LIST; }
 

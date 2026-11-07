@@ -78,6 +78,10 @@ private let thunkString: @convention(c) (RawPtr?, UnsafePointer<CChar>?, RawPtr?
     let value = s.map { String(cString: $0) } ?? ""
     MainActor.assumeIsolated { fn(value) }
 }
+private let thunkIntInt: @convention(c) (RawPtr?, Int32, Int32, RawPtr?) -> Void = { _, a, b, data in
+    guard let fn: @MainActor (Int, Int) -> Void = unbox(data) else { return }
+    MainActor.assumeIsolated { fn(Int(a), Int(b)) }
+}
 private let thunkDrop: @convention(c) (RawPtr?, UnsafePointer<GValue>?, Double, Double, RawPtr?) -> gboolean = { _, value, _, _, data in
     guard let fn: @MainActor ([String]) -> Bool = unbox(data), let value else { return 0 }
     var paths: [String] = []
@@ -125,6 +129,11 @@ enum Signal {
     @discardableResult
     static func onString(_ instance: RawPtr, _ signal: String, _ fn: @escaping @MainActor (String) -> Void) -> UInt {
         connectRaw(instance, signal, unsafeBitCast(thunkString, to: GCallback.self), fn)
+    }
+    /// Signals with two int arguments, e.g. GtkDrawingArea "resize".
+    @discardableResult
+    static func onIntInt(_ instance: RawPtr, _ signal: String, _ fn: @escaping @MainActor (Int, Int) -> Void) -> UInt {
+        connectRaw(instance, signal, unsafeBitCast(thunkIntInt, to: GCallback.self), fn)
     }
     @discardableResult
     static func onDrop(_ instance: RawPtr, _ fn: @escaping @MainActor ([String]) -> Bool) -> UInt {
@@ -380,6 +389,8 @@ final class Entry: Widget {
             gc_object_set_string(raw, "placeholder-text", placeholder)
         } else {
             gtk_entry_set_placeholder_text(p(GtkEntry.self), placeholder)
+            // Enter in a dialog's field answers with the default response.
+            gtk_entry_set_activates_default(p(GtkEntry.self), 1)
         }
         self.text = text
     }

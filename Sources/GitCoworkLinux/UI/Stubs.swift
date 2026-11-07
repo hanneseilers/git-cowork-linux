@@ -12,29 +12,6 @@ private func placeholder(_ title: String) -> Widget {
     return s
 }
 
-@MainActor final class SidebarView {
-    let root: Widget
-    init(page: RepoPage) { root = placeholder(L("Branches")) }
-    func focusFilter() {}
-}
-
-@MainActor final class HistoryView {
-    let root: Widget
-    init(page: RepoPage) { root = placeholder(L("History")) }
-    func focusFilter() {}
-}
-
-@MainActor final class InspectorView {
-    let root: Widget
-    init(page: RepoPage) { root = placeholder(L("Changes")) }
-    func commitShortcut() {}
-}
-
-@MainActor final class DiffView {
-    let root: Widget
-    init(page: RepoPage) { root = placeholder(L("Diff")) }
-}
-
 @MainActor final class BoardView {
     let root: Widget
     init(page: RepoPage) { root = placeholder(L("Board")) }
@@ -51,8 +28,15 @@ private func placeholder(_ title: String) -> Widget {
     init(page: RepoPage) { root = Button(icon: "mail-unread-symbolic", "flat") }
 }
 
-@MainActor enum Sheets {
-    static func present(_ sheet: SheetKind, page: RepoPage) {}
+@MainActor enum CoworkSheets {
+    static func newTask(status: TaskStatus, page: RepoPage) {}
+    static func requestReview(branch: String, page: RepoPage) {}
+    static func team(page: RepoPage) {}
+}
+
+@MainActor final class CoworkPanel {
+    let root: Widget
+    init(page: RepoPage) { root = placeholder(L("Select a task or review")) }
 }
 
 @MainActor enum CloneDialog {
