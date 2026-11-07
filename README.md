@@ -143,6 +143,28 @@ account.
 Custom refs aren't shown in your host's web UI, so tasks are visible in
 git-cowork and with plain git only.
 
+### From the terminal: `git cowork`
+
+`make install` also puts a small command-line tool on your PATH (linked into
+`~/.local/bin`; `make install-cli BINDIR=…` for another folder). It works
+on the same tasks as the app, so people and coding agents can use it side by
+side. Changes sync right away; add `--json` for scripts and agents.
+
+```bash
+git cowork list --mine                   # my open tasks
+git cowork new "Rate-limit the API" --assign me --label backend
+git cowork start CW-a3f9 --worktree      # branch + own folder, task → In Progress
+git cowork comment CW-a3f9 "Done, see branch"
+git cowork review CW-a3f9-rate-limit --to anna@example.com
+git cowork reviews --waiting             # reviews asked of me
+git cowork approve R-7k2p "Looks good"
+git cowork inbox --sync
+```
+
+`git cowork help` lists everything. Reads use what's already fetched; add
+`--sync` to fetch teammates' changes first. The remote is `origin` unless
+`git config cowork.remote <name>` says otherwise.
+
 ## Keyboard shortcuts
 
 | | |
@@ -195,10 +217,13 @@ Builds with the Command Line Tools only; no Xcode project, no dependencies.
 ```
 Sources/GitCoworkCore/   pure logic: parsers, graph lane layout, diff, host links,
                          cowork file format, merge and inbox (tested)
+Sources/CoworkKit/       reads, writes and syncs refs/cowork/main; the edits (new task,
+                         comment, review, verdict); shared by the app and the tool (tested)
+Sources/GitCoworkCLI/    the `git cowork` command-line tool
 Sources/GitCowork/
   App/                   entry point, windows/tabs, menus, settings, welcome screen
   Git/                   GitRunner (process + env), RepoModel (state, refresh, file watching),
-                         actions, CoworkStore (refs/cowork/main read/write/sync), notifier
+                         actions, CoworkStore (on-screen state on top of CoworkKit), notifier
   Views/                 Theme (design tokens), Components, History (NSTableView graph),
                          Diff, Inspector, Sidebar, Chrome, Sheets, Cowork (board, reviews, inbox)
 Scripts/                 build-app.sh, make-icon.swift

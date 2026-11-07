@@ -18,8 +18,10 @@ BIN="$(swift build -c release --arch arm64 --show-bin-path)/GitCowork"
 
 echo "→ Assembling $APP"
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Helpers"
 cp "$BIN" "$APP/Contents/MacOS/GitCowork"
+# The `git cowork` command-line tool ships inside the app; `make install` links it onto PATH.
+cp "$(dirname "$BIN")/git-cowork" "$APP/Contents/Helpers/git-cowork"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 # Build number = the commit it's built from, so About shows "Version 0.1.0 (1448777)".
 BUILD="$(git describe --always --dirty --abbrev=7 --exclude '*' 2>/dev/null || echo unknown)"
@@ -41,5 +43,6 @@ cp .build/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
 
 echo "→ Signing (ad-hoc)"
+codesign --force --sign - --timestamp=none "$APP/Contents/Helpers/git-cowork"
 codesign --force --sign - --timestamp=none "$APP"
 echo "✓ Built $APP ($(Scripts/version.sh), $BUILD)"

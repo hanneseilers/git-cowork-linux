@@ -166,10 +166,10 @@
 "Copy" = "Kopieren";
 "Couldn't create the task" = "Aufgabe konnte nicht erstellt werden";
 "Couldn't find a free file name for the key in ~/.ssh." = "In ~/.ssh wurde kein freier Dateiname für den Schlüssel gefunden.";
+"Couldn't push cowork changes: the remote kept moving. Will retry." = "Aufgaben-Änderungen konnten nicht hochgeladen werden: Das Remote hat sich ständig geändert. Neuer Versuch folgt.";
 "Couldn't reach %@: %@" = "%1$@ ist nicht erreichbar: %2$@";
 "Couldn't request the review" = "Review konnte nicht angefragt werden";
 "Couldn't save the token in the Keychain." = "Das Token konnte nicht im Schlüsselbund gespeichert werden.";
-"Couldn't write the cowork merge" = "Cowork-Merge konnte nicht geschrieben werden";
 "Create %@ in its own folder and open it in a new tab, e.g. for an agent" = "%@ in einem eigenen Ordner erstellen und in einem neuen Tab öffnen, z. B. für einen Agent";
 "Create %@ on %@" = "%1$@ auf %2$@ erstellen";
 "Create a Token…" = "Token erstellen …";

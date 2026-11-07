@@ -52,3 +52,6 @@ First public release.
 - Review requests with reviewers, verdicts and comments.
 - Inbox and macOS notifications for assignments, reviews and @mentions.
 - Everything stored on `refs/cowork/main` and synced with plain git.
+- `git cowork` command-line tool for people and agents: list, create, edit,
+  start (optionally in a new worktree) and comment on tasks; request, list and
+  approve reviews; inbox; `--json` output. Installed by `make install`.
