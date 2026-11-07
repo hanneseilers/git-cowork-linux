@@ -1,3 +1,7 @@
 import Foundation
+
+// git-cowork for Linux (GTK 4 + libadwaita).
+// The same binary answers ssh's passphrase prompts for keys it made (see Askpass).
 Askpass.runIfRequested()
-print("git-cowork (Linux) – UI follows")
+MainLoop.install()
+exit(MainActor.assumeIsolated { App.shared.run() })
