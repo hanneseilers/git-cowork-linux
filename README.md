@@ -53,28 +53,28 @@ review work without leaving the repo.
 
 ## Install
 
-Requirements: Apple Silicon Mac, macOS 14 or newer, Xcode Command Line Tools with Swift 6
-(details in [INSTALL.md](INSTALL.md#requirements)).
+Apple Silicon Mac, macOS 14 or newer. One line in Terminal:
 
 ```bash
-xcode-select --install          # skip if you already have git and swift
+curl -fsSL https://raw.githubusercontent.com/michael-smao/git-cowork/main/install.sh | bash
+```
+
+It downloads the newest release, checks it, installs `git-cowork.app` and
+the `git cowork` command. No Xcode, no Apple Developer account, no Gatekeeper
+warning. **Updates**: the app checks once a day and shows "Update to x.y.z"
+in the status bar; one click installs it. Or run the same line again.
+
+**From source** (to change the code or follow `main`), with Xcode Command
+Line Tools and Swift 6:
+
+```bash
 git clone https://github.com/michael-smao/git-cowork.git && cd git-cowork
 make install                    # builds and copies git-cowork.app to /Applications
+make update                     # later: pull, rebuild, reinstall
 ```
 
-**Update** later from the same folder:
-
-```bash
-make update
-```
-
-The app is built on your own Mac and signed ad-hoc, so Gatekeeper doesn't
-block it and no Apple Developer account is needed. (A built `.app` shared by
-AirDrop or zip *does* trigger Gatekeeper — build from source instead.)
-
-**[INSTALL.md](INSTALL.md)** has the details: installing just for your
-user, staying on stable releases instead of `main`, installing a specific
-version, uninstalling, and troubleshooting.
+**[INSTALL.md](INSTALL.md)** has the details: requirements, installing just
+for your user, a specific version, uninstalling, and troubleshooting.
 
 ### Versions
 

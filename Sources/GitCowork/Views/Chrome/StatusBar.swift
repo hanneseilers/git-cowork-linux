@@ -10,6 +10,7 @@ struct StatusBar: View {
         HStack(spacing: Theme.Space.l) {
             activity
             Spacer(minLength: Theme.Space.l)
+            UpdateBadge()
             AutoFetchStatus(model: model)
             CoworkSyncStatus(model: model)
             upstream

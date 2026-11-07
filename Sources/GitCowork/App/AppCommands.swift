@@ -17,6 +17,10 @@ struct AppCommands: Commands {
     private var gitUndoTitle: String? { idle ? model?.undoTitle : nil }
 
     var body: some Commands {
+        CommandGroup(after: .appInfo) {
+            Button("Check for Updates…") { Updater.shared.checkFromMenu() }
+        }
+
         CommandGroup(after: .newItem) {
             Button("New Tab") { WindowChrome.newTab() }
                 .keyboardShortcut("t")

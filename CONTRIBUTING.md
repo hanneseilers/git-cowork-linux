@@ -72,6 +72,9 @@ GITCOWORK_SNAPSHOT=/tmp/shot.png GITCOWORK_SNAPSHOT_QUIT=1 .build/debug/GitCowor
 - `GITCOWORK_DEBUG_SELECT=commit:<n> | diff | commitdiff:<n>`
 - `GITCOWORK_DEBUG_MODE=board | reviews` (add `:<n>` to select the nth task or review)
 - `GITCOWORK_DEBUG_APPEARANCE=light | dark`
+- `GITCOWORK_DEBUG_UPDATE=check | install` with `GITCOWORK_UPDATE_API_BASE=…` and
+  `GIT_COWORK_DOWNLOAD_BASE=…`: runs the updater against a test release server
+  and quits (run it from inside an app bundle).
 - `GITCOWORK_DEBUG_LOG=1` (open the command log, e.g. to see the background fetch)
 
 End-to-end cowork sync test against a local bare remote with two clones:

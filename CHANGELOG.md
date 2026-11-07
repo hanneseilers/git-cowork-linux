@@ -2,7 +2,7 @@
 
 All notable changes to git-cowork. Versions follow
 [Semantic Versioning](https://semver.org): `MAJOR.MINOR.PATCH`.
-How to update: see [INSTALL.md](INSTALL.md#update).
+How to update: see [INSTALL.md](INSTALL.md#quick-install) (or [from source](INSTALL.md#update-a-source-install)).
 
 ## [Unreleased]
 
@@ -10,6 +10,12 @@ How to update: see [INSTALL.md](INSTALL.md#update).
 - `git cowork` command-line tool for people and agents: list, create, edit,
   start (optionally in a new worktree) and comment on tasks; request, list and
   approve reviews; inbox; `--json` output. Installed by `make install`.
+- One-line install without Xcode: `curl -fsSL …/install.sh | bash` downloads
+  the newest release, checks its checksum and installs the app and
+  `git cowork`. Releases now include the app as a zip.
+- Updates from inside the app: a daily check (Settings › Updates) shows
+  "Update to x.y.z" in the status bar; one click installs it and restarts.
+  Also git-cowork › Check for Updates….
 
 ## [0.1.0] - 2026-11-07
 
