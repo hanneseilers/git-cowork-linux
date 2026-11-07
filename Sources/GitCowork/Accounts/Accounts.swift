@@ -165,6 +165,11 @@ final class Credentials: @unchecked Sendable {
     }
 
     private func cache(_ action: [String], input: Data, gitPath: String, env: [String: String]) {
+        #if os(Linux)
+        // The first store starts the daemon; Foundation's Process would wait for it to exit.
+        _ = try? Subprocess.run(gitPath, ["credential-cache", "--socket", socketPath, "--timeout", String(Self.cacheTimeout)] + action,
+                                environment: env, input: input, timeout: 30)
+        #else
         let p = Process()
         p.executableURL = URL(fileURLWithPath: gitPath)
         p.arguments = ["credential-cache", "--socket", socketPath, "--timeout", String(Self.cacheTimeout)] + action
@@ -177,6 +182,7 @@ final class Credentials: @unchecked Sendable {
         try? inPipe.fileHandleForWriting.write(contentsOf: input)
         try? inPipe.fileHandleForWriting.close()
         p.waitUntilExit()
+        #endif
     }
 }
 

@@ -48,13 +48,27 @@ final class GitRunner: @unchecked Sendable {
         e["GIT_OPTIONAL_LOCKS"] = "0"      // `git status` must not touch the index (would retrigger file watching)
         e["GIT_EDITOR"] = "true"           // accept default messages (merge, rebase --continue)
         e["GIT_MERGE_AUTOEDIT"] = "no"
+        #if os(Linux)
+        e["LC_ALL"] = "C.UTF-8"            // always installed on Debian/Ubuntu; en_US.UTF-8 may not be
+        #else
         e["LC_ALL"] = "en_US.UTF-8"
+        #endif
         env = e
 
         Task.detached(priority: .utility) { [weak self] in self?.loadLoginShellPath() }
     }
 
     private func loadLoginShellPath() {
+        #if os(Linux)
+        // Desktop launchers start apps without the PATH set in ~/.profile or ~/.bashrc.
+        let shell = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/bash"
+        guard let r = try? Subprocess.run(shell, ["-l", "-c", "printf %s \"$PATH\""], timeout: 5), r.status == 0 else { return }
+        let path = String(decoding: r.stdout, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard path.contains("/") else { return }
+        lock.lock()
+        env["PATH"] = path + ":" + (env["PATH"] ?? "")
+        lock.unlock()
+        #else
         let shell = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh"
         let p = Process()
         p.executableURL = URL(fileURLWithPath: shell)
@@ -73,6 +87,7 @@ final class GitRunner: @unchecked Sendable {
         lock.lock()
         env["PATH"] = path + ":" + (env["PATH"] ?? "")
         lock.unlock()
+        #endif
     }
 
     private var environment: [String: String] {
@@ -130,8 +145,30 @@ final class GitRunner: @unchecked Sendable {
                 env["GIT_SSH_COMMAND"] = ssh
             }
         }
+        #if os(Linux)
+        // The account's SSH key: its passphrase comes from the Secret Service
+        // through the app's askpass helper (no UseKeychain on Linux).
+        if let ssh = credentials.sshCommand, env["GIT_SSH_COMMAND"] == ssh {
+            env.merge(credentials.sshAskpassEnvironment) { _, new in new }
+        }
+        #endif
         let processEnv = env
         let configArgs = GitDefaults.configArgs + credentials.configArgs
+        #if os(Linux)
+        // Subprocess, not Foundation's Process: that one leaks a descriptor into
+        // daemons git starts (credential-cache, ssh ControlMaster) and would wait for them.
+        return await withCheckedContinuation { cont in
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    let r = try Subprocess.run(gitPath, configArgs + args, currentDirectory: dir.path,
+                                               environment: processEnv, input: input)
+                    cont.resume(returning: (r.stdout, r.stderr, r.status))
+                } catch {
+                    cont.resume(returning: (Data(), Data(error.localizedDescription.utf8), -1))
+                }
+            }
+        }
+        #else
         return await withCheckedContinuation { cont in
             DispatchQueue.global(qos: .userInitiated).async {
                 let p = Process()
@@ -171,5 +208,6 @@ final class GitRunner: @unchecked Sendable {
                 cont.resume(returning: (outData, errData, p.terminationStatus))
             }
         }
+        #endif
     }
 }
