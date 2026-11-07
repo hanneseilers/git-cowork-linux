@@ -7,6 +7,7 @@
 #include <adwaita.h>
 #include <glib-unix.h>
 #include <libsecret/secret.h>
+#include <pango/pangocairo.h>
 
 // MARK: Secret Service (GNOME Keyring, KWallet) — the Linux "Keychain"
 
@@ -84,5 +85,30 @@ static inline void gc_cairo_rgba(cairo_t *cr, double r, double g, double b, doub
 }
 
 static inline GType gc_string_object_type(void) { return GTK_TYPE_STRING_OBJECT; }
+static inline GType gc_file_list_type(void) { return GDK_TYPE_FILE_LIST; }
+
+/// GFile paths dropped on a widget (GdkFileList in a GValue), as a NULL-terminated
+/// array of newly allocated strings; free with g_strfreev.
+static inline char **gc_dropped_paths(const GValue *value) {
+    if (!G_VALUE_HOLDS(value, GDK_TYPE_FILE_LIST)) return NULL;
+    GSList *files = gdk_file_list_get_files(g_value_get_boxed(value));
+    guint n = g_slist_length(files);
+    char **out = g_new0(char *, n + 1);
+    guint i = 0;
+    for (GSList *l = files; l; l = l->next) {
+        char *path = g_file_get_path(G_FILE(l->data));
+        if (path) out[i++] = path;
+    }
+    g_slist_free(files);
+    return out;
+}
+
+static inline void gc_notification_set_target(GNotification *n, const char *action, const char *target) {
+    g_notification_set_default_action_and_target_value(n, action, g_variant_new_string(target));
+}
+
+static inline const char *gc_variant_string(GVariant *v) {
+    return v ? g_variant_get_string(v, NULL) : NULL;
+}
 
 #endif
