@@ -55,4 +55,55 @@ let package = Package(
 package.platforms = nil
 package.targets.removeAll { $0.name == "GitCowork" }
 package.products.removeAll { $0.name == "GitCowork" }
+
+/// Files of the macOS app that hold no UI (repository model, git actions,
+/// cowork store, accounts). The Linux app compiles the very same files, so
+/// fixes and features made upstream reach Linux with a merge.
+let sharedAppSources = [
+    "GitCowork/Git/CommandLog.swift",
+    "GitCowork/Git/CoworkActions.swift",
+    "GitCowork/Git/CoworkEdits.swift",
+    "GitCowork/Git/CoworkStore.swift",
+    "GitCowork/Git/CoworkSync.swift",
+    "GitCowork/Git/DiffLoader.swift",
+    "GitCowork/Git/GitRunner.swift",
+    "GitCowork/Git/RepoActions.swift",
+    "GitCowork/Git/RepoModel.swift",
+    "GitCowork/Git/RepoQueries.swift",
+    "GitCowork/Git/RepoUndo.swift",
+    "GitCowork/Accounts/Accounts.swift",
+    "GitCowork/Accounts/OAuthApps.swift",
+    "GitCowork/Accounts/RepoList.swift",
+    "GitCowork/Accounts/SignIn.swift",
+    "GitCowork/App/Prefs.swift",
+]
+
+package.products.append(.executable(name: "git-cowork-gtk", targets: ["GitCoworkLinux"]))
+package.targets += [
+    // GTK 4, libadwaita and libsecret, with a few C helpers (Sources/CGtk/shim.h).
+    .systemLibrary(
+        name: "CGtk",
+        pkgConfig: "gtk4 libadwaita-1 libsecret-1",
+        providers: [.apt(["libgtk-4-dev", "libadwaita-1-dev", "libsecret-1-dev"])]
+    ),
+    // The handful of AppKit calls the shared files make (NSApp.isActive,
+    // NSWorkspace.open, NSPasteboard), answered by the GTK app.
+    .target(
+        name: "AppKit",
+        path: "Sources/LinuxShims/AppKit",
+        swiftSettings: [.swiftLanguageMode(.v5)]
+    ),
+    .executableTarget(
+        name: "GitCoworkLinux",
+        dependencies: ["GitCoworkCore", "CoworkKit", "CGtk", "AppKit"],
+        path: "Sources",
+        sources: ["GitCoworkLinux"] + sharedAppSources,
+        swiftSettings: [.swiftLanguageMode(.v5)]
+    ),
+    .testTarget(
+        name: "GitCoworkLinuxTests",
+        dependencies: ["GitCoworkLinux", "GitCoworkCore", "CoworkKit"],
+        swiftSettings: [.swiftLanguageMode(.v5)]
+    ),
+]
 #endif

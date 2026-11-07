@@ -445,6 +445,7 @@ extension RepoModel {
 
 // MARK: Opening things outside the app
 
+#if os(macOS)   // Linux: Sources/GitCoworkLinux/Platform/External.swift
 enum External {
     static func open(app: String, path: String) {
         let p = Process()
@@ -463,3 +464,4 @@ enum External {
         NSPasteboard.general.setString(s, forType: .string)
     }
 }
+#endif

@@ -28,7 +28,8 @@ public enum Subprocess {
     public static func run(_ executable: String, _ arguments: [String],
                            currentDirectory: String? = nil,
                            environment: [String: String]? = nil,
-                           input: Data? = nil) throws -> Result {
+                           input: Data? = nil,
+                           timeout: TimeInterval? = nil) throws -> Result {
         ignoreSIGPIPE
 
         var inFDs: [Int32] = [-1, -1], outFDs: [Int32] = [-1, -1], errFDs: [Int32] = [-1, -1]
@@ -88,7 +89,10 @@ public enum Subprocess {
         close(errFDs[1]); errFDs[1] = -1
 
         var stdout = Data(), stderr = Data()
-        pump(input: input, inFD: &inFDs[1], outFD: &outFDs[0], errFD: &errFDs[0], stdout: &stdout, stderr: &stderr)
+        let deadline = timeout.map { Date().addingTimeInterval($0) }
+        let finished = pump(input: input, inFD: &inFDs[1], outFD: &outFDs[0], errFD: &errFDs[0],
+                            stdout: &stdout, stderr: &stderr, deadline: deadline)
+        if !finished { kill(pid, SIGKILL) }
 
         var status: Int32 = 0
         while waitpid(pid, &status, 0) < 0 && errno == EINTR {}
@@ -97,8 +101,9 @@ public enum Subprocess {
 
     /// Writes stdin and reads stdout/stderr at the same time, so a child that
     /// fills one pipe while we write the other can't deadlock.
+    /// Returns false when `deadline` passed first.
     private static func pump(input: Data?, inFD: inout Int32, outFD: inout Int32, errFD: inout Int32,
-                             stdout: inout Data, stderr: inout Data) {
+                             stdout: inout Data, stderr: inout Data, deadline: Date?) -> Bool {
         let bytes = [UInt8](input ?? Data())
         var written = 0
         if inFD >= 0 {
@@ -111,7 +116,14 @@ public enum Subprocess {
             if outFD >= 0 { fds.append(pollfd(fd: outFD, events: Int16(POLLIN), revents: 0)) }
             if errFD >= 0 { fds.append(pollfd(fd: errFD, events: Int16(POLLIN), revents: 0)) }
             if inFD >= 0 { fds.append(pollfd(fd: inFD, events: Int16(POLLOUT), revents: 0)) }
-            let n = poll(&fds, nfds_t(fds.count), -1)
+            var wait: Int32 = -1
+            if let deadline {
+                let left = deadline.timeIntervalSinceNow
+                if left <= 0 { return false }
+                wait = Int32(min(left * 1000, 60_000)) + 1
+            }
+            let n = poll(&fds, nfds_t(fds.count), wait)
+            if n == 0 { continue }
             if n < 0 {
                 if errno == EINTR { continue }
                 break
@@ -136,6 +148,7 @@ public enum Subprocess {
             }
         }
         if inFD >= 0 { close(inFD); inFD = -1 }
+        return true
     }
 
     /// Exit code, or 128 + signal number like a shell.
