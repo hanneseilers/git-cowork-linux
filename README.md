@@ -262,3 +262,9 @@ privately as described in [SECURITY.md](SECURITY.md).
 ## License
 
 [MIT](LICENSE) © 2026 smao GmbH
+
+---
+
+<p align="center">
+  git-cowork is a free project by <a href="https://smao.ai/?utm_source=github&amp;utm_medium=readme&amp;utm_campaign=git-cowork">smao</a>, made in Berlin.
+</p>
