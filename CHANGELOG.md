@@ -6,6 +6,8 @@ How to update: see [INSTALL.md](INSTALL.md#update).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-07
+
 First public release.
 
 ### Git client
