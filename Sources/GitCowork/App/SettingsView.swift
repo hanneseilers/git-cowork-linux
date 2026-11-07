@@ -7,6 +7,7 @@ struct SettingsView: View {
     @AppStorage(Prefs.Key.coworkRemote) private var coworkRemote = ""
     @AppStorage(Prefs.Key.coworkAutoSync) private var coworkAutoSync = true
     @AppStorage(Prefs.Key.autoFetch) private var autoFetch = true
+    @AppStorage(Prefs.Key.checkForUpdates) private var checkForUpdates = true
 
     var body: some View {
         Form {
@@ -35,6 +36,12 @@ struct SettingsView: View {
                 Text("Runs git fetch --all --prune for each open repository every 5 minutes while git-cowork is in front, so remote branches and ahead/behind stay current. It never asks for a password: if signing in fails, it pauses until you sign in under Accounts or a fetch, pull or push of yours works.")
                     .font(Theme.Font.small).foregroundStyle(.secondary)
                 LabeledContent("Executable", value: GitRunner.shared.gitPath)
+            }
+            Section("Updates") {
+                Toggle("Check for updates automatically", isOn: $checkForUpdates)
+                Text("Once a day, git-cowork asks GitHub for the newest release. Nothing about you or your repositories is sent. When there's a new version, the status bar offers to install it.")
+                    .font(Theme.Font.small).foregroundStyle(.secondary)
+                LabeledContent("Version", value: Updater.shared.current?.description ?? "development build")
             }
         }
         .formStyle(.grouped)

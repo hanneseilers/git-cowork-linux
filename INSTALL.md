@@ -1,10 +1,45 @@
 # Installing and updating git-cowork
 
-git-cowork is built from source on your own Mac. It takes about a minute,
-needs no Apple Developer account, and the app opens without Gatekeeper
-warnings.
+Two ways, both without an Apple Developer account and without Gatekeeper
+warnings:
 
-## Requirements
+- **[One line](#quick-install)**: downloads the newest release. Easiest; the
+  app tells you about updates and installs them for you.
+- **[From source](#install-from-source)**: builds on your Mac. For changing
+  the code or following `main`.
+
+## Quick install
+
+Needs an Apple Silicon Mac with macOS 14 or newer, and git (Apple's command
+line tools: `xcode-select --install` if `git --version` doesn't work).
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/michael-smao/git-cowork/main/install.sh | bash
+```
+
+It downloads the newest release from GitHub, checks its checksum, puts
+`git-cowork.app` in `/Applications` (or `~/Applications` if you can't write
+there) and links the `git cowork` command into `~/.local/bin`. Running the
+same line again updates. Settings for the script:
+
+```bash
+# a specific version, and only for your user
+curl -fsSL https://raw.githubusercontent.com/michael-smao/git-cowork/main/install.sh | GIT_COWORK_VERSION=0.2.0 GIT_COWORK_PREFIX=~/Applications bash
+```
+
+**Updates**: once a day the app checks GitHub for a newer release. When there
+is one, the status bar shows "Update to x.y.z"; click it, then **Update Now**
+and **Restart**. Or use **git-cowork › Check for Updates…**. Turn the daily
+check off in Settings › Updates.
+
+Downloading with `curl` is what keeps Gatekeeper quiet: macOS quarantines
+apps downloaded in a browser, and an app without a paid Apple signature then
+won't open. If you downloaded the zip in a browser anyway, run
+`xattr -dr com.apple.quarantine /Applications/git-cowork.app` once.
+
+## Install from source
+
+### Requirements
 
 - A Mac with Apple Silicon (M1 or newer)
 - macOS 14 Sonoma or newer, recent enough to get Swift 6 (see below)
@@ -30,7 +65,7 @@ macOS first; the Swift 6 tools need a recent macOS 14 or newer.
 The download is a few GB if you don't have the tools yet. The full Xcode app
 (16 or newer) works too, but isn't needed.
 
-## Install
+### Build and install
 
 Pick a folder for the source, for example `~/Developer`, and run:
 
@@ -52,7 +87,7 @@ To install only for your user (no admin rights needed):
 make install PREFIX=~/Applications
 ```
 
-### Stable release or latest main?
+#### Stable release or latest main?
 
 `git clone` gives you `main`, which has the newest changes. If you'd rather
 stay on tested releases, switch to the newest release tag before installing:
@@ -64,7 +99,7 @@ git checkout $(git tag --list 'v*' --sort=-v:refname | head -1) && make install
 `make update` remembers your choice: on `main` it pulls the latest
 commits, on a release it moves to the next release.
 
-## Update
+### Update a source install
 
 From the `git-cowork` folder:
 
@@ -109,8 +144,12 @@ Then `gk .` opens the current repo.
 
 ## Uninstall
 
+Installed from source: `make uninstall` in the `git-cowork` folder.
+Installed with the one-line script: move `git-cowork.app` to the Trash and
+remove the `git cowork` link:
+
 ```bash
-make uninstall
+unlink ~/.local/bin/git-cowork
 ```
 
 Settings (editor, terminal, recent repos) stay in

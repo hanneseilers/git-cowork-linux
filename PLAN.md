@@ -184,16 +184,20 @@ Sync without conflicts:
 
 ## 5. Phase 3: open source release
 
-Done: MIT license, README with screenshots, INSTALL guide, CHANGELOG,
-contributing and security docs, GitHub Actions (build and test on every push
-and PR; a GitHub release with changelog notes for every `vX.Y.Z` tag),
-`make release` / `make update`, English and German UI.
+Status: public on GitHub; license, README, screenshots and CI are done.
+Every release tag builds the app, attaches it as a zip with its SHA-256, and
+`install.sh` installs or updates it with one line (no Xcode). The app checks
+GitHub once a day and installs updates on request (`App/Updater.swift`, which
+runs the install.sh bundled in the app). Not done: Developer ID signing and
+notarization (needs the paid Apple account; downloading with curl avoids the
+Gatekeeper prompt meanwhile), a Homebrew cask, Sparkle.
 
-Distribution stays free: no Apple Developer account, so no notarized
-download, DMG, Homebrew cask or Sparkle updates. People build from source
-with `make install` (ad-hoc signed, so Gatekeeper doesn't block it) and
-update with `make update`. Revisit if people without developer tools ask
-for a download.
+- License (MIT or Apache-2.0), README, screenshots. Done.
+- Developer ID signing and notarization (Apple Developer account, $99/yr) so
+  browser downloads open without Gatekeeper warnings. Not done.
+- GitHub Actions on macOS runners: build and test on every PR, release a zip
+  on tags (done). DMG and Homebrew cask: not done.
+- Updates: in-app check plus install.sh (done). Sparkle: not needed for now.
 
 ## 6. Performance targets
 

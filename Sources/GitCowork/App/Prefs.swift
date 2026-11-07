@@ -14,6 +14,9 @@ enum Prefs {
         static let coworkAutoSync = "cowork.autoSync"
         /// `git fetch --all --prune` every 5 minutes while the app is in front.
         static let autoFetch = "git.autoFetch"
+        /// Ask GitHub once a day whether a newer release exists.
+        static let checkForUpdates = "updates.check"
+        static let lastUpdateCheck = "updates.lastCheck"
     }
 
     static var editorApp: String { UserDefaults.standard.string(forKey: Key.editorApp) ?? "Visual Studio Code" }
@@ -28,6 +31,7 @@ enum Prefs {
 
     static var coworkAutoSync: Bool { UserDefaults.standard.object(forKey: Key.coworkAutoSync) as? Bool ?? true }
     static var autoFetch: Bool { UserDefaults.standard.object(forKey: Key.autoFetch) as? Bool ?? true }
+    static var checkForUpdates: Bool { UserDefaults.standard.object(forKey: Key.checkForUpdates) as? Bool ?? true }
 
     static var recentRepos: [String] {
         get { UserDefaults.standard.stringArray(forKey: Key.recentRepos) ?? [] }

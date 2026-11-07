@@ -49,6 +49,7 @@
 "1 file change in working directory" = "1 geänderte Datei in der Arbeitskopie";
 "1 file change on " = "1 geänderte Datei auf ";
 "1 match" = "1 Treffer";
+"A new version of git-cowork is available" = "Eine neue Version von git-cowork ist verfügbar";
 "A repository or worktree folder" = "Ein Repository- oder Worktree-Ordner";
 "Abort" = "Abbrechen";
 "Account" = "Account";
@@ -102,6 +103,7 @@
 "Branch / tag" = "Branch / Tag";
 "Branch name" = "Branch-Name";
 "Branches, history and worktrees. Plain git underneath." = "Branches, Verlauf und Worktrees. Darunter ganz normales git.";
+"Builds made with swift run or make run don't update themselves. Use make update in your git-cowork folder." = "Mit swift run oder make run gebaute Versionen aktualisieren sich nicht selbst. Nutze make update in deinem git-cowork-Ordner.";
 "Can't open this repository" = "Dieses Repository lässt sich nicht öffnen";
 "Cancel" = "Abbrechen";
 "Change status" = "Status ändern";
@@ -109,6 +111,8 @@
 "Changes" = "Änderungen";
 "Changes requested" = "Änderungen angefragt";
 "Characters left before %lld" = "Zeichen übrig bis %lld";
+"Check for updates automatically" = "Automatisch nach Updates suchen";
+"Check for Updates…" = "Nach Updates suchen …";
 "Check out %@ here (created if needed), then link it" = "%@ hier auschecken (falls nötig erstellen) und verknüpfen";
 "Check out %@ in its own folder and open it in a new tab" = "%@ in einem eigenen Ordner auschecken und in einem neuen Tab öffnen";
 "Check out a branch first" = "Zuerst einen Branch auschecken";
@@ -164,10 +168,12 @@
 "Copy SHA" = "SHA kopieren";
 "Copy Title" = "Titel kopieren";
 "Copy" = "Kopieren";
+"Couldn't check for updates" = "Suche nach Updates fehlgeschlagen";
 "Couldn't create the task" = "Aufgabe konnte nicht erstellt werden";
 "Couldn't find a free file name for the key in ~/.ssh." = "In ~/.ssh wurde kein freier Dateiname für den Schlüssel gefunden.";
 "Couldn't push cowork changes: the remote kept moving. Will retry." = "Aufgaben-Änderungen konnten nicht hochgeladen werden: Das Remote hat sich ständig geändert. Neuer Versuch folgt.";
 "Couldn't reach %@: %@" = "%1$@ ist nicht erreichbar: %2$@";
+"Couldn't read the newest release from GitHub." = "Die neueste Version konnte nicht von GitHub gelesen werden.";
 "Couldn't request the review" = "Review konnte nicht angefragt werden";
 "Couldn't save the token in the Keychain." = "Das Token konnte nicht im Schlüsselbund gespeichert werden.";
 "Create %@ in its own folder and open it in a new tab, e.g. for an agent" = "%@ in einem eigenen Ordner erstellen und in einem neuen Tab öffnen, z. B. für einen Agent";
@@ -242,6 +248,9 @@
 "Force Push (with lease)…" = "Force-Push (with lease) …";
 "From a URL into a new folder" = "Von einer URL in einen neuen Ordner";
 "Git allows a branch in one worktree at a time. It's open in %@. Open that worktree instead, or create a new branch." = "Git erlaubt einen Branch immer nur in einem Worktree. Er ist in %@ geöffnet. Öffne stattdessen diesen Worktree oder erstelle einen neuen Branch.";
+"git-cowork %@ is available" = "git-cowork %@ ist verfügbar";
+"git-cowork %@ is installed" = "git-cowork %@ ist installiert";
+"git-cowork %@ is the newest version." = "git-cowork %@ ist die neueste Version.";
 "git-cowork already uses this key. To use it in the terminal too, add this near the top of ~/.ssh/config:" = "git-cowork nutzt diesen Schlüssel bereits. Um ihn auch im Terminal zu nutzen, füge dies weit oben in ~/.ssh/config ein:";
 "git-cowork makes a new key, adds it to %@ on %@, and uses it for SSH remotes on %@." = "git-cowork erstellt einen neuen Schlüssel, fügt ihn %1$@ auf %2$@ hinzu und nutzt ihn für SSH-Remotes auf %3$@.";
 "git-cowork needs Apple's developer tools" = "git-cowork braucht die Entwicklerwerkzeuge von Apple";
@@ -264,11 +273,13 @@
 "Inbox" = "Eingang";
 "Inbox: %lld new" = "Eingang: %lld neu";
 "Install" = "Installieren";
+"Installing…" = "Wird installiert …";
 "Into" = "In";
 "It has uncommitted changes. They will be lost. The branch %@ stays." = "Er hat nicht committete Änderungen. Sie gehen verloren. Der Branch %@ bleibt erhalten.";
 "It may have been removed by a rebase or garbage collection." = "Er wurde vielleicht durch einen Rebase oder eine Garbage Collection entfernt.";
 "Its commits aren't in your current branch or its upstream. Delete it anyway? Edit > Undo brings it back until you run another git command." = "Seine Commits sind weder in deinem aktuellen Branch noch in dessen Upstream. Trotzdem löschen? Bearbeiten > Widerrufen holt ihn zurück, bis du einen anderen git-Befehl ausführst.";
 "Labels" = "Labels";
+"Later" = "Später";
 "Link an existing local branch" = "Einen vorhandenen lokalen Branch verknüpfen";
 "Link Branch" = "Branch verknüpfen";
 "Loading repositories…" = "Repositorys werden geladen …";
@@ -341,6 +352,7 @@
 "now" = "jetzt";
 "OAuth client ID" = "OAuth-Client-ID";
 "On commit %@" = "Auf Commit %@";
+"Once a day, git-cowork asks GitHub for the newest release. Nothing about you or your repositories is sent. When there's a new version, the status bar offers to install it." = "Einmal am Tag fragt git-cowork bei GitHub nach der neuesten Version. Dabei wird nichts über dich oder deine Repositories gesendet. Gibt es eine neue Version, bietet die Statusleiste an, sie zu installieren.";
 "One per line: host = github | gitlab | gitea | forgejo. Used for \"Open on…\" and \"Create Pull/Merge Request\" links. github.com, and hosts with gitlab, gitea or forgejo in their name, are detected automatically." = "Einer pro Zeile: host = github | gitlab | gitea | forgejo. Wird für die Links „Auf … öffnen“ und „Pull/Merge Request erstellen“ verwendet. github.com und Server mit gitlab, gitea oder forgejo im Namen werden automatisch erkannt.";
 "Only deletes the local tag." = "Löscht nur den lokalen Tag.";
 "Open" = "Öffnen";
@@ -399,6 +411,7 @@
 "Redo" = "Wiederholen";
 "Refresh" = "Aktualisieren";
 "Register an OAuth app under Settings > Developer settings > OAuth Apps on that server, tick \"Enable Device Flow\", and paste its client ID. Or use Add Token instead." = "Registriere auf dem Server unter „Settings > Developer settings > OAuth Apps“ eine OAuth-App, aktiviere „Enable Device Flow“ und füge ihre Client-ID hier ein. Oder nutze stattdessen „Token hinzufügen“.";
+"Release Notes" = "Versionshinweise";
 "Remote" = "Remote";
 "Remote with cowork data, else origin" = "Remote mit Cowork-Daten, sonst origin";
 "Remove" = "Entfernen";
@@ -427,6 +440,9 @@
 "Reset" = "Zurücksetzen";
 "Reset %@ to %@" = "%1$@ auf %2$@ zurücksetzen";
 "Resolve the conflicted files in Changes, then Continue, or Abort the merge." = "Löse die Konflikte unter „Änderungen“ und klicke dann auf „Fortsetzen“, oder brich den Merge ab.";
+"Restart for %@" = "Neu starten für %@";
+"Restart git-cowork to use it. Your open repositories reopen." = "Starte git-cowork neu, um sie zu nutzen. Deine offenen Repositories öffnen sich wieder.";
+"Restart Now" = "Jetzt neu starten";
 "Reveal in Finder" = "Im Finder zeigen";
 "Revert Commit" = "Commit zurücknehmen (Revert)";
 "Review" = "Review";
@@ -523,6 +539,7 @@
 "That folder already exists" = "Diesen Ordner gibt es schon";
 "The code expired. Start again." = "Der Code ist abgelaufen. Starte noch mal.";
 "The file may be binary, empty, or only its mode changed." = "Die Datei ist vielleicht binär oder leer, oder nur ihre Rechte haben sich geändert.";
+"The update didn't install." = "Das Update wurde nicht installiert.";
 "They include git. macOS sometimes removes them during an update. Installing them is free and takes a few minutes; git-cowork works again as soon as they're done." = "Sie enthalten git. macOS entfernt sie manchmal bei einem Update. Die Installation ist kostenlos und dauert ein paar Minuten; danach funktioniert git-cowork sofort wieder.";
 "This can't be undone." = "Das lässt sich nicht rückgängig machen.";
 "This deletes the branch on the server for everyone." = "Damit wird der Branch auf dem Server für alle gelöscht.";
@@ -549,7 +566,11 @@
 "Unstage Hunk" = "Abschnitt zurücknehmen";
 "Unstaged files" = "Nicht vorgemerkte Dateien";
 "Up to date with %@" = "Auf dem Stand von %@";
+"Update Now" = "Jetzt aktualisieren";
+"Update to %@" = "Update auf %@";
 "Updated %@" = "Aktualisiert %@";
+"Updates aren't available for this build" = "Für diese Version gibt es keine Updates";
+"Updates" = "Updates";
 "Upstream branch was deleted" = "Upstream-Branch wurde gelöscht";
 "Use Mine" = "Meine verwenden";
 "Use My Commit" = "Meinen Commit verwenden";
@@ -557,6 +578,7 @@
 "Use Upstream" = "Upstream verwenden";
 "Used for HTTPS remotes on these servers, and for SSH remotes once you create an SSH key, only by git-cowork. Git in the terminal and other servers keep your own setup. Tokens and key passphrases are kept in the Keychain." = "Wird für HTTPS-Remotes auf diesen Servern verwendet, und für SSH-Remotes, sobald du einen SSH-Schlüssel erstellst, nur von git-cowork. Git im Terminal und andere Server behalten deine eigene Einrichtung. Tokens und Schlüssel-Passphrasen liegen im Schlüsselbund.";
 "Uses --force-with-lease: it overwrites the remote branch, but only if nobody else pushed to it since your last fetch." = "Nutzt --force-with-lease: Der Remote-Branch wird überschrieben, aber nur, wenn seit deinem letzten Fetch niemand sonst gepusht hat.";
+"Version" = "Version";
 "View" = "Darstellung";
 "View Changes" = "Änderungen ansehen";
 "Viewing %lld" = "%lld angezeigt";
@@ -571,8 +593,11 @@
 "Worktrees" = "Worktrees";
 "Write a comment" = "Kommentar schreiben";
 "Write Commit Message" = "Commit-Nachricht schreiben";
+"You have %@. Update now? git-cowork restarts when it's done." = "Du hast %@. Jetzt aktualisieren? git-cowork startet danach neu.";
+"You have %@." = "Du hast %@.";
 "you" = "du";
 "You approve git-cowork in your browser. No password is typed here." = "Du gibst git-cowork im Browser frei. Hier wird kein Passwort eingegeben.";
+"You're up to date" = "Du bist auf dem neuesten Stand";
 "You: %@" = "Du: %@";
 "Your Repositories" = "Deine Repositorys";
 "Your review" = "Dein Review";

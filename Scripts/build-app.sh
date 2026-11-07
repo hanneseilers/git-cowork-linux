@@ -39,6 +39,8 @@ if [ ! -f .build/AppIcon.icns ]; then
   iconutil -c icns "$ICONSET" -o .build/AppIcon.icns
 fi
 cp .build/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+# The in-app updater runs this copy of install.sh (not one fetched from the web).
+cp install.sh "$APP/Contents/Resources/install.sh"
 # Translations (Resources/<lang>.lproj/Localizable.strings).
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
 

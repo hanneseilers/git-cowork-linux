@@ -33,8 +33,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DebugSnapshot.scheduleIfRequested()
         CoworkSelfTest.runIfRequested()
         UndoSelfTest.runIfRequested()
+        UpdaterSelfTest.runIfRequested()
         #endif
         LaunchFolders.openFromCommandLine()
+        Updater.shared.startAutomaticChecks()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
