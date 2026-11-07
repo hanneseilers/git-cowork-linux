@@ -44,3 +44,15 @@ let package = Package(
         ),
     ]
 )
+
+// MARK: - Linux (Debian / Ubuntu)
+//
+// Everything above is the upstream (macOS) package and stays untouched, so
+// changes from the original repository merge cleanly. On Linux the SwiftUI /
+// AppKit app can't build; it is replaced by the GTK 4 + libadwaita app in
+// Sources/GitCoworkLinux. The core, CoworkKit, the CLI and the tests are shared.
+#if os(Linux)
+package.platforms = nil
+package.targets.removeAll { $0.name == "GitCowork" }
+package.products.removeAll { $0.name == "GitCowork" }
+#endif

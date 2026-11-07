@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Host API calls for sign-in and the repo list (HostRepos.swift). Builds
 /// requests and reads responses; the app does the actual networking.

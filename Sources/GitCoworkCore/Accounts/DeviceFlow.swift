@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// OAuth device flow (RFC 8628), the sign-in GitHub and GitLab offer for apps
 /// that can't keep a secret: the app shows a short code, the user approves it

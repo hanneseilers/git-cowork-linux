@@ -79,8 +79,10 @@ public enum SSHKey {
         var shown = keyPath
         if !home.isEmpty, keyPath.hasPrefix(home + "/") { shown = "~" + keyPath.dropFirst(home.count) }
         guard var block = hostBlock(host: host, identityFile: shown) else { return nil }
+        #if os(macOS)
         // Other ssh builds (Homebrew) don't know UseKeychain and would refuse the file.
         block.insert("  IgnoreUnknown UseKeychain", at: block.count - 1)
+        #endif
         return block.joined(separator: "\n") + "\n"
     }
 
@@ -96,9 +98,17 @@ public enum SSHKey {
         else { return nil }
         // ssh expands %-tokens in IdentityFile.
         let file = identityFile.replacingOccurrences(of: "%", with: "%%")
+        #if os(macOS)
         return ["Host \(name)",
                 "  IdentityFile \"\(file)\"",
                 "  IdentitiesOnly yes",
                 "  UseKeychain yes"]
+        #else
+        // OpenSSH on Linux has no UseKeychain (and refuses unknown options);
+        // the passphrase comes from the Secret Service through SSH_ASKPASS.
+        return ["Host \(name)",
+                "  IdentityFile \"\(file)\"",
+                "  IdentitiesOnly yes"]
+        #endif
     }
 }
