@@ -6,6 +6,8 @@ How to update: see [INSTALL.md](INSTALL.md#quick-install) (or [from source](INST
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-07
+
 Coming from 0.1.0? Update once by hand with the one-line install (or
 `make update`); 0.1.0 doesn't have the in-app updater yet.
 
