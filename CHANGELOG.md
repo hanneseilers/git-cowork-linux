@@ -6,6 +6,11 @@ How to update: see [INSTALL.md](INSTALL.md#update).
 
 ## [Unreleased]
 
+### Added
+- `git cowork` command-line tool for people and agents: list, create, edit,
+  start (optionally in a new worktree) and comment on tasks; request, list and
+  approve reviews; inbox; `--json` output. Installed by `make install`.
+
 ## [0.1.0] - 2026-11-07
 
 First public release.

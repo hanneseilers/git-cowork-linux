@@ -117,8 +117,9 @@ GitHub, GitLab, Gitea and Forgejo without tokens, accounts or a server.
   `update-ref`) into a temporary index. **It never touches anyone's working
   tree.**
 - Plain text: Markdown with a small header. People can read it with
-  `git show refs/cowork/main:tasks/CW-12.md`. Agents can read or create tasks
-  with plain git, or a tiny `git cowork` CLI later.
+  `git show refs/cowork/main:tasks/CW-12.md`. Agents use the `git cowork`
+  command-line tool (built; `Sources/GitCoworkCLI`, on top of
+  `Sources/CoworkKit`, which the app shares).
 - Prior art: `git-bug` stores issues in git refs the same way.
 
 Downside: tasks aren't visible in the host's web UI, since custom refs aren't
