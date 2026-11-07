@@ -6,3 +6,6 @@ dist/
 
 # Local Claude Code skills and settings
 .claude/
+
+# Landing page: kept locally, not published in this repo
+site/
