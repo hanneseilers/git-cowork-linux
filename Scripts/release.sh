@@ -23,7 +23,9 @@ echo "→ Running tests"
 swift test >/dev/null 2>&1 || { echo "Tests fail; fix them first (make test)."; exit 1; }
 
 echo "→ Setting version $VERSION"
-plutil -replace CFBundleShortVersionString -string "$VERSION" Resources/Info.plist
+# Edit just the one line, so the file keeps its formatting (plutil would rewrite it all).
+sed -i '' "/<key>CFBundleShortVersionString<\/key>/{n;s|<string>.*</string>|<string>$VERSION</string>|;}" Resources/Info.plist
+[ "$(Scripts/version.sh)" = "$VERSION" ] || { echo "Couldn't set the version in Resources/Info.plist."; exit 1; }
 TODAY="$(date +%Y-%m-%d)"
 awk -v v="$VERSION" -v d="$TODAY" \
   '{print} /^## \[Unreleased\]$/{print ""; print "## [" v "] - " d}' CHANGELOG.md > CHANGELOG.md.tmp
