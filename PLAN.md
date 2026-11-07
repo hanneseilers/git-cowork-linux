@@ -1,6 +1,6 @@
 # git-cowork — plan
 
-A small, fast Mac git client for a team that works mostly through agents.
+A small, fast Mac git client for teams that work on many branches and worktrees at once.
 It wraps the `git` CLI, shows branches and history clearly, handles worktrees
 well, and adds lightweight shared tasks and review requests that sync through
 git itself. No AI features, no server. Accounts are optional: you can sign

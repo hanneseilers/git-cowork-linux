@@ -175,9 +175,10 @@ is 5.x`** — your Command Line Tools are too old. See
 **Build errors after a macOS or Xcode update** — clear the build cache and try
 again: `make clean && make install`.
 
-**"git-cowork can't be opened because Apple cannot check it"** — you're opening
-a copy someone sent you. Apps built on your own Mac don't get this; build it
-yourself with the steps above.
+**"git-cowork can't be opened because Apple cannot check it"** — the app was
+downloaded in a browser or sent to you. Install it with the
+[one-line install](#quick-install) instead, or build it from source; neither
+triggers this warning.
 
 **`make update` says "You have local changes"** — you edited files in the
 source folder. Keep them with `git stash`, or throw them away with

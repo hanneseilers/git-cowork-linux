@@ -35,8 +35,11 @@ The version lives in `Resources/Info.plist`. To cut a release:
 2. Run `make release VERSION=x.y.z` on a clean `main`. It runs the tests,
    sets the version, dates the changelog section, commits and creates the
    tag `vx.y.z`.
-3. Push: `git push origin main vx.y.z`. The Release workflow builds, tests
-   and publishes a GitHub release with the changelog notes.
+3. Push: `git push origin main vx.y.z`. The Release workflow builds and
+   tests, then publishes a GitHub release with the changelog notes and
+   attaches `git-cowork-x.y.z-macos-arm64.zip` plus its `.sha256`. The
+   one-line install and the in-app updater download that zip, so check that
+   both files are on the release.
 
 Bump PATCH for fixes, MINOR for new features, MAJOR for breaking changes
 (for example to the cowork file format on `refs/cowork/main`).

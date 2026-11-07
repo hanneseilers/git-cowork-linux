@@ -6,10 +6,14 @@ How to update: see [INSTALL.md](INSTALL.md#quick-install) (or [from source](INST
 
 ## [Unreleased]
 
+Coming from 0.1.0? Update once by hand with the one-line install (or
+`make update`); 0.1.0 doesn't have the in-app updater yet.
+
 ### Added
 - `git cowork` command-line tool for people and agents: list, create, edit,
   start (optionally in a new worktree) and comment on tasks; request, list and
-  approve reviews; inbox; `--json` output. Installed by `make install`.
+  approve reviews; inbox; `--json` output. Installed with the app (one-line
+  install or `make install`).
 - One-line install without Xcode: `curl -fsSL …/install.sh | bash` downloads
   the newest release, checks its checksum and installs the app and
   `git cowork`. Releases now include the app as a zip.

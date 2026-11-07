@@ -27,10 +27,11 @@ Most git GUIs are either heavy Electron apps or thin wrappers that hide what
 git is doing. git-cowork is a native SwiftUI + AppKit app (about 8 MB) that
 runs plain `git` underneath and shows you every command it runs.
 
-It's built for how many teams work now: lots of branches and worktrees,
-often several agents (Claude, Codex, …) working in parallel. You see all of
-them in one graph, with their uncommitted changes, and you can hand out and
-review work without leaving the repo.
+We built it because we wanted a fast, clear git client without a per-seat
+subscription, and gave it away. It's made for how many teams work now: lots of
+branches and worktrees in parallel. You see all of them in one graph, with
+their uncommitted changes, and you can hand out and review work without
+leaving the repo.
 
 - **Fast and light.** ~80 MB memory and 0% CPU when idle, measured on a repo
   with 8.7k commits and 27 worktrees.
@@ -197,12 +198,14 @@ Editor and terminal apps are set in Settings (⌘,).
 **Intel Macs or Linux/Windows?** Not supported. The app targets Apple Silicon
 and macOS 14+.
 
-**Does it use AI?** No. It's a git client that happens to work well when
-agents are making the commits.
+**Does it use AI?** No. It's a plain git client.
 
-**Why build from source instead of a download?** Downloads need Apple's
-paid notarization to open without warnings. Building locally avoids that and
-takes about a minute.
+**Why the Terminal line instead of a download button?** Apps downloaded in a
+browser need Apple's paid notarization to open without a warning. The install
+line downloads with `curl`, which macOS doesn't flag, and checks the file's
+checksum and signature before installing. Building from source works too.
+
+**Is it free?** Yes. MIT license, no subscription, no seat limit.
 
 **Is my data sent anywhere?** No telemetry, no server of ours. The app talks
 to your git remotes through your own `git`. If you add an account, it also

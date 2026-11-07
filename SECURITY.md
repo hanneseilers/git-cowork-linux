@@ -22,8 +22,10 @@ you set `GIT_SSH_COMMAND`, `GIT_SSH` or `core.sshCommand` yourself.
 
 ## Supported versions
 
-Fixes go into the newest release and `main`. Please update with
-`make update` before reporting.
+Fixes go into the newest release and `main`. Please update before
+reporting: click "Update" when git-cowork offers it, run the
+[one-line install](INSTALL.md#quick-install) again, or `make update` for a
+source install.
 
 ## Reporting a vulnerability
 
