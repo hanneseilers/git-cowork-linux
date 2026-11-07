@@ -144,6 +144,13 @@ import Testing
         let socket = dir.appendingPathComponent("sock").path
 
         func git(_ args: [String], input: Data) throws -> String {
+            #if os(Linux)
+            // Foundation's Process leaks a descriptor into the cache daemon; see Subprocess.
+            var env = ProcessInfo.processInfo.environment
+            env["GIT_TERMINAL_PROMPT"] = "0"
+            let r = try Subprocess.run("/usr/bin/git", args, currentDirectory: dir.path, environment: env, input: input)
+            return String(decoding: r.stdout, as: UTF8.self)
+            #else
             let p = Process()
             p.executableURL = URL(fileURLWithPath: "/usr/bin/git")
             p.arguments = args
@@ -161,6 +168,7 @@ import Testing
             let data = out.fileHandleForReading.readDataToEndOfFile()
             p.waitUntilExit()
             return String(decoding: data, as: UTF8.self)
+            #endif
         }
 
         let store = try #require(CredentialConfig.storeInput(host: "github.com", username: "octo", password: "tok-123"))
@@ -249,11 +257,17 @@ import Testing
     @Test func appConfigAndHostEntry() {
         let config = SSHKey.appConfig(keys: [(host: "gitlab.example.com:8443", keyPath: "/Users/a/.ssh/git-cowork_gitlab.example.com"),
                                              (host: "bad\nhost", keyPath: "/x")])
+        #if os(macOS)
         #expect(config.contains("Host gitlab.example.com\n  IdentityFile \"/Users/a/.ssh/git-cowork_gitlab.example.com\"\n  IdentitiesOnly yes\n  UseKeychain yes\n"))
+        #else
+        #expect(config.contains("Host gitlab.example.com\n  IdentityFile \"/Users/a/.ssh/git-cowork_gitlab.example.com\"\n  IdentitiesOnly yes\n"))
+        #expect(!config.contains("UseKeychain"))
+        #endif
         #expect(!config.contains("bad"))
         #expect(config.hasSuffix("Host *\n  Include ~/.ssh/config\n  Include /etc/ssh/ssh_config\n"))
 
         let entry = SSHKey.hostEntry(host: "github.com", keyPath: "/Users/a/.ssh/git-cowork_github.com", home: "/Users/a")
+        #if os(macOS)
         #expect(entry == """
             Host github.com
               IdentityFile "~/.ssh/git-cowork_github.com"
@@ -262,6 +276,14 @@ import Testing
               UseKeychain yes
 
             """)
+        #else
+        #expect(entry == """
+            Host github.com
+              IdentityFile "~/.ssh/git-cowork_github.com"
+              IdentitiesOnly yes
+
+            """)
+        #endif
         #expect(SSHKey.sshCommand(configPath: "/tmp/a b/ssh_config") == "/usr/bin/ssh -F '/tmp/a b/ssh_config'")
     }
 
