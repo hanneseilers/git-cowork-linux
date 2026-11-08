@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dev.gitcowork.GitCowork</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>git-cowork</name>
+  <summary>Git client with a task board and code reviews inside your repo</summary>
+  <description>
+    <p>A small, fast git client that runs plain git underneath and shows every command it runs.
+       Branches and worktrees in one graph, with their uncommitted changes. Tasks, a board and
+       review requests are stored on a hidden ref in the repository and sync with plain git.</p>
+  </description>
+  <launchable type="desktop-id">dev.gitcowork.GitCowork.desktop</launchable>
+  <url type="homepage">https://github.com/hanneseilers/git-cowork-linux</url>
+  <developer id="ai.smao"><name>smao GmbH</name></developer>
+  <content_rating type="oars-1.1"/>
+  <provides><binary>git-cowork-gtk</binary><binary>git-cowork</binary></provides>
+</component>
