@@ -225,6 +225,10 @@ enum AppResources {
 
     /// This program's own path (for the askpass helper and the updater).
     static var executablePath: String {
-        (try? FileManager.default.destinationOfSymbolicLink(atPath: "/proc/self/exe")) ?? CommandLine.arguments[0]
+        var path = (try? FileManager.default.destinationOfSymbolicLink(atPath: "/proc/self/exe")) ?? CommandLine.arguments[0]
+        // After an update replaced the file, the kernel reports "<path> (deleted)";
+        // the new binary is at the same path.
+        if path.hasSuffix(" (deleted)") { path = String(path.dropLast(" (deleted)".count)) }
+        return path
     }
 }

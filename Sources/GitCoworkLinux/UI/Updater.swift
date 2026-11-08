@@ -38,7 +38,10 @@ final class Updater {
     }()
 
     private var apiBase: String {
-        ProcessInfo.processInfo.environment["GIT_COWORK_API_BASE"] ?? "https://api.github.com/repos/\(repository)"
+        #if DEBUG
+        if let base = ProcessInfo.processInfo.environment["GIT_COWORK_API_BASE"] { return base }
+        #endif
+        return "https://api.github.com/repos/\(repository)"
     }
 
     private var script: URL? {

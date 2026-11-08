@@ -114,7 +114,22 @@ final class AlertDialog {
             // With can-close off, a response is emitted but the dialog stays;
             // we close it ourselves once the form is fine.
             adw_dialog_set_can_close(dlg, 0)
+            // libadwaita emits "close-attempt" first, then the response (if
+            // any). Only an attempt with no response after it (e.g. a click
+            // outside) closes the form as cancelled.
+            var answered = false
+            Signal.on(raw, "close-attempt") { [weak self] in
+                answered = false
+                DispatchQueue.main.async {
+                    MainActor.assumeIsolated {
+                        guard let self, !answered else { return }
+                        handler("cancel")
+                        self.close()
+                    }
+                }
+            }
             onResponse = { [weak self] response in
+                answered = true
                 guard let self else { return }
                 if keepOpen(response) { return }
                 handler(response)
