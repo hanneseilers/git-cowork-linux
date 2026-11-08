@@ -23,8 +23,8 @@
 </p>
 
 git-cowork was originally written for macOS
-([michael-smao/git-cowork](https://github.com/michael-smao/git-cowork)).
-This is its Linux version.
+([michael-smao/git-cowork](https://github.com/michael-smao/git-cowork);
+its README: [README-macos.md](README-macos.md)). This is its Linux version.
 
 ## Why
 
