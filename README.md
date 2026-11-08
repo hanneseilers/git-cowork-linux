@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/hanneseilers/git-cowork-linux/actions/workflows/linux.yml"><img src="https://github.com/hanneseilers/git-cowork-linux/actions/workflows/linux.yml/badge.svg" alt="Linux CI"></a>
+  <a href="https://github.com/hanneseilers/git-cowork-linux/actions/workflows/linux.yml?query=branch%3Adev"><img src="https://github.com/hanneseilers/git-cowork-linux/actions/workflows/linux.yml/badge.svg?branch=dev" alt="Linux CI"></a>
   <img src="https://img.shields.io/badge/Debian-13%2B-A81D33?logo=debian&logoColor=white" alt="Debian 13+">
   <img src="https://img.shields.io/badge/Ubuntu-24.04%2B-E95420?logo=ubuntu&logoColor=white" alt="Ubuntu 24.04+">
   <img src="https://img.shields.io/badge/GTK-4%20%2B%20libadwaita-4A86CF?logo=gnome&logoColor=white" alt="GTK 4 + libadwaita">
