@@ -1,0 +1,4 @@
+# The README describes the Linux app; on merges from the original (macOS)
+# repository keep this version. Scripts/linux/sync-upstream.sh sets up the
+# "ours" driver and lists upstream's README changes for review.
+README.md merge=ours

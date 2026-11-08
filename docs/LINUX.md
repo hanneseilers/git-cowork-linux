@@ -180,7 +180,9 @@ current branch, then builds and tests on Linux. The changes to upstream
 files are kept small and marked with `#if os(Linux)` / `#if os(macOS)`, so
 most merges are clean. Where conflicts can happen, the script prints what
 to keep. When upstream adds a model file the Linux app should use, add it
-to `sharedAppSources` at the end of `Package.swift`. New UI in the macOS
+to `sharedAppSources` at the end of `Package.swift`. `README.md` describes
+the Linux app and is kept on merges (`.gitattributes`); the script lists
+upstream's README changes so you can carry over what's useful. New UI in the macOS
 app has to be built again in `Sources/GitCoworkLinux/UI` by hand.
 
 Branches in this fork: `main` follows upstream, `dev` holds the Linux port

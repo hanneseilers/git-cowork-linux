@@ -16,6 +16,9 @@ if ! git remote get-url upstream >/dev/null 2>&1; then
 fi
 echo "→ Fetching upstream"
 git fetch --no-tags upstream main
+# README.md is the Linux README (see .gitattributes): keep ours on merges.
+git config merge.ours.driver true
+BASE="$(git merge-base HEAD upstream/main)"
 echo "→ Merging upstream/main into $(git branch --show-current)"
 if ! git merge --no-edit upstream/main; then
   cat <<'HELP'
@@ -34,6 +37,10 @@ New files in Sources/GitCowork/Git or Accounts that the Linux app should use:
 add them to sharedAppSources at the end of Package.swift.
 HELP
   exit 1
+fi
+if [ -n "$(git diff --name-only "$BASE" upstream/main -- README.md)" ]; then
+  echo "  Upstream changed README.md; the Linux README was kept. Their changes, to carry over by hand if useful:"
+  echo "    git diff $BASE upstream/main -- README.md"
 fi
 echo "→ Building and testing the Linux port"
 swift build && swift test
