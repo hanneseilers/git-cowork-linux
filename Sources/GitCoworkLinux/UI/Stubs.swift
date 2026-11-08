@@ -12,33 +12,6 @@ private func placeholder(_ title: String) -> Widget {
     return s
 }
 
-@MainActor final class BoardView {
-    let root: Widget
-    init(page: RepoPage) { root = placeholder(L("Board")) }
-    func move(_ id: String, by step: Int) {}
-}
-
-@MainActor final class ReviewsView {
-    let root: Widget
-    init(page: RepoPage) { root = placeholder(L("Reviews")) }
-}
-
-@MainActor final class InboxButton {
-    let root: Widget
-    init(page: RepoPage) { root = Button(icon: "mail-unread-symbolic", "flat") }
-}
-
-@MainActor enum CoworkSheets {
-    static func newTask(status: TaskStatus, page: RepoPage) {}
-    static func requestReview(branch: String, page: RepoPage) {}
-    static func team(page: RepoPage) {}
-}
-
-@MainActor final class CoworkPanel {
-    let root: Widget
-    init(page: RepoPage) { root = placeholder(L("Select a task or review")) }
-}
-
 @MainActor enum CloneDialog {
     static func present(parent: Widget?, done: @escaping @MainActor (String) -> Void) {}
 }
