@@ -12,9 +12,11 @@ enum SettingsDialog {
         let dialog = Widget(raw: RP(adw_preferences_dialog_new()))
         current = dialog
         let d = dialog.raw.assumingMemoryBound(to: AdwPreferencesDialog.self)
-        adw_preferences_dialog_add(d, generalPage().p())
-        adw_preferences_dialog_add(d, gitPage().p())
-        adw_preferences_dialog_add(d, AccountsPage.make().p())
+        // Keep each page's wrapper (and the rows it holds) alive with the dialog.
+        for page in [generalPage(), gitPage(), AccountsPage.make()] {
+            adw_preferences_dialog_add(d, page.p())
+            dialog.keep(page)
+        }
         adw_dialog_present(dialog.raw.assumingMemoryBound(to: AdwDialog.self), parent?.w)
     }
 

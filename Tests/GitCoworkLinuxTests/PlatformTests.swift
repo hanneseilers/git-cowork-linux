@@ -109,3 +109,25 @@ final class Collected: @unchecked Sendable {
     var paths: Set<String> { lock.lock(); defer { lock.unlock() }; return _paths }
     func add(_ p: [String]) { lock.lock(); _paths.formUnion(p); lock.unlock() }
 }
+
+/// Needs a Secret Service (GNOME Keyring, KWallet). Skipped without one
+/// (e.g. on CI without a D-Bus session); run Scripts/linux/e2e.sh for it.
+@Suite struct KeychainTests {
+    @Test func storesLooksUpAndClears() throws {
+        let account = "test-\(UUID().uuidString.prefix(8))"
+        guard Keychain.store("s3cret\nline", service: "git-cowork-test", account: account, label: "git-cowork test") else {
+            print("No Secret Service available (\(Keychain.lastError ?? "?")); skipping")
+            return
+        }
+        #expect(Keychain.lookup(service: "git-cowork-test", account: account) == "s3cret\nline")
+        #expect(Keychain.lookup(service: "git-cowork-test", account: account + "x") == nil)
+        Keychain.clear(service: "git-cowork-test", account: account)
+        #expect(Keychain.lookup(service: "git-cowork-test", account: account) == nil)
+
+        let tokens = Data(#"{"access":"tok"}"#.utf8)
+        #expect(Keychain.save(tokens, host: "example.invalid"))
+        #expect(Keychain.load(host: "example.invalid") == tokens)
+        Keychain.delete(host: "example.invalid")
+        #expect(Keychain.load(host: "example.invalid") == nil)
+    }
+}

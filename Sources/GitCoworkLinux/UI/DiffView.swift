@@ -86,7 +86,10 @@ final class DiffView {
         tag("added-change", [("background", dark ? "#2f6a43" : "#b8e6c4")])
         tag("removed-change", [("background", dark ? "#7a3338" : "#f3c0c4")])
         tag("hunk", [("paragraph-background", dark ? "#22303f" : "#eef3fb"), ("foreground", dark ? "#9bb6d8" : "#3a5f8f")])
-        tag("meta", [("foreground", "#888888"), ("style", "italic")])
+        tag("meta", [("foreground", "#888888")])
+        if let meta = gtk_text_tag_table_lookup(gtk_text_buffer_get_tag_table(buf), "meta") {
+            gc_object_set_int(RP(meta), "style", Int32(PANGO_STYLE_ITALIC.rawValue))
+        }
         tag("gutter", [("foreground", "#999999")])
         tag("empty", [("paragraph-background", dark ? "#2a2a2c" : "#f4f4f5")])
         let bold = gc_text_tag(buf, "bold")!
