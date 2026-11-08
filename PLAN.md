@@ -1,6 +1,7 @@
 # git-cowork — plan
 
-A small, fast Mac git client for teams that work on many branches and worktrees at once.
+A small, fast Mac git client for teams that work on many branches and worktrees at once
+(this fork adds a Linux app, see section "Linux port" at the end).
 It wraps the `git` CLI, shows branches and history clearly, handles worktrees
 well, and adds lightweight shared tasks and review requests that sync through
 git itself. No AI features, no server. Accounts are optional: you can sign
@@ -24,7 +25,8 @@ Non-goals
 - AI anything.
 - Replacing Slack, or being a full Jira.
 - Host features that need the API (PR lists, CI status) in v1. Planned, see section 10.
-- Windows or Linux (macOS on Apple Silicon only).
+- Windows. (The original targets macOS on Apple Silicon only; this fork
+  adds Linux, see "Linux port" below.)
 
 ## 2. Tech stack
 
@@ -350,3 +352,32 @@ In this order:
   small protocol, building on `HostKind` and `RemoteLinks` in GitCoworkCore.
   Token storage and the helper live in the app target, and request/response
   parsing goes in core with tests.
+
+---
+
+## Linux port (this fork)
+
+Goal: the same app on Debian 13+ / Ubuntu 24.04+, without forking the
+logic, so changes from the original repository keep flowing in.
+
+- **UI:** GTK 4 + libadwaita, written in Swift against the C API through a
+  module map (`Sources/CGtk`), the way the macOS app uses AppKit directly.
+  No bindings library. `Sources/GitCoworkLinux/Gtk` is a thin layer
+  (widgets, signals as closures, Observation-driven re-rendering); the
+  screens are in `Sources/GitCoworkLinux/UI`.
+- **Model:** shared. The Linux target compiles the macOS app's model files
+  unchanged (`sharedAppSources` in `Package.swift`); a small `AppKit` shim
+  answers the few AppKit calls in them.
+- **Platform layer:** libdispatch main queue inside GLib's loop (no
+  polling), inotify file watching, Secret Service instead of the Keychain,
+  GNotification, xdg/portal launchers, the app as `SSH_ASKPASS` for keys it
+  made, `Subprocess` (posix_spawn) for every process.
+- **Distribution:** tarball and `.deb` with the Swift runtime linked in,
+  `install-linux.sh`, in-app updates for user installs, CI and release
+  workflows for x86_64 and aarch64.
+- **Upstream:** changes to upstream files are small `#if` branches;
+  `make sync-upstream` merges the original's `main` and runs the Linux
+  build and tests. New macOS UI has to be rebuilt in GTK by hand.
+
+Details: [docs/LINUX.md](docs/LINUX.md).
+
