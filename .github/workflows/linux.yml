@@ -1,0 +1,43 @@
+name: Linux
+
+# Builds and tests the Linux port (GTK 4 app, `git cowork`, shared core) on
+# Ubuntu 24.04 with the official Swift image, including the end-to-end tests
+# (keyring, ssh askpass, CLI sync, the app under Xvfb).
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    container: swift:6.1-noble
+    steps:
+      - uses: actions/checkout@v7
+      - name: Dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            libgtk-4-dev libadwaita-1-dev libsecret-1-dev libcurl4-openssl-dev git openssh-client openssh-server \
+            xvfb xdotool dbus dbus-x11 gnome-keyring libsecret-tools imagemagick python3 ca-certificates
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global user.email ci@example.com
+          git config --global user.name CI
+      - name: Swift version
+        run: swift --version
+      - name: Build
+        run: swift build
+      - name: Translations
+        run: make check-translations
+      - name: Unit and end-to-end tests
+        run: make e2e
+      - name: Package
+        run: make app && make deb
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: git-cowork-linux
+          path: |
+            dist/linux/*.tar.gz*
+            dist/linux/*.deb*
+            .build/e2e/*.png

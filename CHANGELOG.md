@@ -6,6 +6,17 @@ How to update: see [INSTALL.md](INSTALL.md#quick-install) (or [from source](INST
 
 ## [Unreleased]
 
+### Added
+- Linux port (Debian 13+, Ubuntu 24.04+): a native GTK 4 + libadwaita app
+  with the macOS app's features, built on the same model code; `git cowork`
+  on Linux; `.deb` and tarball releases, `install-linux.sh`, in-app updates
+  for installs into a user folder. See docs/LINUX.md.
+
+### Fixed
+- `git cowork` and every git call on Linux: no more waiting minutes for a
+  credential-cache daemon started by git (Foundation's Process kept a
+  descriptor open in it).
+
 ## [0.2.0] - 2026-11-07
 
 Coming from 0.1.0? Update once by hand with the one-line install (or

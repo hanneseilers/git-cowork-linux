@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=git-cowork
+GenericName=Git Client
+GenericName[de]=Git-Client
+Comment=A small, fast git client with a task board and code reviews that live inside your repo
+Comment[de]=Ein kleiner, schneller Git-Client mit Task-Board und Code-Reviews direkt im Repository
+Exec=git-cowork-gtk %F
+Icon=dev.gitcowork.GitCowork
+Terminal=false
+Categories=Development;RevisionControl;GTK;
+Keywords=git;version control;worktree;review;board;tasks;
+StartupNotify=true
+StartupWMClass=dev.gitcowork.GitCowork
+DBusActivatable=false
