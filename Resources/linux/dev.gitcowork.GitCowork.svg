@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- git-cowork app icon for Linux: the same drawing as Scripts/make-icon.swift. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#292e3d"/>
+      <stop offset="1" stop-color="#1a1c26"/>
+    </linearGradient>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#bg)"/>
+  <g fill="none" stroke-width="44" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="370" y1="790" x2="370" y2="234" stroke="#4599f5"/>
+    <path d="M370,694 C370,624.0 512,624.0 512,554" stroke="#e66b9e"/>
+    <line x1="512" y1="554" x2="512" y2="424" stroke="#e66b9e"/>
+    <path d="M512,424 C512,364.0 370,364.0 370,304" stroke="#e66b9e"/>
+    <path d="M370,604 C370,534.0 654,534.0 654,464" stroke="#5cb86b"/>
+    <line x1="654" y1="464" x2="654" y2="334" stroke="#5cb86b"/>
+  </g>
+  <g stroke="#1f212e" stroke-width="14">
+    <circle cx="370" cy="764" r="46" fill="#4599f5"/>
+    <circle cx="370" cy="264" r="46" fill="#4599f5"/>
+    <circle cx="512" cy="489" r="46" fill="#e66b9e"/>
+    <circle cx="654" cy="334" r="46" fill="#5cb86b"/>
+  </g>
+</svg>

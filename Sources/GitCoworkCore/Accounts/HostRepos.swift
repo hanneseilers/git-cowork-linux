@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// A repository the signed-in account can clone, from the host's API.
 public struct HostRepo: Hashable, Sendable, Identifiable {

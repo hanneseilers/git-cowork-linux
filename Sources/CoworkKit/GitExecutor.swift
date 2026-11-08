@@ -1,4 +1,7 @@
 import Foundation
+#if os(Linux)
+import GitCoworkCore
+#endif
 
 /// What a git call returned. Output stays raw bytes; callers decode.
 public struct GitOutput: Sendable {
@@ -36,7 +39,26 @@ public struct ProcessGit: GitExecutor {
     public init() {}
 
     public func git(_ args: [String], in dir: URL, input: Data?, env extra: [String: String]) async -> GitOutput {
-        await withCheckedContinuation { cont in
+        #if os(Linux)
+        // Foundation's Process leaks a descriptor into daemons git starts
+        // (credential-cache), which would block us until they exit.
+        return await withCheckedContinuation { cont in
+            DispatchQueue.global(qos: .userInitiated).async {
+                var env = ProcessInfo.processInfo.environment
+                env["GIT_TERMINAL_PROMPT"] = "0"
+                env["GIT_OPTIONAL_LOCKS"] = "0"
+                env.merge(extra) { _, new in new }
+                do {
+                    let r = try Subprocess.run("/usr/bin/env", ["git"] + args, currentDirectory: dir.path,
+                                               environment: env, input: input)
+                    cont.resume(returning: GitOutput(stdout: r.stdout, stderr: r.stderr, exitCode: r.status))
+                } catch {
+                    cont.resume(returning: GitOutput(stdout: Data(), stderr: Data(error.localizedDescription.utf8), exitCode: -1))
+                }
+            }
+        }
+        #else
+        return await withCheckedContinuation { cont in
             DispatchQueue.global(qos: .userInitiated).async {
                 let p = Process()
                 p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
@@ -74,5 +96,6 @@ public struct ProcessGit: GitExecutor {
                 cont.resume(returning: GitOutput(stdout: outData, stderr: errData, exitCode: p.terminationStatus))
             }
         }
+        #endif
     }
 }

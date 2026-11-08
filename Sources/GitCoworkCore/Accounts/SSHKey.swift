@@ -68,6 +68,14 @@ public enum SSHKey {
             guard let block = hostBlock(host: key.host, identityFile: key.keyPath) else { continue }
             lines += block + [""]
         }
+        #if os(Linux)
+        // The app answers ssh's passphrase prompts itself (SSH_ASKPASS). A
+        // server can send its own prompt text through keyboard-interactive
+        // auth, so the app's ssh never offers it (or passwords): without a
+        // terminal nobody could answer them anyway. First value wins in ssh,
+        // so this comes before the person's own config.
+        lines += ["Host *", "  KbdInteractiveAuthentication no", "  PasswordAuthentication no", ""]
+        #endif
         lines.append("Host *")
         lines += includes.map { "  Include \($0)" }
         return lines.joined(separator: "\n") + "\n"
@@ -79,8 +87,10 @@ public enum SSHKey {
         var shown = keyPath
         if !home.isEmpty, keyPath.hasPrefix(home + "/") { shown = "~" + keyPath.dropFirst(home.count) }
         guard var block = hostBlock(host: host, identityFile: shown) else { return nil }
+        #if os(macOS)
         // Other ssh builds (Homebrew) don't know UseKeychain and would refuse the file.
         block.insert("  IgnoreUnknown UseKeychain", at: block.count - 1)
+        #endif
         return block.joined(separator: "\n") + "\n"
     }
 
@@ -96,9 +106,17 @@ public enum SSHKey {
         else { return nil }
         // ssh expands %-tokens in IdentityFile.
         let file = identityFile.replacingOccurrences(of: "%", with: "%%")
+        #if os(macOS)
         return ["Host \(name)",
                 "  IdentityFile \"\(file)\"",
                 "  IdentitiesOnly yes",
                 "  UseKeychain yes"]
+        #else
+        // OpenSSH on Linux has no UseKeychain (and refuses unknown options);
+        // the passphrase comes from the Secret Service through SSH_ASKPASS.
+        return ["Host \(name)",
+                "  IdentityFile \"\(file)\"",
+                "  IdentitiesOnly yes"]
+        #endif
     }
 }

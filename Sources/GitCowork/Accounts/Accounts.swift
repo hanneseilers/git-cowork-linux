@@ -78,10 +78,20 @@ final class Credentials: @unchecked Sendable {
     private let refresher = Refresher()
 
     private init() {
+        #if os(Linux)
+        // /tmp is shared on Linux; see PrivateDirectory. Without a safe folder,
+        // use a fresh random one in /tmp (made 0700 by us, so nobody else's).
+        let dir = PrivateDirectory.app() ?? {
+            let d = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("git-cowork-\(UUID().uuidString)", isDirectory: true)
+            _ = PrivateDirectory.ensurePrivate(d.path)
+            return d
+        }()
+        #else
         let dir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("git-cowork", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true,
                                                  attributes: [.posixPermissions: 0o700])
         try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: dir.path)
+        #endif
         socketPath = dir.appendingPathComponent("credentials.sock").path
         sshConfigPath = dir.appendingPathComponent("ssh_config").path
         writeSSHConfig()
@@ -165,6 +175,11 @@ final class Credentials: @unchecked Sendable {
     }
 
     private func cache(_ action: [String], input: Data, gitPath: String, env: [String: String]) {
+        #if os(Linux)
+        // The first store starts the daemon; Foundation's Process would wait for it to exit.
+        _ = try? Subprocess.run(gitPath, ["credential-cache", "--socket", socketPath, "--timeout", String(Self.cacheTimeout)] + action,
+                                environment: env, input: input, timeout: 30)
+        #else
         let p = Process()
         p.executableURL = URL(fileURLWithPath: gitPath)
         p.arguments = ["credential-cache", "--socket", socketPath, "--timeout", String(Self.cacheTimeout)] + action
@@ -177,6 +192,7 @@ final class Credentials: @unchecked Sendable {
         try? inPipe.fileHandleForWriting.write(contentsOf: input)
         try? inPipe.fileHandleForWriting.close()
         p.waitUntilExit()
+        #endif
     }
 }
 

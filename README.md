@@ -77,6 +77,18 @@ make update                     # later: pull, rebuild, reinstall
 **[INSTALL.md](INSTALL.md)** has the details: requirements, installing just
 for your user, a specific version, uninstalling, and troubleshooting.
 
+### Linux (Debian / Ubuntu)
+
+This fork also runs on Linux as a native GTK 4 app with the same features
+and the `git cowork` tool (Debian 13+, Ubuntu 24.04+):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hanneseilers/git-cowork-linux/main/install-linux.sh | bash
+```
+
+Building from source, the `.deb`, and how the port stays in sync with this
+repository: **[docs/LINUX.md](docs/LINUX.md)**.
+
 ### Versions
 
 Releases follow [Semantic Versioning](https://semver.org) and are tagged
@@ -195,8 +207,9 @@ Editor and terminal apps are set in Settings (⌘,).
 
 ## FAQ
 
-**Intel Macs or Linux/Windows?** Not supported. The app targets Apple Silicon
-and macOS 14+.
+**Intel Macs or Linux/Windows?** The Mac app targets Apple Silicon and
+macOS 14+. Linux (Debian/Ubuntu) has its own GTK app, see
+[docs/LINUX.md](docs/LINUX.md). Windows isn't supported.
 
 **Does it use AI?** No. It's a plain git client.
 

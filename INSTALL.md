@@ -190,3 +190,9 @@ commits that aren't upstream. If you don't need them:
 
 Anything else: [open an issue](https://github.com/michael-smao/git-cowork/issues)
 with the version from the About window.
+
+## Linux
+
+For Debian and Ubuntu, see [docs/LINUX.md](docs/LINUX.md): one-line install
+(`install-linux.sh`), the `.deb`, building from source with `make install`,
+and uninstalling with `make uninstall`.
