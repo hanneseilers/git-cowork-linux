@@ -131,3 +131,34 @@ final class Collected: @unchecked Sendable {
         #expect(Keychain.load(host: "example.invalid") == nil)
     }
 }
+
+/// The app as SSH_ASKPASS: given ssh's prompt for a key the app made, it
+/// prints that key's passphrase from the Secret Service; for any other key
+/// (even one with a stored passphrase) it answers nothing. Needs a Secret
+/// Service; skipped without one. Scripts/linux/e2e.sh also logs in to a
+/// local sshd this way.
+@Suite struct AskpassEndToEndTests {
+    @Test func answersOnlyForAppKeys() throws {
+        let app = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent().appendingPathComponent("git-cowork-gtk").path
+        guard FileManager.default.isExecutableFile(atPath: app) else { return }
+        let id = UUID().uuidString.prefix(8)
+        let key = SSHKeys.sshDir + "/git-cowork_askpass-test-\(id).invalid"
+        let other = SSHKeys.sshDir + "/askpass-test-\(id)"
+        let pass = SSHKey.newPassphrase()
+        guard Keychain.store(pass, service: Keychain.sshService, account: key, label: "test key") else { return }
+        defer { Keychain.clear(service: Keychain.sshService, account: key) }
+        _ = Keychain.store(pass, service: Keychain.sshService, account: other, label: "test other")
+        defer { Keychain.clear(service: Keychain.sshService, account: other) }
+
+        var env = ProcessInfo.processInfo.environment
+        env[Askpass.environmentFlag] = "1"
+        let ok = try Subprocess.run(app, ["Enter passphrase for key '\(key)': "], environment: env, timeout: 30)
+        #expect(ok.status == 0)
+        #expect(String(decoding: ok.stdout, as: UTF8.self) == pass + "\n")
+        let refused = try Subprocess.run(app, ["Enter passphrase for key '\(other)': "], environment: env, timeout: 30)
+        #expect(refused.status != 0)
+        #expect(refused.stdout.isEmpty)
+        let hostKey = try Subprocess.run(app, ["Are you sure you want to continue connecting (yes/no/[fingerprint])?"], environment: env, timeout: 30)
+        #expect(hostKey.status != 0)
+    }
+}
