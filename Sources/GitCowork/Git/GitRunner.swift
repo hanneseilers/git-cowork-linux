@@ -48,12 +48,13 @@ final class GitRunner: @unchecked Sendable {
         e["GIT_OPTIONAL_LOCKS"] = "0"      // `git status` must not touch the index (would retrigger file watching)
         e["GIT_EDITOR"] = "true"           // accept default messages (merge, rebase --continue)
         e["GIT_MERGE_AUTOEDIT"] = "no"
-        #if os(Linux)
-        e["LC_ALL"] = "C.UTF-8"            // always installed on Debian/Ubuntu; en_US.UTF-8 may not be
-        #else
         e["LC_ALL"] = "en_US.UTF-8"
-        #endif
         env = e
+
+        #if os(Linux)
+        // C.UTF-8 is always installed on Debian/Ubuntu; en_US.UTF-8 may not be.
+        env["LC_ALL"] = "C.UTF-8"
+        #endif
 
         Task.detached(priority: .utility) { [weak self] in self?.loadLoginShellPath() }
     }
