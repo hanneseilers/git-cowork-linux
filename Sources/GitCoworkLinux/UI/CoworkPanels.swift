@@ -268,9 +268,14 @@ final class TaskPanel {
     private func render() {
         guard case .task(let id)? = model.coworkSelection, let t = model.cowork.task(id) else { return }
         let store = model.cowork
+        var switched = false
         if id != taskID {
+            // Save what was typed for the previous task first; the fields
+            // keep focus when a card is clicked, so they'd show the old text.
+            if !taskID.isEmpty { saveTitle(); saveBody() }
             taskID = id
             signature = ""
+            switched = true
         }
         _ = store.version
         comments.show(parent: t.commentParent)
@@ -278,8 +283,8 @@ final class TaskPanel {
         guard sig != signature else { return }
         signature = sig
         idLabel.text = t.id
-        if !isFocused(title) { title.text = t.title }
-        if !isFocused(body) { body.text = t.body }
+        if switched || !isFocused(title) { title.text = t.title }
+        if switched || !isFocused(body) { body.text = t.body }
         status.setLabel(t.status.label)
         assignee.setLabel(displayName(t.assignee, in: store))
         labels.removeAll()

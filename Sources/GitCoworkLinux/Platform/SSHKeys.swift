@@ -141,12 +141,15 @@ enum Askpass {
         exit(0)
     }
 
-    /// The key file named in ssh's prompt: "Enter passphrase for key '/home/a/.ssh/k': ".
+    /// The key file named in ssh's own prompt, exactly "Enter passphrase for key '<path>': ".
+    /// ssh cuts paths at 100 characters (%.100s), so a 100-character path may be
+    /// cut short and is refused.
     static func keyPath(in prompt: String) -> String? {
-        guard let start = prompt.range(of: "passphrase for key '") ?? prompt.range(of: "passphrase for '"),
-              let end = prompt.range(of: "'", options: .backwards), end.lowerBound > start.upperBound
-        else { return nil }
-        return String(prompt[start.upperBound..<end.lowerBound])
+        let prefix = "Enter passphrase for key '", suffix = "': "
+        guard prompt.hasPrefix(prefix), prompt.hasSuffix(suffix), prompt.count > prefix.count + suffix.count else { return nil }
+        let path = String(prompt.dropFirst(prefix.count).dropLast(suffix.count))
+        guard path.hasPrefix("/"), path.count < 100, !path.contains("'"), !path.contains("\n") else { return nil }
+        return path
     }
 
     /// Only keys git-cowork made (in ~/.ssh, named git-cowork_<host>).

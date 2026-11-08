@@ -68,6 +68,14 @@ public enum SSHKey {
             guard let block = hostBlock(host: key.host, identityFile: key.keyPath) else { continue }
             lines += block + [""]
         }
+        #if os(Linux)
+        // The app answers ssh's passphrase prompts itself (SSH_ASKPASS). A
+        // server can send its own prompt text through keyboard-interactive
+        // auth, so the app's ssh never offers it (or passwords): without a
+        // terminal nobody could answer them anyway. First value wins in ssh,
+        // so this comes before the person's own config.
+        lines += ["Host *", "  KbdInteractiveAuthentication no", "  PasswordAuthentication no", ""]
+        #endif
         lines.append("Host *")
         lines += includes.map { "  Include \($0)" }
         return lines.joined(separator: "\n") + "\n"

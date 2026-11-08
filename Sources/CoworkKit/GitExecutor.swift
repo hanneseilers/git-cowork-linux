@@ -58,7 +58,7 @@ public struct ProcessGit: GitExecutor {
             }
         }
         #else
-        await withCheckedContinuation { cont in
+        return await withCheckedContinuation { cont in
             DispatchQueue.global(qos: .userInitiated).async {
                 let p = Process()
                 p.executableURL = URL(fileURLWithPath: "/usr/bin/env")

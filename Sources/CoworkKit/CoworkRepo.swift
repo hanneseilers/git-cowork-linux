@@ -111,8 +111,13 @@ public struct CoworkRepo: Sendable {
     /// Returns the new commit sha, or nil when a single-parent commit would
     /// not change the tree (nothing to write).
     public func writeCommit(base: String?, parents: [String], changes: [String: String?], message: String) async throws -> String? {
-        let indexFile = FileManager.default.temporaryDirectory
-            .appendingPathComponent("git-cowork-index-\(UUID().uuidString)").path
+        #if os(Linux)
+        // Not in the shared /tmp (see PrivateDirectory).
+        let tempDir = PrivateDirectory.app() ?? FileManager.default.temporaryDirectory
+        #else
+        let tempDir = FileManager.default.temporaryDirectory
+        #endif
+        let indexFile = tempDir.appendingPathComponent("git-cowork-index-\(UUID().uuidString)").path
         defer { try? FileManager.default.removeItem(atPath: indexFile) }
         let env = ["GIT_INDEX_FILE": indexFile]
 

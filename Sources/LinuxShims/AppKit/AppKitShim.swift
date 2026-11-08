@@ -50,6 +50,8 @@ public final class NSWorkspace: @unchecked Sendable {
     @discardableResult
     public func open(_ url: URL) -> Bool {
         if let openHandler { return openHandler(url) }
+        // Only web pages and local files; never other URL schemes.
+        guard url.isFileURL || url.scheme == "https" || url.scheme == "http" else { return false }
         return Self.spawnDetached("/usr/bin/xdg-open", [url.isFileURL ? url.path : url.absoluteString])
     }
 

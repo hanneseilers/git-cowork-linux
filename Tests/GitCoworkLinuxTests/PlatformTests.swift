@@ -63,6 +63,11 @@ import GitCoworkCore
         #expect(Askpass.keyPath(in: "Enter passphrase for key '/home/a/.ssh/git-cowork_github.com': ") == "/home/a/.ssh/git-cowork_github.com")
         #expect(Askpass.keyPath(in: "Are you sure you want to continue connecting (yes/no)?") == nil)
         #expect(Askpass.keyPath(in: "git@github.com's password: ") == nil)
+        // Only ssh's exact format, not text that merely contains it (a server's prompt).
+        #expect(Askpass.keyPath(in: "Server says: Enter passphrase for key '/home/a/.ssh/git-cowork_x': ") == nil)
+        #expect(Askpass.keyPath(in: "Enter passphrase for key '/home/a/.ssh/git-cowork_x': extra") == nil)
+        #expect(Askpass.keyPath(in: "Enter passphrase for key 'relative/git-cowork_x': ") == nil)
+        #expect(Askpass.keyPath(in: "Enter passphrase for key '/" + String(repeating: "a", count: 99) + "': ") == nil)
     }
 
     @Test func onlyAnswersForAppKeys() {
@@ -70,6 +75,35 @@ import GitCoworkCore
         #expect(!Askpass.isAppKey("/home/a/.ssh/id_ed25519", sshDir: "/home/a/.ssh"))
         #expect(!Askpass.isAppKey("/tmp/git-cowork_x", sshDir: "/home/a/.ssh"))
         #expect(!Askpass.isAppKey("/home/a/.ssh/../x/git-cowork_x", sshDir: "/home/a/.ssh"))
+    }
+}
+
+@Suite struct PrivateDirectoryTests {
+    @Test func makesAPrivateFolderAndRefusesOthers() throws {
+        let fm = FileManager.default
+        let base = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("gc-priv-\(UUID().uuidString.prefix(8))").path
+        try fm.createDirectory(atPath: base, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        defer { try? fm.removeItem(atPath: base) }
+        let dir = try #require(PrivateDirectory.app(environment: ["XDG_RUNTIME_DIR": base]))
+        #expect(dir.path == base + "/git-cowork")
+        let mode = try fm.attributesOfItem(atPath: dir.path)[.posixPermissions] as? Int
+        #expect(mode == 0o700)
+
+        // Too open: tightened. A symlink in its place: refused.
+        chmod(dir.path, 0o777)
+        #expect(PrivateDirectory.ensurePrivate(dir.path))
+        #expect((try fm.attributesOfItem(atPath: dir.path)[.posixPermissions] as? Int) == 0o700)
+        let link = base + "/link"
+        try fm.createSymbolicLink(atPath: link, withDestinationPath: dir.path)
+        #expect(!PrivateDirectory.ensurePrivate(link))
+    }
+
+    @Test func sshConfigTurnsOffServerPrompts() {
+        let config = SSHKey.appConfig(keys: [(host: "github.com", keyPath: "/home/a/.ssh/git-cowork_github.com")])
+        let first = config.range(of: "KbdInteractiveAuthentication no")
+        let include = config.range(of: "Include ~/.ssh/config")
+        #expect(first != nil && include != nil && first!.lowerBound < include!.lowerBound)
+        #expect(config.contains("PasswordAuthentication no"))
     }
 }
 
@@ -160,5 +194,23 @@ final class Collected: @unchecked Sendable {
         #expect(refused.stdout.isEmpty)
         let hostKey = try Subprocess.run(app, ["Are you sure you want to continue connecting (yes/no/[fingerprint])?"], environment: env, timeout: 30)
         #expect(hostKey.status != 0)
+    }
+}
+
+/// A pasted "URL" that looks like an option must not run anything.
+@Suite struct CloneSafetyTests {
+    @Test @MainActor func cloneDoesNotTakeOptionsFromTheURL() async throws {
+        let fm = FileManager.default
+        let dir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("gc-clone-\(UUID().uuidString.prefix(8))").path
+        try fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        defer { try? fm.removeItem(atPath: dir) }
+        let marker = dir + "/pwned"
+        do {
+            try await RepoModel.clone("--upload-pack=touch \(marker)", into: dir + "/dest")
+        } catch {}
+        #expect(!fm.fileExists(atPath: marker))
+        #expect(CloneDialog.folderName(for: "--upload-pack=x") == "")
+        #expect(CloneDialog.folderName(for: "https://example.com/org/repo.git/") == "repo")
+        #expect(CloneDialog.folderName(for: "git@example.com:org/..") == "")
     }
 }

@@ -216,16 +216,24 @@ func relativeDate(_ date: Date, now: Date = Date()) -> String {
     if s < 3600 { return String(localized: "\(Int(s / 60)) min ago") }
     if s < 86400 { return String(localized: "\(Int(s / 3600)) h ago") }
     if s < 7 * 86400 { return String(localized: "\(Int(s / 86400)) d ago") }
-    let f = DateFormatter()
-    f.locale = Locale(identifier: Localization.shared.language)
-    f.setLocalizedDateFormatFromTemplate(Calendar.current.isDate(date, equalTo: now, toGranularity: .year) ? "d MMM" : "d MMM yyyy")
-    return f.string(from: date)
+    let sameYear = Calendar.current.isDate(date, equalTo: now, toGranularity: .year)
+    return (sameYear ? DateFormats.dayMonth : DateFormats.dayMonthYear).string(from: date)
 }
 
 func fullDate(_ date: Date) -> String {
-    let f = DateFormatter()
-    f.locale = Locale(identifier: Localization.shared.language)
-    f.dateStyle = .medium
-    f.timeStyle = .short
-    return f.string(from: date)
+    DateFormats.full.string(from: date)
+}
+
+/// Formatters are expensive to make; these are made once (main thread only).
+private enum DateFormats {
+    nonisolated(unsafe) static let dayMonth = make { $0.setLocalizedDateFormatFromTemplate("d MMM") }
+    nonisolated(unsafe) static let dayMonthYear = make { $0.setLocalizedDateFormatFromTemplate("d MMM yyyy") }
+    nonisolated(unsafe) static let full = make { $0.dateStyle = .medium; $0.timeStyle = .short }
+
+    private static func make(_ configure: (DateFormatter) -> Void) -> DateFormatter {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: Localization.shared.language)
+        configure(f)
+        return f
+    }
 }

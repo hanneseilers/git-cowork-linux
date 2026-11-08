@@ -125,7 +125,8 @@ extension RepoModel {
                 args = ["switch", "--track", ref.name]
             }
         case .tag:
-            args = ["switch", "--detach", ref.name]
+            // The full ref: a tag fetched from a remote may be named like an option ("-x").
+            args = ["switch", "--detach", ref.fullName]
         }
         await performUndoable(.checkout, "Checkout", args)
     }
@@ -242,7 +243,7 @@ extension RepoModel {
     func deleteTag(_ name: String) {
         confirmation = Confirmation(title: String(localized: "Delete tag \(name)?"), message: "Only deletes the local tag.",
                                     confirmTitle: "Delete") { [weak self] in
-            await self?.perform("Delete tag", ["tag", "-d", name])
+            await self?.perform("Delete tag", ["tag", "-d", "--", name])
         }
     }
 
@@ -352,7 +353,8 @@ extension RepoModel {
     /// Clones `url` into `dest` (a folder that doesn't exist yet). Used before a repo window exists.
     static func clone(_ url: String, into dest: String) async throws {
         let parent = URL(fileURLWithPath: dest).deletingLastPathComponent()
-        try await GitRunner.shared.run(["clone", url, dest], in: parent, logged: true)
+        // "--": a pasted "URL" like --upload-pack=… must not become an option.
+        try await GitRunner.shared.run(["clone", "--", url, dest], in: parent, logged: true)
     }
 
     // MARK: Merge / rebase in progress

@@ -24,6 +24,8 @@ final class DiffView {
     private var target: DiffTarget?
     private var loadedRefresh = -1
     private var loadTask: Task<Void, Never>?
+    /// Hunk buttons of the diff on screen (replaced on every render, not accumulated).
+    private var hunkButtons: [Widget] = []
 
     init(page: RepoPage) {
         self.page = page
@@ -186,6 +188,7 @@ final class DiffView {
     private func renderUnified(_ doc: DiffDocument) {
         let tv = unified
         tv.text = ""
+        hunkButtons.removeAll()
         let buf = tv.buffer
         let width = max(3, String(doc.maxLineNumber).count)
         var iter = GtkTextIter()
@@ -205,7 +208,7 @@ final class DiffView {
                         let b = Button(a.title, "flat", a == .stage ? "success" : "error") { [weak self] in self?.hunkAction(a, hunk: hunk) }
                         b.css("caption")
                         gtk_text_view_add_child_at_anchor(tv.p(GtkTextView.self), b.w, anchor)
-                        tv.keep(b)
+                        hunkButtons.append(b)
                         gtk_text_buffer_get_end_iter(buf, &iter)
                     }
                 }
