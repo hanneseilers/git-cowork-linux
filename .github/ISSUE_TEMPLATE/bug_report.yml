@@ -13,20 +13,30 @@ body:
     id: log
     attributes:
       label: Command log
-      description: If a git action failed, paste the relevant lines from the command log (⌘J).
+      description: If a git action failed, paste the relevant lines from the command log (⌘J on macOS, Ctrl+J on Linux).
       render: shell
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - macOS
+        - Linux
+    validations:
+      required: true
   - type: input
     id: macos
     attributes:
-      label: macOS version
-      placeholder: "15.1"
+      label: OS version
+      description: macOS version, or on Linux the distribution and desktop (e.g. "Ubuntu 24.04, GNOME 46").
+      placeholder: "15.1 / Ubuntu 24.04, GNOME 46"
     validations:
       required: true
   - type: input
     id: commit
     attributes:
       label: git-cowork version
-      description: From git-cowork › About git-cowork, e.g. "0.1.0 (1448777)".
+      description: From About git-cowork (on Linux in the main menu), e.g. "0.1.0 (1448777)". On Linux also say how you installed it (install-linux.sh, .deb, from source).
   - type: input
     id: host
     attributes:

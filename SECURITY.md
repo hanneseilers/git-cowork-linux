@@ -20,6 +20,21 @@ you can read it) gives the signed-in host the key with `IdentitiesOnly yes`
 and includes your own `~/.ssh/config` for everything else. It isn't used if
 you set `GIT_SSH_COMMAND`, `GIT_SSH` or `core.sshCommand` yourself.
 
+### On Linux
+
+The same design with Linux parts: tokens and SSH key passphrases are kept
+in the Secret Service (GNOME Keyring, KWallet, KeePassXC). Without one,
+accounts can't be saved; nothing is ever written to a plain file. The
+credential-cache socket, the app's ssh config and temporary index files
+live in `$XDG_RUNTIME_DIR/git-cowork` (or `~/.cache/git-cowork`), created
+0700 and checked for owner and permissions, never in the shared `/tmp`.
+ssh gets an app key's passphrase from git-cowork itself acting as
+`SSH_ASKPASS`: it answers only ssh's own "Enter passphrase for key" prompt,
+only for keys named `~/.ssh/git-cowork_<host>`, and the app's ssh config
+turns off password and keyboard-interactive authentication so a server
+can't send a prompt of its own. Every process is started with
+`posix_spawn` and no inherited descriptors.
+
 ## Supported versions
 
 Fixes go into the newest release and `main`. Please update before
@@ -36,6 +51,9 @@ source install.
 
 You can also use this link directly:
 <https://github.com/michael-smao/git-cowork/security/advisories/new>
+
+Problems that only affect the Linux app: report them privately in this
+fork instead, <https://github.com/hanneseilers/git-cowork-linux/security/advisories/new>.
 
 Include what you found, how to reproduce it, and which version you use
 (git-cowork › About git-cowork).

@@ -6,6 +6,7 @@
 
 <p align="center">
   A small, fast, native Mac git client — with a task board and code reviews that live inside your repo.<br>
+  This fork adds a native Linux app (GTK 4) with the same features: <a href="docs/LINUX.md">docs/LINUX.md</a>.<br>
   No sign-up. No server. No telemetry. Just <code>git</code>.
 </p>
 
@@ -103,6 +104,7 @@ open -a git-cowork .
 ```
 
 Or add `alias gk='open -a git-cowork'` to `~/.zshrc` and run `gk .`.
+On Linux: `git-cowork-gtk .` (or `alias gk=git-cowork-gtk`).
 If the front tab is empty it opens there, otherwise in a new tab. You can
 also drop a folder onto any window.
 
@@ -205,6 +207,9 @@ git cowork inbox --sync
 
 Editor and terminal apps are set in Settings (⌘,).
 
+On Linux the same shortcuts use Ctrl instead of ⌘ (Ctrl+O, Ctrl+1, Ctrl+Shift+P,
+…); Ctrl+? lists them in the app. See [docs/LINUX.md](docs/LINUX.md#keyboard-shortcuts).
+
 ## FAQ
 
 **Intel Macs or Linux/Windows?** The Mac app targets Apple Silicon and
@@ -241,6 +246,8 @@ make check-translations   # UI text without a German translation
 ```
 
 Builds with the Command Line Tools only; no Xcode project, no dependencies.
+On Linux the same `make` targets build and test the GTK app, plus `make e2e`
+and `make deb`; see [docs/LINUX.md](docs/LINUX.md#development).
 
 ```
 Sources/GitCoworkCore/   pure logic: parsers, graph lane layout, diff, host links,
@@ -255,8 +262,12 @@ Sources/GitCowork/
   Accounts/              tokens in the Keychain, browser sign-in, SSH keys, host APIs
   Views/                 Theme (design tokens), Components, History (NSTableView graph),
                          Diff, Inspector, Sidebar, Chrome, Sheets, Cowork (board, reviews, inbox)
+Sources/GitCoworkLinux/  the Linux app (GTK 4 + libadwaita); uses the model files above
+Sources/CGtk/, Sources/LinuxShims/
+                         GTK/libadwaita/libsecret module map; AppKit stand-in for the shared model
 Scripts/                 build-app.sh, make-icon.swift, release, update, check-translations
-Resources/               Info.plist, translations (de.lproj)
+Scripts/linux/           Linux build, install, .deb, e2e tests, upstream sync
+Resources/               Info.plist, translations (de.lproj); linux/: icon, desktop entry, Linux-only text
 ```
 
 How it stays light:
