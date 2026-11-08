@@ -89,6 +89,20 @@ static inline GtkTextTag *gc_text_tag(GtkTextBuffer *buffer, const char *name) {
     return gtk_text_buffer_create_tag(buffer, name, NULL);
 }
 
+/// Content for dragging a plain string (a task id).
+static inline GdkContentProvider *gc_string_provider(const char *text) {
+    GValue value = G_VALUE_INIT;
+    g_value_init(&value, G_TYPE_STRING);
+    g_value_set_string(&value, text);
+    GdkContentProvider *p = gdk_content_provider_new_for_value(&value);
+    g_value_unset(&value);
+    return p;
+}
+
+static inline const char *gc_value_string(const GValue *value) {
+    return G_VALUE_HOLDS_STRING(value) ? g_value_get_string(value) : NULL;
+}
+
 static inline GType gc_string_object_type(void) { return GTK_TYPE_STRING_OBJECT; }
 static inline GType gc_file_list_type(void) { return GDK_TYPE_FILE_LIST; }
 

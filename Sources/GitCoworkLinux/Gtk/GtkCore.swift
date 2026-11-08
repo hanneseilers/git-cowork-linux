@@ -82,6 +82,16 @@ private let thunkIntInt: @convention(c) (RawPtr?, Int32, Int32, RawPtr?) -> Void
     guard let fn: @MainActor (Int, Int) -> Void = unbox(data) else { return }
     MainActor.assumeIsolated { fn(Int(a), Int(b)) }
 }
+private let thunkProvider: @convention(c) (RawPtr?, Double, Double, RawPtr?) -> UnsafeMutablePointer<GdkContentProvider>? = { _, _, _, data in
+    guard let fn: @MainActor () -> String = unbox(data) else { return nil }
+    let text = MainActor.assumeIsolated { fn() }
+    return gc_string_provider(text)
+}
+private let thunkDropString: @convention(c) (RawPtr?, UnsafePointer<GValue>?, Double, Double, RawPtr?) -> gboolean = { _, value, _, _, data in
+    guard let fn: @MainActor (String) -> Bool = unbox(data), let value, let s = gc_value_string(value) else { return 0 }
+    let text = String(cString: s)
+    return MainActor.assumeIsolated { gbool(fn(text)) }
+}
 private let thunkDrop: @convention(c) (RawPtr?, UnsafePointer<GValue>?, Double, Double, RawPtr?) -> gboolean = { _, value, _, _, data in
     guard let fn: @MainActor ([String]) -> Bool = unbox(data), let value else { return 0 }
     var paths: [String] = []
@@ -134,6 +144,16 @@ enum Signal {
     @discardableResult
     static func onIntInt(_ instance: RawPtr, _ signal: String, _ fn: @escaping @MainActor (Int, Int) -> Void) -> UInt {
         connectRaw(instance, signal, unsafeBitCast(thunkIntInt, to: GCallback.self), fn)
+    }
+    /// GtkDragSource "prepare": the dragged content is the returned string.
+    @discardableResult
+    static func onXYProvider(_ instance: RawPtr, _ fn: @escaping @MainActor () -> String) -> UInt {
+        connectRaw(instance, "prepare", unsafeBitCast(thunkProvider, to: GCallback.self), fn)
+    }
+    /// GtkDropTarget "drop" with a string.
+    @discardableResult
+    static func onDropString(_ instance: RawPtr, _ fn: @escaping @MainActor (String) -> Bool) -> UInt {
+        connectRaw(instance, "drop", unsafeBitCast(thunkDropString, to: GCallback.self), fn)
     }
     @discardableResult
     static func onDrop(_ instance: RawPtr, _ fn: @escaping @MainActor ([String]) -> Bool) -> UInt {
@@ -306,7 +326,13 @@ final class Label: Widget {
         gtk_label_set_wrap_mode(op, PANGO_WRAP_WORD_CHAR)
         return self
     }
-    @discardableResult func selectable(_ v: Bool = true) -> Self { gtk_label_set_selectable(op, gbool(v)); return self }
+    /// Text can be selected with the mouse; the label doesn't take keyboard
+    /// focus (it would grab it, all text selected, whenever a panel rebuilds).
+    @discardableResult func selectable(_ v: Bool = true) -> Self {
+        gtk_label_set_selectable(op, gbool(v))
+        gtk_widget_set_focusable(w, 0)
+        return self
+    }
     @discardableResult func xalign(_ v: Float) -> Self { gtk_label_set_xalign(op, v); return self }
     @discardableResult func lines(_ n: Int32) -> Self { gtk_label_set_lines(op, n); return self }
     @discardableResult func maxChars(_ n: Int32) -> Self { gtk_label_set_max_width_chars(op, n); return self }

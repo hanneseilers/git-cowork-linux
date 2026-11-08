@@ -76,6 +76,7 @@ let sharedAppSources = [
     "GitCowork/Accounts/RepoList.swift",
     "GitCowork/Accounts/SignIn.swift",
     "GitCowork/App/Prefs.swift",
+    "GitCowork/Views/Cowork/Board/BoardLogic.swift",
 ]
 
 package.products.append(.executable(name: "git-cowork-gtk", targets: ["GitCoworkLinux"]))
